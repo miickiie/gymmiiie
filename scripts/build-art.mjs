@@ -14,6 +14,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import svgPathBounds from 'svg-path-bounds';
 
 const ROOT = process.cwd();
 const WG = path.join(ROOT, '.reference/workout-guide/packages/workout-guide');
@@ -123,6 +124,23 @@ function dsFromSvg(svg, filename) {
   if (!ds.length) throw new Error(`no paths in ${filename}`);
   return ds;
 }
+function viewBoxOf(svg) {
+  const m = svg.match(/viewBox="([^"]+)"/);
+  if (!m) return null;
+  const n = m[1].trim().split(/[\s,]+/).map(Number);
+  if (n.length !== 4 || n.some((v) => !Number.isFinite(v)) || n[2] <= 0 || n[3] <= 0) return null;
+  return n; // [minX, minY, width, height]
+}
+/** Union of declared viewBoxes; null unless every frame declares one. */
+function unionViewBox(boxes) {
+  if (!boxes.length || boxes.some((b) => !b)) return null;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const [x, y, w, h] of boxes) {
+    minX = Math.min(minX, x); minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x + w); maxY = Math.max(maxY, y + h);
+  }
+  return [minX, minY, maxX - minX, maxY - minY];
+}
 function stripD(d) {
   // Emit path data verbatim. Compact-rounding is unsafe here: SVG arc commands
   // (`a`) allow run-together boolean flags ("…0 01-3.36…" = rot 0, flags 0,1)
@@ -130,25 +148,34 @@ function stripD(d) {
   // can re-tokenize differently (dropping a flag or merging two numbers).
   return d;
 }
-function svgContent(files) {
-  // files: [{ds:[], src}] — returns frames: Array<Array<d>>, bounds union
+function svgContent(files, declaredBox) {
+  // files: [{ds:[], viewBox?}] — returns frames: Array<Array<d>>, viewBox.
+  // Prefer the source document's declared viewBox (frame-perfect scale); fall
+  // back to computed path bounds only when no frame declares one.
   const frames = [];
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  for (const f of files) {
-    const ds = f.ds.map(stripD);
-    frames.push(ds);
-    for (const d of ds) {
-      const b = pathBounds(d);
-      if (!b) continue;
-      minX = Math.min(minX, b.minX); minY = Math.min(minY, b.minY);
-      maxX = Math.max(maxX, b.maxX); maxY = Math.max(maxY, b.maxY);
+  for (const f of files) frames.push(f.ds.map(stripD));
+
+  let viewBox = null;
+  if (declaredBox) {
+    viewBox = declaredBox;
+  } else {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const ds of frames) {
+      for (const d of ds) {
+        const b = pathBounds(d);
+        if (!b) continue;
+        minX = Math.min(minX, b.minX); minY = Math.min(minY, b.minY);
+        maxX = Math.max(maxX, b.maxX); maxY = Math.max(maxY, b.maxY);
+      }
     }
+    if (minX === Infinity) return null;
+    // small pad so strokes/edges never clip
+    const pad = Math.max(maxX - minX, maxY - minY) * 0.01;
+    minX -= pad; minY -= pad; maxX += pad; maxY += pad;
+    viewBox = [minX, minY, maxX - minX, maxY - minY];
   }
-  if (minX === Infinity) return null;
-  // small pad so strokes/edges never clip
-  const pad = Math.max(maxX - minX, maxY - minY) * 0.01;
-  minX -= pad; minY -= pad; maxX += pad; maxY += pad;
-  return { frames, viewBox: [minX, minY, maxX - minX, maxY - minY].map((n) => Math.round(n * 100) / 100).join(' ') };
+  const fmt = (n) => String(Math.round(n * 100) / 100);
+  return { frames, viewBox: viewBox.map(fmt).join(' ') };
 }
 
 function writeMotion(slug, motion, source, srcUrl, credit) {
@@ -306,8 +333,11 @@ function motionFromWG(slug) {
   const w = wgBySlug.get(slug);
   if (!w) return null;
   try {
-    const files = w.frames.map((f) => ({ ds: dsFromSvg(fs.readFileSync(path.join(WG, f.path), 'utf8'), f.path) }));
-    const motion = svgContent(files);
+    const files = w.frames.map((f) => {
+      const svg = fs.readFileSync(path.join(WG, f.path), 'utf8');
+      return { ds: dsFromSvg(svg, f.path), viewBox: viewBoxOf(svg) };
+    });
+    const motion = svgContent(files, unionViewBox(files.map((f) => f.viewBox)));
     if (!motion) return null;
     const ekName = wgSlugToEk.get(slug);
     return { motion, source: 'workout-guide', url: 'https://github.com/bryllim/workout-guide — assets/' + slug + '/frame-{1..3}.svg', credit: 'Workout Guide by Bryl Lim (first pose derived from Everkinetic)' };
@@ -320,8 +350,11 @@ function motionFromEK(ekName) {
   const files2 = ekAvailable.get(ekName);
   if (!files2) return null;
   try {
-    const localDs = files2.map((p) => ({ ds: dsFromSvg(fs.readFileSync(p, 'utf8'), p) }));
-    const motion = svgContent(localDs);
+    const localDs = files2.map((p) => {
+      const svg = fs.readFileSync(p, 'utf8');
+      return { ds: dsFromSvg(svg, p), viewBox: viewBoxOf(svg) };
+    });
+    const motion = svgContent(localDs, unionViewBox(localDs.map((f) => f.viewBox)));
     if (!motion) return null;
     const ex = ekByName.get(ekName);
     return { motion, source: 'everkinetic', url: `https://github.com/everkinetic/data — dist/svg/${ex.id_num}.svg (relaxation + tension)`, credit: 'Everkinetic' };
@@ -334,7 +367,23 @@ function motionFromGG(slug) {
   if (!fs.existsSync(p)) return null;
   const lines = fs.readFileSync(p, 'utf8').split('\n').map((l) => l.trim()).filter(Boolean);
   if (!lines.length) return null;
-  const motion = svgContent(lines.map((d) => ({ ds: [d] })));
+  // GymMane art has no declared viewBox; fit all frames using a real path
+  // parser (svg-path-bounds) so arcs/curves can't inflate the bounds.
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const d of lines) {
+    try {
+      const b = svgPathBounds(d);
+      if (b && b.every(Number.isFinite)) {
+        minX = Math.min(minX, b[0]); minY = Math.min(minY, b[1]);
+        maxX = Math.max(maxX, b[2]); maxY = Math.max(maxY, b[3]);
+      }
+    } catch {
+      /* skip unparsable line */
+    }
+  }
+  if (minX === Infinity) return null;
+  const ownsBox = [minX, minY, maxX - minX, maxY - minY];
+  const motion = svgContent(lines.map((d) => ({ ds: [d] })), ownsBox);
   if (!motion) return null;
   return { motion, source: 'gymmane', url: 'https://github.com/InlitX/gymmane — assets/art (Everkinetic-derived)', credit: 'GymMane by InlitX (Everkinetic-derived, CC BY-SA 4.0)' };
 }
