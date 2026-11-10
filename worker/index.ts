@@ -1,6 +1,7 @@
 /// <reference path="./worker-configuration.d.ts" />
 /** Account snapshots are server-readable. The separate legacy sync API remains encrypted. */
 import { handleAccounts } from './accounts';
+import { appUpdateResponse } from './app-update';
 import { ApiError, json as apiJson } from './http';
 
 const MAX_PAYLOAD_BYTES = 8 * 1024 * 1024; // 8 MB of ciphertext
@@ -96,6 +97,13 @@ export default {
       const accountResponse = await handleAccounts(request, env);
       if (accountResponse) return accountResponse;
       const url = new URL(request.url);
+
+      if (url.pathname === '/api/app-update') {
+        if (request.method !== 'GET') {
+          return new Response(null, { status: 405, headers: { Allow: 'GET' } });
+        }
+        return appUpdateResponse();
+      }
 
       if (url.pathname === '/api/health') {
         return json({ ok: true, service: 'gymmiie-sync' });
