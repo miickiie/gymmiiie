@@ -20,11 +20,11 @@ The native browser harness serves built frontend assets and dispatches API reque
 
 Every one of the 466 exercise IDs has an audit record and structural checks. Independent semantic verification remains partial: 16 instruction sets, four exact exercise/artwork mappings, 19 partially reviewed catalog entries, and 20 logging classifications have supporting review evidence. There are 129 explicitly grouped auto-suggestion candidates and 150 entries with unresolved audit flags.
 
-The complete catalog remains selectable. Unverified bundled instructions and artwork are omitted, with an equipment fallback. Raw candidate content remains available to the tooling for further review, outside the runtime bundle. All 388 retained SVG files keep their original attribution and licenses. See [EXERCISE_REVIEW.md](EXERCISE_REVIEW.md) for sources and field-level status.
+The complete catalog remains selectable. Original exercise-specific instructions are restored for all 466 exercises, with 16 reviewed guides taking priority. Existing artwork is restored for 445 exercises using 384 assets; 17 missing mappings and four confirmed incompatible mappings use equipment icons. Known mismatched generated instruction candidates remain excluded. Independent approval counts are unchanged. Raw candidate files remain tooling inputs rather than runtime imports. All 388 retained SVG files keep their original attribution and licenses. See [EXERCISE_REVIEW.md](EXERCISE_REVIEW.md) for sources and field-level status.
 
 ## Performance
 
-The original clean HEAD was built in an isolated temporary checkout using the same installed Vite version, with environment-file loading disabled. The current build includes the account feature.
+The original clean HEAD was built in an isolated temporary checkout using the same installed Vite version, with environment-file loading disabled. The measurements below describe the account build before exercise-content restoration.
 
 | Initial entry graph | Original | Current |
 | --- | ---: | ---: |

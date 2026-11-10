@@ -18,7 +18,7 @@ import { roundTo } from './date';
 import { loadKindFor, modeFor } from './exerciseBehavior';
 export { modeFor, loadKindFor, isCompletableSet } from './exerciseBehavior';
 
-// Generated only from independent reviewed selections; unapproved source text stays out of the browser bundle.
+// Original catalog guidance with reviewed taxonomy, logging and instruction corrections.
 export const EXERCISES = catalog as Exercise[];
 const byId = new Map(EXERCISES.map((exercise) => [exercise.id, exercise]));
 setExerciseLookup(EXERCISES);

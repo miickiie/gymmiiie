@@ -1,5 +1,4 @@
 import index from '../data/art.json';
-import catalog from '../data/exercises-runtime.json';
 
 export interface ArtEntry {
   n: number;
@@ -13,7 +12,7 @@ interface ArtData {
   frames: string[][];
 }
 
-// The generator emits approved assets only.
+// Original catalog mappings and reviewed corrections; known conflicts are excluded.
 export const ART = index as unknown as Record<string, ArtEntry>;
 
 export function artEntry(slug: string): ArtEntry | undefined {
@@ -88,7 +87,6 @@ const INSTRUCTIONS = instructions as unknown as Record<
   string,
   ExerciseInstructions
 >;
-const bundledIds = new Set(catalog.map((exercise) => exercise.id));
 
 export function instructionsOf(
   exerciseId: string,
@@ -99,12 +97,9 @@ export function instructionsOf(
     : undefined;
 }
 
-// Unverified original catalogue text is not shipped. Custom entries carry the user's own notes.
+// Reviewed corrections take priority over original catalog or custom-authored steps.
 export function stepsFor(exercise: { id: string; steps: string[] }): string[] {
-  return (
-    instructionsOf(exercise.id)?.steps ??
-    (bundledIds.has(exercise.id) ? [] : (exercise.steps ?? []))
-  );
+  return instructionsOf(exercise.id)?.steps ?? exercise.steps ?? [];
 }
 
 export function tipsFor(exercise: { id: string }): string[] {

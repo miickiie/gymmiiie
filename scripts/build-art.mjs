@@ -1,8 +1,8 @@
 /**
- * Publish only explicitly reviewed exercise guidance.
- * Candidate provenance/fuzzy similarity never grants semantic approval. Review
- * instructions and artwork separately in src/data/exercise-review.json.
- * Existing source SVGs and candidate JSON remain available for future review.
+ * Publish existing catalog guidance while preserving independent review metadata.
+ * Reviewed corrections take priority. Original exercise-specific steps and SVG
+ * mappings remain visible, except explicitly incompatible artwork. Fuzzy-generated
+ * instruction candidates are never selected without independent review.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,10 +17,22 @@ export function approvedGuidance(
 ) {
   const art = {};
   const instructions = {};
+  const artSlugs = new Map(
+    catalog.map((exercise) => {
+      const review = manifest.exercises[exercise.id];
+      const slug =
+        review.art.status === 'reviewed'
+          ? review.art.slug
+          : review.catalog.flags.includes('incompatible-equipment-or-grip-art')
+            ? ''
+            : exercise.art;
+      return [exercise.id, artCandidates[slug]?.n ? slug : ''];
+    }),
+  );
   for (const exercise of catalog) {
     const review = manifest.exercises[exercise.id];
-    if (review.art.status === 'reviewed')
-      art[review.art.slug] = artCandidates[review.art.slug];
+    const slug = artSlugs.get(exercise.id);
+    if (slug) art[slug] = artCandidates[slug];
     if (review.instructions.status !== 'reviewed') continue;
     instructions[exercise.id] =
       review.instructions.origin === 'catalog'
@@ -45,8 +57,8 @@ export function approvedGuidance(
       mode: review.logging.mode,
       loadKind: review.logging.loadKind,
       suggestionGroup: review.suggestionGroup,
-      art: review.art.status === 'reviewed' ? review.art.slug : '',
-      steps: instructions[exercise.id]?.steps ?? [],
+      art: artSlugs.get(exercise.id) ?? '',
+      steps: instructions[exercise.id]?.steps ?? exercise.steps,
     };
   });
   return { art, instructions, runtimeCatalog };

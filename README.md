@@ -12,7 +12,7 @@ Gymmiie keeps each user’s training log under an account identified by name and
 - **Live session logging** — weight, reps, cardio, time, RPE/RIR, set kinds and notes through mobile set details; automatic rest with end beep/vibration, PR context, reorder/swap/remove. Active workouts cannot be replaced without confirmation.
 - **Routines & programs** — build routines, schedule weekdays, or install Full Body, Push/Pull/Legs, Upper/Lower and Arnold templates.
 - **Progress that means something** — e1RM, records, streaks, heatmaps, weekly volume, bodyweight, measurements, goals and awards.
-- **466-exercise library** — search/filter by muscle and equipment, custom tracking modes and load types, favourites, archive, per-exercise notes and charts. Guides use reviewed exercise-specific mappings; unverified guides use an icon and an unavailable state.
+- **466-exercise library** — search/filter by muscle and equipment, custom tracking modes and load types, favourites, archive, per-exercise notes and charts. Original exercise instructions and available animations are shown, with reviewed corrections retained and confirmed incompatible artwork excluded.
 - **Nutrition** — 561 foods and 27 dishes, meal slots, macro goals, water tracking and custom foods.
 - **Tools & journal** — 1RM, BMI, TDEE/macros, body fat, FFMI, plate maths, warm-up ramps, RPE load, DOTS and Wilks, plus a tagged training journal.
 - **Gym pass cards** — store membership numbers and entry codes locally.
@@ -191,10 +191,12 @@ attribution term. Gymmiie keeps that attribution in its About screen and docs.
 Exercise animations are bundled under **CC BY-SA 4.0**, sourced from
 [Workout Guide](https://github.com/bryllim/workout-guide) by Bryl Lim,
 [Everkinetic](https://github.com/everkinetic/data) and GymMane's derived pose
-data. Only reviewed exercise-specific mappings are displayed; per-exercise provenance is listed in
-[public/art/ATTRIBUTION.md](public/art/ATTRIBUTION.md). Step-by-step form
-guidance is approved independently from artwork. Shared artwork slugs or fuzzy
-name matches do not authorize instructions; unverified guides remain unavailable. Nunito is used under the SIL Open Font License via
+data. Available original mappings are displayed except confirmed incompatible artwork;
+per-asset provenance is listed in [public/art/ATTRIBUTION.md](public/art/ATTRIBUTION.md).
+Original GymMane instructions are available for every built-in exercise, with 16
+reviewed guides taking priority. Artwork and instruction review remain independent;
+restoring existing content does not imply new approval. Known mismatched generated
+instruction candidates remain excluded. Nunito is used under the SIL Open Font License via
 Google Fonts. Nutrition values are approximate and not medical advice.
 
 Gymmiie is an independent web project and is not affiliated with InlitX.

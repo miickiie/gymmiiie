@@ -78,9 +78,9 @@ for the signed-in account, with device caching and automatic account synchroniza
 - Custom exercises choose repetitions/time/distance tracking, load type and authored instructions.
 - Exercise detail: muscles, equipment, instructions, cues, personal records,
   e1RM/volume history charts, per-exercise notes and archive/favourite actions.
-- Reviewed artwork (CC BY-SA 4.0) from Workout Guide by Bryl Lim, Everkinetic and GymMane-derived poses, with lazy thumbnails.
-- Artwork and instructions have independent exercise-specific review. Unverified content uses an icon or an explicit unavailable guide. Custom authored instructions are preserved.
-- Reviewed form guides are accessible from exercise details and live workouts.
+- Exercise animations (CC BY-SA 4.0) from Workout Guide by Bryl Lim, Everkinetic and GymMane-derived poses, with lazy thumbnails. Existing mappings cover 445 exercises using 384 SVG assets; missing or confirmed incompatible mappings use an equipment icon.
+- Original exercise-specific instructions are available for all 466 built-in exercises, with 16 reviewed guides taking priority. Known mismatched generated instructions remain excluded; independent review metadata and custom authored instructions are preserved.
+- Form guides are accessible from exercise details and live workouts.
 
 ## Progress
 

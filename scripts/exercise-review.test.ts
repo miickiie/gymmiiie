@@ -17,7 +17,7 @@ describe('independent exercise guidance review', () => {
     expect(report.instructionsReviewed).toBeGreaterThan(0);
     expect(report.instructionsUnverified).toBeGreaterThan(0);
   });
-  it('never ships unverified original or fuzzy-generated guidance', () => {
+  it('keeps known mismatched generated guides out of reviewed overrides', () => {
     const result = approvedGuidance(
       input.catalog,
       input.manifest,

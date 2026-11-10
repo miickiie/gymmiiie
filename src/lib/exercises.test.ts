@@ -138,10 +138,12 @@ describe('exercise discovery', () => {
       picks.filter((ex) => ex.suggestionGroup === 'horizontal-press'),
     ).toHaveLength(1);
   });
-  it('preserves all catalog IDs while omitting unverified guide content', () => {
+  it('preserves catalog IDs and guides while omitting confirmed artwork mismatches', () => {
     expect(EXERCISES).toHaveLength(466);
     expect(new Set(EXERCISES.map((ex) => ex.id)).size).toBe(466);
-    expect(exercise('face-pull').steps).toEqual([]);
+    expect(exercise('face-pull').steps[0]).toBe(
+      'Set a rope attachment on a cable pulley just above head height.',
+    );
     expect(exercise('wide-grip-barbell-curl').art).toBe('');
     expect(exercise('I4hDWkc').steps.length).toBeGreaterThan(0);
   });

@@ -276,8 +276,8 @@ export default function ExerciseDetail() {
             title="How to perform it"
             subtitle={
               steps.length
-                ? `${steps.length} steps · ${isCustom ? 'Your instructions' : 'Reviewed form guide'}`
-                : 'Verified guide unavailable'
+                ? `${steps.length} steps · ${isCustom ? 'Your instructions' : 'Form guide'}`
+                : 'Guide unavailable'
             }
           />
           {steps.length ? (
@@ -312,9 +312,7 @@ export default function ExerciseDetail() {
                 </div>
               )}
               <p className="mt-3 text-[10px] font-bold text-mute">
-                {isCustom
-                  ? 'Your exercise instructions'
-                  : 'Reviewed form guide'}
+                {isCustom ? 'Your exercise instructions' : 'Form guide'}
                 {instr?.url && (
                   <>
                     {' '}
@@ -335,7 +333,7 @@ export default function ExerciseDetail() {
             <EmptyState
               icon={<BookOpen size={22} />}
               title="No form notes yet"
-              body="Verified form guidance is not available for this movement."
+              body="Form guidance is not available for this movement."
             />
           )}
 
