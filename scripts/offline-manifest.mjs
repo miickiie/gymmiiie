@@ -6,11 +6,11 @@ export const precacheMarker = '/* __GYMMIIE_PRECACHE__ */ null';
 const shell = [
   '/',
   '/manifest.webmanifest',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/icon-512-maskable.png',
+  '/logo.svg',
+  '/icon.svg',
+  '/icon-maskable.svg',
+  '/favicon.svg',
   '/apple-touch-icon.png',
-  '/favicon-32.png',
 ];
 
 async function emittedAssets(directory, prefix = '') {

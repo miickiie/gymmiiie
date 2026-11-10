@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* ---------- themes ---------- */
+/* Ember — warm charcoal (default) */
+:root,
+html[data-theme='dark'] {
   --bg: #0b0a09;
   --bg-2: #12100e;
   --surface: #181512;
@@ -23,32 +26,148 @@
   --bad: #e2706b;
   --bad-soft: rgba(226, 112, 107, 0.14);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 18px 44px -24px rgba(0, 0, 0, 0.7);
+  --glow-1: rgba(223, 127, 74, 0.13);
+  --glow-2: rgba(194, 90, 42, 0.08);
   --nav-h: 72px;
   color-scheme: dark;
 }
 
-html.light {
-  --bg: #f6f1e9;
-  --bg-2: #efe6d9;
+/* Midnight — cool navy */
+html[data-theme='midnight'] {
+  --bg: #080b14;
+  --bg-2: #0d1220;
+  --surface: #121a2b;
+  --surface-2: #182338;
+  --surface-3: #223149;
+  --text: #eef2fb;
+  --text-dim: #a9b6cf;
+  --text-mute: #75849f;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --accent: #6ea8fe;
+  --accent-strong: #4d8ce8;
+  --accent-soft: rgba(110, 168, 254, 0.14);
+  --accent-line: rgba(110, 168, 254, 0.35);
+  --good: #5fc7a0;
+  --good-soft: rgba(95, 199, 160, 0.14);
+  --warn: #e8c268;
+  --bad: #ef8b8b;
+  --bad-soft: rgba(239, 139, 139, 0.14);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 44px -24px rgba(0, 0, 0, 0.75);
+  --glow-1: rgba(110, 168, 254, 0.14);
+  --glow-2: rgba(77, 140, 232, 0.08);
+  color-scheme: dark;
+}
+
+/* Royal Amethyst — deep violet */
+html[data-theme='forest'] {
+  --bg: #0d0817;
+  --bg-2: #130d22;
+  --surface: #1a1130;
+  --surface-2: #211640;
+  --surface-3: #2d1f56;
+  --text: #f1ecfb;
+  --text-dim: #b6a9d4;
+  --text-mute: #8578a6;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --accent: #b78cff;
+  --accent-strong: #9a6bf0;
+  --accent-soft: rgba(183, 140, 255, 0.14);
+  --accent-line: rgba(183, 140, 255, 0.35);
+  --good: #7ad6b0;
+  --good-soft: rgba(122, 214, 176, 0.14);
+  --warn: #e8c268;
+  --bad: #ef8b8b;
+  --bad-soft: rgba(239, 139, 139, 0.14);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 18px 44px -24px rgba(0, 0, 0, 0.78);
+  --glow-1: rgba(183, 140, 255, 0.15);
+  --glow-2: rgba(154, 107, 240, 0.09);
+  color-scheme: dark;
+}
+
+/* Rose Quartz — soft pink light (default light) */
+html.light,
+html[data-theme='light'] {
+  --bg: #fbf1f3;
+  --bg-2: #f3e4e9;
   --surface: #ffffff;
-  --surface-2: #f7f1e8;
-  --surface-3: #ece1d2;
-  --text: #201b16;
-  --text-dim: #5c5248;
-  --text-mute: #8a7c6d;
-  --line: rgba(32, 27, 22, 0.09);
-  --line-strong: rgba(32, 27, 22, 0.16);
-  --accent: #c25a2a;
-  --accent-strong: #a94a20;
-  --accent-soft: rgba(194, 90, 42, 0.11);
-  --accent-line: rgba(194, 90, 42, 0.28);
+  --surface-2: #fbf2f6;
+  --surface-3: #f2e2e9;
+  --text: #2a1c22;
+  --text-dim: #6b5560;
+  --text-mute: #957e89;
+  --line: rgba(42, 28, 34, 0.09);
+  --line-strong: rgba(42, 28, 34, 0.17);
+  --accent: #b95a7d;
+  --accent-strong: #9d4666;
+  --accent-soft: rgba(185, 90, 125, 0.11);
+  --accent-line: rgba(185, 90, 125, 0.3);
   --good: #3f9463;
   --good-soft: rgba(63, 148, 99, 0.12);
   --warn: #b98223;
   --bad: #c4544e;
   --bad-soft: rgba(196, 84, 78, 0.12);
   --shadow:
-    0 1px 2px rgba(60, 45, 30, 0.06), 0 18px 40px -28px rgba(60, 45, 30, 0.35);
+    0 1px 2px rgba(60, 45, 50, 0.06), 0 18px 40px -28px rgba(60, 45, 50, 0.35);
+  --glow-1: rgba(185, 90, 125, 0.1);
+  --glow-2: rgba(185, 90, 125, 0.06);
+  color-scheme: light;
+}
+
+/* Mist — cool light */
+html[data-theme='mist'] {
+  --bg: #f2f5f9;
+  --bg-2: #e9eef5;
+  --surface: #ffffff;
+  --surface-2: #f4f7fb;
+  --surface-3: #e6ebf2;
+  --text: #1a2129;
+  --text-dim: #56616f;
+  --text-mute: #7f8a98;
+  --line: rgba(26, 33, 41, 0.09);
+  --line-strong: rgba(26, 33, 41, 0.16);
+  --accent: #4a7fb5;
+  --accent-strong: #3a6a9c;
+  --accent-soft: rgba(74, 127, 181, 0.11);
+  --accent-line: rgba(74, 127, 181, 0.3);
+  --good: #3a926b;
+  --good-soft: rgba(58, 146, 107, 0.12);
+  --warn: #b0822a;
+  --bad: #c25454;
+  --bad-soft: rgba(194, 84, 84, 0.12);
+  --shadow:
+    0 1px 2px rgba(30, 45, 60, 0.06), 0 18px 40px -28px rgba(30, 45, 60, 0.32);
+  --glow-1: rgba(74, 127, 181, 0.1);
+  --glow-2: rgba(74, 127, 181, 0.06);
+  color-scheme: light;
+}
+
+/* Sage — soft green light */
+html[data-theme='sage'] {
+  --bg: #f2f6f0;
+  --bg-2: #e9f0e5;
+  --surface: #ffffff;
+  --surface-2: #f4f8f1;
+  --surface-3: #e4ecdf;
+  --text: #1c241b;
+  --text-dim: #566552;
+  --text-mute: #7f8e7a;
+  --line: rgba(28, 36, 27, 0.09);
+  --line-strong: rgba(28, 36, 27, 0.16);
+  --accent: #4f8a5b;
+  --accent-strong: #3f7249;
+  --accent-soft: rgba(79, 138, 91, 0.11);
+  --accent-line: rgba(79, 138, 91, 0.3);
+  --good: #3a926b;
+  --good-soft: rgba(58, 146, 107, 0.12);
+  --warn: #b0822a;
+  --bad: #c25454;
+  --bad-soft: rgba(194, 84, 84, 0.12);
+  --shadow:
+    0 1px 2px rgba(35, 55, 35, 0.06), 0 18px 40px -28px rgba(35, 55, 35, 0.32);
+  --glow-1: rgba(79, 138, 91, 0.1);
+  --glow-2: rgba(79, 138, 91, 0.06);
   color-scheme: light;
 }
 
@@ -65,6 +184,17 @@ body,
 html,
 body {
   overflow-x: clip;
+}
+
+.logo-tile {
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--accent) 32%, var(--surface-2)),
+      var(--surface-2)
+    );
+  border: 1px solid var(--accent-line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 @media (pointer: coarse) {
@@ -109,31 +239,9 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(
-      900px 520px at 100% -10%,
-      rgba(223, 127, 74, 0.13),
-      transparent 60%
-    ),
-    radial-gradient(
-      700px 420px at -10% 110%,
-      rgba(194, 90, 42, 0.08),
-      transparent 60%
-    );
+    radial-gradient(900px 520px at 100% -10%, var(--glow-1), transparent 60%),
+    radial-gradient(700px 420px at -10% 110%, var(--glow-2), transparent 60%);
   z-index: 0;
-}
-
-html.light body::before {
-  background:
-    radial-gradient(
-      900px 520px at 100% -10%,
-      rgba(194, 90, 42, 0.09),
-      transparent 60%
-    ),
-    radial-gradient(
-      700px 420px at -10% 110%,
-      rgba(194, 90, 42, 0.06),
-      transparent 60%
-    );
 }
 
 #root {

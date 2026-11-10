@@ -14,11 +14,11 @@ describe('build-specific offline manifest', () => {
       [
         'index.html',
         'manifest.webmanifest',
-        'icon-192.png',
-        'icon-512.png',
-        'icon-512-maskable.png',
+        'logo.svg',
+        'icon.svg',
+        'icon-maskable.svg',
+        'favicon.svg',
         'apple-touch-icon.png',
-        'favicon-32.png',
         'assets/main.js',
         'assets/lazy-route.js',
         'assets/food-data.js',
@@ -70,7 +70,7 @@ describe('build-specific offline manifest', () => {
   });
 
   it('fails the build if a required shell file is missing', async () => {
-    await rm(join(directory, 'icon-512.png'));
+    await rm(join(directory, 'icon.svg'));
     await expect(offlineManifest(directory)).rejects.toThrow();
   });
 });

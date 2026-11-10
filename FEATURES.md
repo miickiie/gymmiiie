@@ -21,7 +21,7 @@ for the signed-in account, with device caching and automatic account synchroniza
 
 - Multi-step onboarding: welcome → units → profile → weekly goal, with optional setup later.
 - Profile: name, sex, age, height, bodyweight, activity level.
-- Unit system (kg/lb), theme (dark/light/system), week start, weekly workout goal.
+- Unit system (kg/lb), six themes (three dark: Ember, Midnight, Royal Amethyst; three light: Rose Quartz, Mist, Sage), week start, weekly workout goal. Mochi the cat announces each settings change in her speech bubble.
 - TDEE/macro starter targets derived from profile.
 
 ## Today / dashboard

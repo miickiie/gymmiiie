@@ -1,5 +1,6 @@
 import type { AppData } from '../types';
 import { defaultData } from './defaults';
+import { normalizeTheme } from './theme';
 
 export class SnapshotValidationError extends Error {
   constructor(message: string) {
@@ -9,6 +10,20 @@ export class SnapshotValidationError extends Error {
 }
 
 type Obj = Record<string, unknown>;
+/** Legacy `system` preferences cannot be checked against the OS inside workers. */
+function prefersLightMode(): boolean {
+  try {
+    return (
+      (
+        globalThis as {
+          matchMedia?: (query: string) => { matches: boolean };
+        }
+      ).matchMedia?.('(prefers-color-scheme: light)').matches ?? false
+    );
+  } catch {
+    return false;
+  }
+}
 const fail = (path: string): never => {
   throw new SnapshotValidationError(`Invalid backup field: ${path}`);
 };
@@ -142,7 +157,12 @@ export function parseBackup(input: unknown): AppData {
   );
   const settings = data.settings as Obj;
   enumeration(settings.unit, ['kg', 'lb'], 'settings.unit');
-  enumeration(settings.theme, ['dark', 'light', 'system'], 'settings.theme');
+  enumeration(
+    settings.theme,
+    ['dark', 'midnight', 'forest', 'light', 'mist', 'sage', 'system'],
+    'settings.theme',
+  );
+  settings.theme = normalizeTheme(settings.theme, prefersLightMode());
   enumeration(settings.weekStart, [0, 1, 6], 'settings.weekStart');
   enumeration(settings.effort, ['off', 'rpe', 'rir'], 'settings.effort');
   array(settings.plates, 'settings.plates').forEach((v, i) =>

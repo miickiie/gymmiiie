@@ -16,6 +16,7 @@ import {
 } from 'react-router-dom';
 import { useStore } from './lib/store';
 import { getLibraryView } from './lib/libraryView';
+import { isLightTheme, themeMeta } from './lib/theme';
 import Layout from './components/Layout';
 import { Btn, Confirm } from './components/ui';
 import { LegacyDeviceNotice } from './components/AccountGate';
@@ -197,18 +198,14 @@ export default function App() {
     return () => document.documentElement.classList.remove('session-route');
   }, [pathname]);
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: light)');
-    const apply = () => {
-      const light = theme === 'light' || (theme === 'system' && mq.matches);
-      document.documentElement.classList.toggle('light', light);
-      document.documentElement.classList.toggle('dark', !light);
-      document
-        .querySelector('meta[name="theme-color"]')
-        ?.setAttribute('content', light ? '#f6f1e9' : '#0b0a09');
-    };
-    apply();
-    mq.addEventListener('change', apply);
-    return () => mq.removeEventListener('change', apply);
+    const themeOption = themeMeta(theme);
+    const light = isLightTheme(theme);
+    document.documentElement.dataset.theme = themeOption.value;
+    document.documentElement.classList.toggle('light', light);
+    document.documentElement.classList.toggle('dark', !light);
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', themeOption.themeColor);
   }, [theme]);
   if (!hydrated)
     return status === 'error' ? <StorageRecovery blocking /> : <Loading />;

@@ -4,7 +4,7 @@
 
 Gymmiie keeps each user’s training log under an account identified by name and international telephone number. Logs are cached separately on each device and synchronized to the server when connected. There are no ads or trackers. An optional code-protected encrypted backup remains separate from account sync.
 
-![Gymmiie](public/icon-192.png)
+![Gymmiie](public/logo.svg)
 
 ## Highlights
 

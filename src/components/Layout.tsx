@@ -95,13 +95,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r border-line bg-[var(--bg-2)]/80 px-4 py-5 backdrop-blur lg:flex">
         <Link to="/" className="mb-7 flex items-center gap-3 px-2">
-          <img
-            src="/icon-192.png"
-            alt=""
-            width={44}
-            height={44}
-            className="h-11 w-11 shrink-0 rounded-2xl [image-rendering:pixelated]"
-          />
+          <span className="logo-tile grid h-11 w-11 shrink-0 place-items-center rounded-2xl p-1">
+            <img
+              src="/logo.svg"
+              alt=""
+              width={44}
+              height={44}
+              className="h-full w-full"
+            />
+          </span>
           <div>
             <p className="text-lg font-black leading-none tracking-tight">
               Gymmiie
@@ -209,13 +211,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* mobile top bar */}
       <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-line bg-[var(--bg)]/85 px-4 py-2.5 backdrop-blur-xl lg:hidden">
         <Link to="/" className="flex items-center gap-2">
+          <span className="logo-tile grid h-8 w-8 shrink-0 place-items-center rounded-xl p-0.5">
             <img
-              src="/icon-192.png"
+              src="/logo.svg"
               alt=""
               width={32}
               height={32}
-              className="h-8 w-8 shrink-0 rounded-xl [image-rendering:pixelated]"
+              className="h-full w-full"
             />
+          </span>
           <span className="text-[15px] font-black tracking-tight">Gymmiie</span>
         </Link>
         <div className="ml-auto flex items-center gap-1.5">

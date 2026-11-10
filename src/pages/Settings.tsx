@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import clsx from 'clsx';
 import {
   Activity,
   Check,
@@ -24,6 +25,12 @@ import {
 } from 'lucide-react';
 import { useStore } from '../lib/store';
 import { manualSyncStorageKey } from '../lib/accounts';
+import {
+  DARK_THEMES,
+  LIGHT_THEMES,
+  themeMeta,
+  type ThemeOption,
+} from '../lib/theme';
 import { useAccount } from '../components/AccountGate';
 import { AccountSettingsCard } from '../components/AccountStatus';
 import { fromDisplayWeight, toDisplayWeight } from '../lib/stats';
@@ -38,7 +45,7 @@ import {
   type SyncNamespace,
 } from '../lib/cloud';
 import { beep, vibrate } from '../lib/audio';
-import type { AppData } from '../types';
+import type { AppData, ThemePref } from '../types';
 import {
   Btn,
   Card,
@@ -55,10 +62,118 @@ import {
   useToast,
 } from '../components/ui';
 
+const WEEKDAYS = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+] as const;
+
+interface SettingsSnapshot {
+  settings: AppData['settings'];
+  profile: AppData['profile'];
+}
+
+interface SettingReaction {
+  key: string;
+  message: string;
+}
+
+/** Mochi narrates every settings/profile change so the bubble stays lively. */
+function settingMessages(
+  prev: SettingsSnapshot,
+  next: SettingsSnapshot,
+): SettingReaction[] {
+  const reactions: SettingReaction[] = [];
+  const add = (key: string, message: string) =>
+    reactions.push({ key, message });
+  const was = prev.settings;
+  const now = next.settings;
+  if (was.theme !== now.theme)
+    add('theme', `Switched to ${themeMeta(now.theme).label} theme! ✨`);
+  if (was.unit !== now.unit)
+    add('unit', `Units set to ${now.unit === 'kg' ? 'kilograms' : 'pounds'}! ⚖️`);
+  if (was.weekStart !== now.weekStart)
+    add('weekStart', `Week starts on ${WEEKDAYS[now.weekStart]}! 📅`);
+  if (was.effort !== now.effort)
+    add(
+      'effort',
+      now.effort === 'off'
+        ? 'Effort tracking turned off! 🎯'
+        : `Effort tracking set to ${now.effort.toUpperCase()}! 🎯`,
+    );
+  if (was.weeklyGoal !== now.weeklyGoal)
+    add('weeklyGoal', `Weekly goal set to ${now.weeklyGoal}×! 🎯`);
+  if (was.autoRest !== now.autoRest)
+    add('autoRest', `Auto rest timer ${now.autoRest ? 'on' : 'off'}! ⏱️`);
+  if (was.autoAdvance !== now.autoAdvance)
+    add('autoAdvance', `Auto advance ${now.autoAdvance ? 'on' : 'off'}! ⏭️`);
+  if (was.restSec !== now.restSec)
+    add('restSec', `Default rest set to ${now.restSec}s! ⏱️`);
+  if (was.sound !== now.sound)
+    add('sound', `Sound ${now.sound ? 'on' : 'off'}! 🔊`);
+  if (was.vibrate !== now.vibrate)
+    add('vibrate', `Vibration ${now.vibrate ? 'on' : 'off'}! 📳`);
+  if (was.barWeight !== now.barWeight)
+    add('barWeight', 'Bar weight updated! 🏋️');
+  if (
+    was.plates.length !== now.plates.length ||
+    was.plates.some((plate, i) => plate !== now.plates[i])
+  )
+    add('plates', 'Plate inventory updated! 🏋️');
+
+  const before = prev.profile;
+  const after = next.profile;
+  if (before.name !== after.name) {
+    const name = after.name.trim();
+    add('name', name ? `Name saved as ${name}! 🐾` : 'Name cleared! 🐾');
+  }
+  if (before.weightKg !== after.weightKg)
+    add('weightKg', 'Bodyweight updated! ⚖️');
+  if (before.sex !== after.sex) add('sex', `Sex set to ${after.sex}. 🐾`);
+  if (before.age !== after.age) add('age', `Age set to ${after.age}. 🐾`);
+  if (before.heightCm !== after.heightCm)
+    add('heightCm', `Height set to ${after.heightCm} cm. 📏`);
+  if (before.activity !== after.activity)
+    add('activity', 'Activity level updated! 🏃');
+  return reactions;
+}
+
+/** Debounced so typing in a number/name field produces one spoken update. */
+function useCatSettingReactions(data: AppData) {
+  const { push, clear } = useToast();
+  const previous = useRef<SettingsSnapshot>();
+  const pending = useRef(new Map<string, string>());
+  useEffect(() => {
+    const snapshot: SettingsSnapshot = {
+      settings: data.settings,
+      profile: data.profile,
+    };
+    const before = previous.current;
+    previous.current = snapshot;
+    if (before) {
+      for (const reaction of settingMessages(before, snapshot))
+        pending.current.set(reaction.key, reaction.message);
+    }
+    if (!pending.current.size) return;
+    const timeout = window.setTimeout(() => {
+      const messages = [...pending.current.values()];
+      pending.current.clear();
+      clear();
+      push(messages.join(' '), 'good');
+    }, 450);
+    return () => window.clearTimeout(timeout);
+  }, [data.settings, data.profile, push, clear]);
+}
+
 export default function SettingsPage() {
   const { account } = useAccount();
   const toast = useToast();
   const data = useStore((s) => s.data);
+  useCatSettingReactions(data);
   const setProfile = useStore((s) => s.setProfile);
   const setSettings = useStore((s) => s.setSettings);
   const replaceData = useStore((s) => s.replaceData);
@@ -304,14 +419,9 @@ export default function SettingsPage() {
           <Card className="space-y-4 p-4">
             <div>
               <p className="label mb-2">Theme</p>
-              <Segmented
+              <ThemePicker
                 value={data.settings.theme}
                 onChange={(v) => setSettings({ theme: v })}
-                options={[
-                  { value: 'dark', label: 'Dark' },
-                  { value: 'light', label: 'Light' },
-                  { value: 'system', label: 'System' },
-                ]}
               />
             </div>
             <div>
@@ -639,7 +749,7 @@ export default function SettingsPage() {
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-[10px] font-bold text-mute">
         <span className="flex items-center gap-1">
-          <Palette size={12} /> {data.settings.theme} theme
+          <Palette size={12} /> {themeMeta(data.settings.theme).label} theme
         </span>
         <span className="flex items-center gap-1">
           <Weight size={12} /> {unit}
@@ -741,6 +851,70 @@ function BackupSummary({ data }: { data: AppData }) {
       {data.sessions.length} workouts · {data.routines.length} routines ·{' '}
       {data.notes.length} notes · {data.nutrition.entries.length} meals
       {data.active ? ' · active workout' : ''}
+    </div>
+  );
+}
+
+function ThemePicker({
+  value,
+  onChange,
+}: {
+  value: ThemePref;
+  onChange: (value: ThemePref) => void;
+}) {
+  const groups: { label: string; options: readonly ThemeOption[] }[] = [
+    { label: 'Dark tones', options: DARK_THEMES },
+    { label: 'Light tones', options: LIGHT_THEMES },
+  ];
+  return (
+    <div className="space-y-3">
+      {groups.map((group) => (
+        <div key={group.label}>
+          <p className="mb-1.5 text-[10px] font-extrabold uppercase tracking-[0.08em] text-mute">
+            {group.label}
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {group.options.map((theme) => {
+              const active = value === theme.value;
+              return (
+                <button
+                  key={theme.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => onChange(theme.value)}
+                  className={clsx(
+                    'flex flex-col gap-2 rounded-xl border p-2 text-left transition',
+                    active
+                      ? 'border-[var(--accent-line)] bg-[var(--accent-soft)]'
+                      : 'border-line bg-[var(--surface-2)] hover:border-strong',
+                  )}
+                >
+                  <span
+                    className="flex h-8 items-center gap-1 rounded-lg p-1.5"
+                    style={{ background: theme.swatch.bg }}
+                    aria-hidden="true"
+                  >
+                    <span
+                      className="h-5 w-5 rounded-md"
+                      style={{ background: theme.swatch.surface }}
+                    />
+                    <span
+                      className="h-5 flex-1 rounded-md"
+                      style={{ background: theme.swatch.accent }}
+                    />
+                  </span>
+                  <span className="flex items-center justify-between gap-1 text-[11px] font-extrabold">
+                    {theme.label}
+                    {active && (
+                      <Check size={12} className="shrink-0 text-accent" />
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

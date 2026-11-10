@@ -1,5 +1,11 @@
 export type Unit = 'kg' | 'lb';
-export type ThemePref = 'dark' | 'light' | 'system';
+export type ThemePref =
+  | 'dark'
+  | 'midnight'
+  | 'forest'
+  | 'light'
+  | 'mist'
+  | 'sage';
 export type SetKind =
   'normal' | 'warmup' | 'drop' | 'failure' | 'restPause' | 'cluster';
 export type EffortMode = 'off' | 'rpe' | 'rir';
