@@ -1,4 +1,5 @@
 import index from '../data/art.json';
+import catalog from '../data/exercises-runtime.json';
 
 export interface ArtEntry {
   n: number;
@@ -12,6 +13,7 @@ interface ArtData {
   frames: string[][];
 }
 
+// The generator emits approved assets only.
 export const ART = index as unknown as Record<string, ArtEntry>;
 
 export function artEntry(slug: string): ArtEntry | undefined {
@@ -41,7 +43,9 @@ function parseMotion(svgText: string): ArtData | null {
     const groups = Array.from(svg.querySelectorAll('g[data-frame]'));
     if (!groups.length) return null;
     const frames = groups.map((g) =>
-      Array.from(g.querySelectorAll('path')).map((p) => p.getAttribute('d') || '').filter(Boolean),
+      Array.from(g.querySelectorAll('path'))
+        .map((p) => p.getAttribute('d') || '')
+        .filter(Boolean),
     );
     if (frames.some((f) => !f.length)) return null;
     return { viewBox, frames };
@@ -57,7 +61,12 @@ export function loadMotion(slug: string): Promise<ArtData | null> {
   const p = fetch(artUrl(slug))
     .then((r) => (r.ok ? r.text() : ''))
     .then((text) => (text ? parseMotion(text) : null))
-    .catch(() => null);
+    .catch(() => null)
+    .then((data) => {
+      // Offline/transient failures must not poison the cache for this app lifetime.
+      if (!data) cache.delete(slug);
+      return data;
+    });
   cache.set(slug, p);
   return p;
 }
@@ -75,17 +84,27 @@ export interface ExerciseInstructions {
   url?: string;
 }
 
-const INSTRUCTIONS = instructions as unknown as Record<string, ExerciseInstructions>;
+const INSTRUCTIONS = instructions as unknown as Record<
+  string,
+  ExerciseInstructions
+>;
+const bundledIds = new Set(catalog.map((exercise) => exercise.id));
 
-export function instructionsOf(exerciseId: string): ExerciseInstructions | undefined {
+export function instructionsOf(
+  exerciseId: string,
+): ExerciseInstructions | undefined {
   const info = INSTRUCTIONS[exerciseId];
-  return info && Array.isArray(info.steps) && info.steps.length ? info : undefined;
+  return info && Array.isArray(info.steps) && info.steps.length
+    ? info
+    : undefined;
 }
 
-// Gymmane's catalog steps are used when Everkinetic availability stops —
-// always reasonably exhaustive per GymMane's own catalogs.
+// Unverified original catalogue text is not shipped. Custom entries carry the user's own notes.
 export function stepsFor(exercise: { id: string; steps: string[] }): string[] {
-  return instructionsOf(exercise.id)?.steps ?? exercise.steps ?? [];
+  return (
+    instructionsOf(exercise.id)?.steps ??
+    (bundledIds.has(exercise.id) ? [] : (exercise.steps ?? []))
+  );
 }
 
 export function tipsFor(exercise: { id: string }): string[] {

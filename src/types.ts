@@ -1,10 +1,26 @@
 export type Unit = 'kg' | 'lb';
 export type ThemePref = 'dark' | 'light' | 'system';
-export type SetKind = 'normal' | 'warmup' | 'drop' | 'failure' | 'restPause' | 'cluster';
+export type SetKind =
+  'normal' | 'warmup' | 'drop' | 'failure' | 'restPause' | 'cluster';
 export type EffortMode = 'off' | 'rpe' | 'rir';
+/** Empty mode is the existing repetition-based logging format. */
+export type ExerciseMode = '' | 'time' | 'cardio';
+export type LoadKind = 'external' | 'added' | 'assistance' | 'none';
 export type MuscleId =
-  | 'chest' | 'shoulders' | 'biceps' | 'abdomen' | 'obliques' | 'quads' | 'forearm'
-  | 'trapezius' | 'back' | 'lowerback' | 'triceps' | 'glutes' | 'hamstrings' | 'calves';
+  | 'chest'
+  | 'shoulders'
+  | 'biceps'
+  | 'abdomen'
+  | 'obliques'
+  | 'quads'
+  | 'forearm'
+  | 'trapezius'
+  | 'back'
+  | 'lowerback'
+  | 'triceps'
+  | 'glutes'
+  | 'hamstrings'
+  | 'calves';
 
 export interface Exercise {
   id: string;
@@ -15,7 +31,10 @@ export interface Exercise {
   difficulty: string;
   art: string;
   steps: string[];
-  mode: string;
+  mode: ExerciseMode;
+  loadKind?: LoadKind;
+  /** Reviewed movement family used only to diversify automatic suggestions. */
+  suggestionGroup?: string;
   aliases: string[];
   kind: string;
 }
@@ -36,6 +55,8 @@ export interface LoggedExercise {
   id: string;
   name: string;
   primary: string;
+  mode?: ExerciseMode;
+  loadKind?: LoadKind;
   sets: LoggedSet[];
 }
 
@@ -68,6 +89,8 @@ export interface SessionExercise {
   id: string;
   name: string;
   primary: string;
+  mode?: ExerciseMode;
+  loadKind?: LoadKind;
   sets: SessionSet[];
   linkedNext?: boolean;
   swappedFrom?: string;

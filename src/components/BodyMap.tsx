@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import clsx from 'clsx';
-import type { MuscleId } from '../types';
+import { useState } from 'react';
 import { MUSCLE_LABEL } from '../lib/stats';
+import type { MuscleId } from '../types';
 
 interface Props {
   selected?: string[];
@@ -11,23 +11,139 @@ interface Props {
 }
 
 const FRONT: { id: MuscleId; render: (p: RegionProps) => React.ReactNode }[] = [
-  { id: 'chest', render: (p) => (<><ellipse cx="94" cy="104" rx="16" ry="13" {...p} /><ellipse cx="126" cy="104" rx="16" ry="13" {...p} /></>) },
-  { id: 'shoulders', render: (p) => (<><ellipse cx="69" cy="88" rx="13" ry="12" {...p} /><ellipse cx="151" cy="88" rx="13" ry="12" {...p} /></>) },
-  { id: 'biceps', render: (p) => (<><ellipse cx="61" cy="121" rx="9.5" ry="19" {...p} /><ellipse cx="159" cy="121" rx="9.5" ry="19" {...p} /></>) },
-  { id: 'forearm', render: (p) => (<><ellipse cx="51" cy="163" rx="8" ry="21" transform="rotate(6 51 163)" {...p} /><ellipse cx="169" cy="163" rx="8" ry="21" transform="rotate(-6 169 163)" {...p} /></>) },
-  { id: 'abdomen', render: (p) => (<rect x="96" y="129" width="28" height="56" rx="9" {...p} />) },
-  { id: 'obliques', render: (p) => (<><path d="M96 132 Q86 142 87 168 L92 182 L96 176 Z" {...p} /><path d="M124 132 Q134 142 133 168 L128 182 L124 176 Z" {...p} /></>) },
-  { id: 'quads', render: (p) => (<><ellipse cx="93" cy="251" rx="15" ry="39" {...p} /><ellipse cx="127" cy="251" rx="15" ry="39" {...p} /></>) },
+  {
+    id: 'chest',
+    render: (p) => (
+      <>
+        <ellipse cx="94" cy="104" rx="16" ry="13" {...p} />
+        <ellipse cx="126" cy="104" rx="16" ry="13" {...p} />
+      </>
+    ),
+  },
+  {
+    id: 'shoulders',
+    render: (p) => (
+      <>
+        <ellipse cx="69" cy="88" rx="13" ry="12" {...p} />
+        <ellipse cx="151" cy="88" rx="13" ry="12" {...p} />
+      </>
+    ),
+  },
+  {
+    id: 'biceps',
+    render: (p) => (
+      <>
+        <ellipse cx="61" cy="121" rx="9.5" ry="19" {...p} />
+        <ellipse cx="159" cy="121" rx="9.5" ry="19" {...p} />
+      </>
+    ),
+  },
+  {
+    id: 'forearm',
+    render: (p) => (
+      <>
+        <ellipse
+          cx="51"
+          cy="163"
+          rx="8"
+          ry="21"
+          transform="rotate(6 51 163)"
+          {...p}
+        />
+        <ellipse
+          cx="169"
+          cy="163"
+          rx="8"
+          ry="21"
+          transform="rotate(-6 169 163)"
+          {...p}
+        />
+      </>
+    ),
+  },
+  {
+    id: 'abdomen',
+    render: (p) => <rect x="96" y="129" width="28" height="56" rx="9" {...p} />,
+  },
+  {
+    id: 'obliques',
+    render: (p) => (
+      <>
+        <path d="M96 132 Q86 142 87 168 L92 182 L96 176 Z" {...p} />
+        <path d="M124 132 Q134 142 133 168 L128 182 L124 176 Z" {...p} />
+      </>
+    ),
+  },
+  {
+    id: 'quads',
+    render: (p) => (
+      <>
+        <ellipse cx="93" cy="251" rx="15" ry="39" {...p} />
+        <ellipse cx="127" cy="251" rx="15" ry="39" {...p} />
+      </>
+    ),
+  },
 ];
 
 const BACK: { id: MuscleId; render: (p: RegionProps) => React.ReactNode }[] = [
-  { id: 'trapezius', render: (p) => (<path d="M88 73 Q110 64 132 73 L145 96 L125 90 L110 86 L95 90 L75 96 Z" {...p} />) },
-  { id: 'back', render: (p) => (<><path d="M91 96 Q76 108 78 142 L92 158 L96 118 Z" {...p} /><path d="M129 96 Q144 108 142 142 L128 158 L124 118 Z" {...p} /></>) },
-  { id: 'lowerback', render: (p) => (<rect x="96" y="150" width="28" height="38" rx="9" {...p} />) },
-  { id: 'triceps', render: (p) => (<><ellipse cx="61" cy="123" rx="9.5" ry="20" {...p} /><ellipse cx="159" cy="123" rx="9.5" ry="20" {...p} /></>) },
-  { id: 'glutes', render: (p) => (<><ellipse cx="97" cy="205" rx="18" ry="16" {...p} /><ellipse cx="123" cy="205" rx="18" ry="16" {...p} /></>) },
-  { id: 'hamstrings', render: (p) => (<><ellipse cx="93" cy="252" rx="15" ry="38" {...p} /><ellipse cx="127" cy="252" rx="15" ry="38" {...p} /></>) },
-  { id: 'calves', render: (p) => (<><ellipse cx="95" cy="329" rx="11" ry="24" {...p} /><ellipse cx="125" cy="329" rx="11" ry="24" {...p} /></>) },
+  {
+    id: 'trapezius',
+    render: (p) => (
+      <path
+        d="M88 73 Q110 64 132 73 L145 96 L125 90 L110 86 L95 90 L75 96 Z"
+        {...p}
+      />
+    ),
+  },
+  {
+    id: 'back',
+    render: (p) => (
+      <>
+        <path d="M91 96 Q76 108 78 142 L92 158 L96 118 Z" {...p} />
+        <path d="M129 96 Q144 108 142 142 L128 158 L124 118 Z" {...p} />
+      </>
+    ),
+  },
+  {
+    id: 'lowerback',
+    render: (p) => <rect x="96" y="150" width="28" height="38" rx="9" {...p} />,
+  },
+  {
+    id: 'triceps',
+    render: (p) => (
+      <>
+        <ellipse cx="61" cy="123" rx="9.5" ry="20" {...p} />
+        <ellipse cx="159" cy="123" rx="9.5" ry="20" {...p} />
+      </>
+    ),
+  },
+  {
+    id: 'glutes',
+    render: (p) => (
+      <>
+        <ellipse cx="97" cy="205" rx="18" ry="16" {...p} />
+        <ellipse cx="123" cy="205" rx="18" ry="16" {...p} />
+      </>
+    ),
+  },
+  {
+    id: 'hamstrings',
+    render: (p) => (
+      <>
+        <ellipse cx="93" cy="252" rx="15" ry="38" {...p} />
+        <ellipse cx="127" cy="252" rx="15" ry="38" {...p} />
+      </>
+    ),
+  },
+  {
+    id: 'calves',
+    render: (p) => (
+      <>
+        <ellipse cx="95" cy="329" rx="11" ry="24" {...p} />
+        <ellipse cx="125" cy="329" rx="11" ry="24" {...p} />
+      </>
+    ),
+  },
 ];
 
 type RegionProps = {
@@ -46,20 +162,38 @@ type RegionProps = {
   onMouseLeave?: () => void;
 };
 
-function Body({ side, selected = [], onToggle, heat }: { side: 'front' | 'back' } & Props) {
+function Body({
+  side,
+  selected = [],
+  onToggle,
+  heat,
+}: { side: 'front' | 'back' } & Props) {
   const regions = side === 'front' ? FRONT : BACK;
   const [hover, setHover] = useState<string | null>(null);
   const maxHeat = heat ? Math.max(1, ...Object.values(heat)) : 1;
 
   const bodyFill = 'var(--surface-2)';
-  const bodyStroke = 'var(--line-strong)';
 
   return (
-    <svg viewBox="0 0 220 390" className="h-auto w-full max-w-[240px] select-none" role="group" aria-label={`${side} body map`}>
+    <svg
+      viewBox="0 0 220 390"
+      className="h-auto w-full max-w-[240px] select-none"
+      role="group"
+      aria-label={`${side} body map`}
+    >
       <defs>
-        <filter id={`glow-${side}`} x="-30%" y="-30%" width="160%" height="160%">
+        <filter
+          id={`glow-${side}`}
+          x="-30%"
+          y="-30%"
+          width="160%"
+          height="160%"
+        >
           <feGaussianBlur stdDeviation="3" result="b" />
-          <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          <feMerge>
+            <feMergeNode in="b" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
         </filter>
       </defs>
 
@@ -70,10 +204,34 @@ function Body({ side, selected = [], onToggle, heat }: { side: 'front' | 'back' 
         <ellipse cx="110" cy="78" rx="32" ry="10" />
         <path d="M78 78 Q110 69 142 78 L146 132 Q144 170 132 198 L88 198 Q76 170 74 132 Z" />
         <path d="M88 194 Q110 204 132 194 L136 224 Q110 238 84 224 Z" />
-        <ellipse cx="62" cy="110" rx="11" ry="27" transform="rotate(6 62 110)" />
-        <ellipse cx="158" cy="110" rx="11" ry="27" transform="rotate(-6 158 110)" />
-        <ellipse cx="51" cy="159" rx="8.5" ry="25" transform="rotate(7 51 159)" />
-        <ellipse cx="169" cy="159" rx="8.5" ry="25" transform="rotate(-7 169 159)" />
+        <ellipse
+          cx="62"
+          cy="110"
+          rx="11"
+          ry="27"
+          transform="rotate(6 62 110)"
+        />
+        <ellipse
+          cx="158"
+          cy="110"
+          rx="11"
+          ry="27"
+          transform="rotate(-6 158 110)"
+        />
+        <ellipse
+          cx="51"
+          cy="159"
+          rx="8.5"
+          ry="25"
+          transform="rotate(7 51 159)"
+        />
+        <ellipse
+          cx="169"
+          cy="159"
+          rx="8.5"
+          ry="25"
+          transform="rotate(-7 169 159)"
+        />
         <circle cx="47" cy="187" r="7" />
         <circle cx="173" cy="187" r="7" />
         <ellipse cx="94" cy="254" rx="18" ry="46" />
@@ -90,36 +248,79 @@ function Body({ side, selected = [], onToggle, heat }: { side: 'front' | 'back' 
         const hv = heat?.[id] ?? 0;
         const heatOpacity = heat ? 0.15 + (hv / maxHeat) * 0.75 : 1;
         return (
-          <g key={id}>
+          <g
+            key={id}
+            role={onToggle ? 'button' : 'img'}
+            tabIndex={onToggle ? 0 : undefined}
+            aria-label={
+              heat
+                ? `${MUSCLE_LABEL[id]}: ${Math.round(hv * 10) / 10} working sets`
+                : MUSCLE_LABEL[id]
+            }
+            aria-pressed={onToggle ? on : undefined}
+            onClick={onToggle ? () => onToggle(id) : undefined}
+            onKeyDown={(event) => {
+              if (onToggle && (event.key === 'Enter' || event.key === ' ')) {
+                event.preventDefault();
+                onToggle(id);
+              }
+            }}
+            onMouseEnter={() => setHover(id)}
+            onMouseLeave={() => setHover(null)}
+          >
             {render({
-              fill: on ? 'var(--accent)' : heat ? `color-mix(in srgb, var(--accent) ${Math.round(heatOpacity * 100)}%, var(--surface-3))` : 'var(--surface-3)',
-              stroke: on ? 'var(--accent)' : hover === id ? 'var(--accent-line)' : 'var(--line)',
+              fill: on
+                ? 'var(--accent)'
+                : heat
+                  ? `color-mix(in srgb, var(--accent) ${Math.round(heatOpacity * 100)}%, var(--surface-3))`
+                  : 'var(--surface-3)',
+              stroke: on
+                ? 'var(--accent)'
+                : hover === id
+                  ? 'var(--accent-line)'
+                  : 'var(--line)',
               strokeWidth: on ? 1.6 : 1,
               opacity: on ? 0.95 : 1,
-              className: 'cursor-pointer transition-all duration-150',
-              onClick: () => onToggle?.(id),
-              role: 'button',
-              tabIndex: 0,
-              'aria-label': MUSCLE_LABEL[id],
-              onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') onToggle?.(id); },
-              onMouseEnter: () => setHover(id),
-              onMouseLeave: () => setHover(null),
+              className: clsx(
+                'transition-all duration-150',
+                onToggle && 'cursor-pointer',
+              ),
               style: { filter: on ? `url(#glow-${side})` : undefined },
             })}
             <text
-              x="110" y="386" textAnchor="middle"
+              x="110"
+              y="386"
+              textAnchor="middle"
               className="pointer-events-none"
               fontSize="0"
-            >{MUSCLE_LABEL[id]}</text>
+            >
+              {MUSCLE_LABEL[id]}
+            </text>
           </g>
         );
       })}
 
-      <text x="110" y="388" textAnchor="middle" fontSize="9" fontWeight="800" fill="var(--text-mute)" className="pointer-events-none uppercase tracking-widest">
+      <text
+        x="110"
+        y="388"
+        textAnchor="middle"
+        fontSize="9"
+        fontWeight="800"
+        fill="var(--text-mute)"
+        className="pointer-events-none uppercase tracking-widest"
+      >
         {side}
       </text>
       {hover && (
-        <text x="110" y="12" textAnchor="middle" fontSize="10" fontWeight="800" fill="var(--accent)" className="pointer-events-none">
+        <text
+          x="110"
+          y="12"
+          textAnchor="middle"
+          fontSize="10"
+          fontWeight="800"
+          fill="var(--accent)"
+          className="pointer-events-none"
+        >
           {MUSCLE_LABEL[hover as MuscleId]}
         </text>
       )}
@@ -127,21 +328,59 @@ function Body({ side, selected = [], onToggle, heat }: { side: 'front' | 'back' 
   );
 }
 
-export default function BodyMap({ selected = [], onToggle, heat, compact }: Props) {
+export default function BodyMap({
+  selected = [],
+  onToggle,
+  heat,
+  compact,
+}: Props) {
   const [tab, setTab] = useState<'front' | 'back'>('front');
   return (
     <div>
       <div className={clsx('grid gap-2', 'sm:grid-cols-2')}>
-        <div className={clsx('flex justify-center', tab !== 'front' && 'hidden sm:flex')}>
-          <Body side="front" selected={selected} onToggle={onToggle} heat={heat} compact={compact} />
+        <div
+          className={clsx(
+            'flex justify-center',
+            tab !== 'front' && 'hidden sm:flex',
+          )}
+        >
+          <Body
+            side="front"
+            selected={selected}
+            onToggle={onToggle}
+            heat={heat}
+            compact={compact}
+          />
         </div>
-        <div className={clsx('flex justify-center', tab !== 'back' && 'hidden sm:flex')}>
-          <Body side="back" selected={selected} onToggle={onToggle} heat={heat} compact={compact} />
+        <div
+          className={clsx(
+            'flex justify-center',
+            tab !== 'back' && 'hidden sm:flex',
+          )}
+        >
+          <Body
+            side="back"
+            selected={selected}
+            onToggle={onToggle}
+            heat={heat}
+            compact={compact}
+          />
         </div>
       </div>
       <div className="mt-2 flex justify-center gap-2 sm:hidden">
         {(['front', 'back'] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={clsx('rounded-full px-4 py-1.5 text-xs font-black capitalize', tab === t ? 'bg-[var(--surface-3)] text-[var(--text)]' : 'text-mute')}>
+          <button
+            key={t}
+            type="button"
+            aria-pressed={tab === t}
+            onClick={() => setTab(t)}
+            className={clsx(
+              'rounded-full px-4 py-1.5 text-xs font-black capitalize',
+              tab === t
+                ? 'bg-[var(--surface-3)] text-[var(--text)]'
+                : 'text-mute',
+            )}
+          >
             {t}
           </button>
         ))}

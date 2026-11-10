@@ -2,11 +2,24 @@
 
 A practical inventory of what the web app does, mapped to the GymMane Android
 app it was reverse-engineered from. “Done” means the flow exists and persists
-locally; optional cloud pieces are marked separately.
+for the signed-in account, with device caching and automatic account synchronization. Manual encrypted backups are separate.
+
+## Accounts
+
+- Signed-out homepage with Name, international Telephone and Continue.
+- Returning users open their server-backed tracking log using those identifiers; no private PIN or telephone verification is requested.
+- Genuine not-found response reveals Create user and a server-checked registration passphrase field. Failed connectivity never becomes account creation.
+- Server session verification precedes private account data hydration and navigation.
+- Read-only account name/telephone, separate editable training display name.
+- Home, Switch user and Sign out in the account menu; active workouts and unsynced changes remain under their original account.
+- Explicit offline continuation of a previously opened, cached account. Local sign-out blocks automatic/offline reopening.
+- Per-account IndexedDB, recovery journal and manual-backup preferences.
+- Device/server sync status, retry/export recovery and explicit conflict replacement.
+- Older unassigned device data is preserved; reviewed import into the named account is always explicit.
 
 ## Onboarding & profile
 
-- Multi-step onboarding: welcome → units → profile → weekly goal.
+- Multi-step onboarding: welcome → units → profile → weekly goal, with optional setup later.
 - Profile: name, sex, age, height, bodyweight, activity level.
 - Unit system (kg/lb), theme (dark/light/system), week start, weekly workout goal.
 - TDEE/macro starter targets derived from profile.
@@ -15,29 +28,31 @@ locally; optional cloud pieces are marked separately.
 
 - Greeting, weekly goal ring, streak, level/XP progress.
 - This-week strip with trained/rest/check-in states; check-in and rest-day toggles.
-- Today’s planned routine (from the weekly plan) with one-tap start.
+- One dominant Start/Resume action, with the planned routine and weekly plan shown separately.
 - Recent workouts, quick-start tiles, bodyweight snapshot and journal shortcut.
 - All-time workouts, working sets, total volume and calorie summary.
 
-## Train
+## Train & navigation
 
-- Front/back interactive muscle map; multi-muscle focus selection.
-- Suggested exercise list (up to 8) with warm-up generation.
-- Empty workout, quick warm-up and cardio starts.
-- Routine shortcuts and template discovery.
-- Session review before starting: add/remove exercises, see matched alternatives.
+- Mobile navigation: Today, Train, History, Progress and More; nutrition is in More.
+- Train presents routines and empty workouts equally, plus exercise library access.
+- Optional front/back muscle-map suggestions from reviewed movement groups (up to 8).
+- Quick warm-up and cardio starts; routine shortcuts and template discovery.
+- Session review: add/remove/replace/reorder exercises, distinguish mobility drills and warn when a selected muscle has no primary movement.
+- Every new-workout entry point shares Resume/Cancel/confirmed Discard & start protection.
 
 ## Live session
 
 - Elapsed timer with pause/resume; session rename.
-- Per-exercise cards with set rows: weight, reps, left/right reps, time/distance for
-  cardio, RPE, notes and set kind (normal, warm-up, drop, failure, rest-pause, cluster).
+- Per-exercise cards with weight/repetition or time/distance set rows.
+- Mobile Set details exposes RPE/RIR, notes and set kind (normal, warm-up, drop, failure, rest-pause, cluster). RIR input converts to canonical stored RPE.
+- Pause freezes elapsed/rest time and prevents logging until resumed.
 - Complete-set toggles; working-set and volume counters; warm-ups excluded from volume.
-- Automatic rest countdown with skip, ±15 s, beep countdown and vibration.
-- Auto-advance to the next exercise; superset linking.
+- Automatic rest timer with skip, ±15 s and end-of-rest beep/vibration.
+- Auto-advance to the next exercise after all its sets are completed.
 - Add/remove sets, add/remove/swap/reorder exercises.
 - Last-time suggestions, best e1RM and PR context.
-- Finish summary (duration, working sets, volume, exercises) and discard with confirm.
+- Finish summary (duration, completed sets, volume, exercises), durable save and discard confirmation. A failed save keeps the active workout available for recovery.
 - Repeat a past workout from session detail.
 
 ## Routines & programmes
@@ -46,7 +61,7 @@ locally; optional cloud pieces are marked separately.
 - Weekly plan assignment per weekday with rest/unplanned state.
 - One-tap start from a weekday or routine card.
 - Built-in templates: Full Body (A/B/C), Push Pull Legs, Upper/Lower, Arnold Split.
-- Default rest per exercise; automatic rest follows Settings.
+- Per-exercise routine rest with the global setting as the default.
 
 ## History
 
@@ -59,19 +74,19 @@ locally; optional cloud pieces are marked separately.
 ## Exercise library
 
 - 466 built-in exercises extracted from GymMane, plus user-created exercises.
-- Search and filters by muscle, equipment and category; favourites and archive.
+- Search and filters by muscle, equipment and body zone; a zone includes all its muscles, with favourites and archive.
+- Custom exercises choose repetitions/time/distance tracking, load type and authored instructions.
 - Exercise detail: muscles, equipment, instructions, cues, personal records,
   e1RM/volume history charts, per-exercise notes and archive/favourite actions.
-- Animated exercise artwork (CC BY-SA 4.0) from Workout Guide by Bryl Lim,
-  Everkinetic and GymMane-derived poses, with lazy still thumbnails in list rows.
-- Step-by-step "How to perform it" with tips, preferentially from Everkinetic;
-  a live form guide (animation + steps) is available inside workouts.
+- Reviewed artwork (CC BY-SA 4.0) from Workout Guide by Bryl Lim, Everkinetic and GymMane-derived poses, with lazy thumbnails.
+- Artwork and instructions have independent exercise-specific review. Unverified content uses an icon or an explicit unavailable guide. Custom authored instructions are preserved.
+- Reviewed form guides are accessible from exercise details and live workouts.
 
 ## Progress
 
 - Overview: streak, working sets, hours, PR count, 12-week volume/sets chart,
   30-day daily volume, recent records and muscle heat map.
-- Records: searchable PR table with best set, e1RM, date and links to exercise pages.
+- Records: searchable PR table with weight, repetitions, seconds or kilometres. Estimated 1RM appears only for applicable loaded repetition sets; heaviest-weight summaries exclude other units.
 - Body: bodyweight series, goal line, measurements, add/delete entries.
 - Awards: milestone badges with progress bars (streaks, sessions, sets, volume, routines).
 
@@ -82,7 +97,8 @@ locally; optional cloud pieces are marked separately.
 - Water tracker with configurable glass size.
 - Four meal slots; add/delete entries.
 - Searchable 561-food catalogue and 27 dishes, per-100 g macros and portion scaling.
-- Custom foods with per-100 g macros.
+- Custom foods with finite, nonnegative per-100 g macros; logged portions must be finite and positive.
+- Food preview shortcuts select the clicked food in the portion editor.
 - Editable macro/water goals.
 
 ## Journal
@@ -93,7 +109,7 @@ locally; optional cloud pieces are marked separately.
 ## Gym pass
 
 - Locally stored pass cards: gym name, holder, membership number, entry code, colour.
-- Add, edit, delete; copy codes; card-style display.
+- Add/delete, copy codes and a full membership-code view for showing at the desk. No decorative barcode is presented as scannable.
 
 ## Tools (10 calculators)
 
@@ -103,30 +119,33 @@ locally; optional cloud pieces are marked separately.
 ## Settings & data
 
 - Profile, appearance, units, week start, weekly goal.
-- Rest timer, auto-rest, auto-advance, beep countdown, mini rest, sound/vibration tests.
+- Rest timer, auto-rest, auto-advance and sound/vibration tests. Unsupported countdown-beep and mini-rest controls are removed.
 - Bar weight and plate inventory for plate maths.
-- JSON export/import; CSV workout export; reset all data; persistent-storage request.
-- Cloud sync: generate/save code, upload/download/delete encrypted snapshot,
+- JSON export/import; CSV workout export; durable reset; persistent-storage request.
+- One version-aware parser for local/import/cloud data; replacement preview and confirmation.
+- Visible persistence failures, unsaved-copy export, retry and explicit reload after cross-tab conflicts.
+- Manual encrypted backup: generate/save a per-account code, upload/download/delete a snapshot,
   status and snapshot workout count.
 - Install prompt and About/credits.
 
 ## PWA & platform
 
 - Web app manifest, maskable PNG icons, Apple touch icon.
-- Service worker precaches the app shell and hashed assets; navigations are
-  network-first with an offline fallback.
+- Generated versioned precache includes the app shell and lazy route chunks; navigations are network-first with an offline fallback.
 - Dark basalt/terracotta theme, light theme, responsive desktop sidebar and mobile
   bottom navigation.
+- Stacked accessible dialogs trap and restore focus, dismiss only the top dialog and lock background scrolling.
+- Keyboard focus indicators, reduced-motion support and responsive mobile set controls.
 - No analytics, cookies or third-party pixels. Fonts are loaded from Google Fonts.
 
 ## Cloud backend (Cloudflare)
 
 - Single Worker serves `dist/` and the SPA fallback.
-- D1 table `sync_snapshots` stores only `id` (SHA-256 of the sync code),
+- Automatic account tracking uses server sessions and owner-scoped account data with revision conflicts.
+- The separate D1 table `sync_snapshots` stores only `id` (SHA-256 of the manual sync code),
   `payload` (base64 AES-GCM ciphertext), `updated_at` and `bytes`.
 - `GET/PUT/DELETE /api/sync/:id`, `GET /api/health`.
-- Payload validation, 8 MB cap, `no-store` responses; no plaintext data or account
-  identity exists server-side.
+- Manual snapshot payload validation, 8 MB cap and `no-store` responses; manual snapshot contents remain ciphertext. Account identity and account tracking JSON are stored separately.
 
 ## Not rebuilt (yet)
 
@@ -136,7 +155,8 @@ are implemented; the following are the remaining parity gaps.
 
 - Circuit workouts / station rotation.
 - Places and equipment-aware exercise filtering (the body map picks by muscle).
-- RIR mode (Gymmiie logs RPE) and voice-guided rest.
+- Voice-guided rest.
+- Superset/circuit timing; legacy link metadata is retained in backups without active controls.
 - Explicit deload-week / light-session programming flags.
 - Progress photos and a photo timeline.
 - Month/weekly recap story cards (session share text exists; image stories do not).

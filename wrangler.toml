@@ -2,7 +2,10 @@ name = "gymmiie"
 main = "worker/index.ts"
 compatibility_date = "2024-12-05"
 
-# Single Worker: static SPA + encrypted sync API.
+# Single Worker: static SPA, account snapshots, and legacy encrypted sync.
+[secrets]
+required = ["REGISTRATION_PASSPHRASE"]
+
 [assets]
 directory = "./dist"
 binding = "ASSETS"
@@ -12,8 +15,12 @@ run_worker_first = true
 [[d1_databases]]
 binding = "DB"
 database_name = "gymmiie"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "799cd448-362e-4a54-b2e1-e1f0407458e9"
 migrations_dir = "migrations"
 
 [observability]
 enabled = true
+
+[observability.traces]
+enabled = true
+head_sampling_rate = 0.01

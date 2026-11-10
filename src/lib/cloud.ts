@@ -1,3 +1,6 @@
+import type { AppData } from '../types';
+import { parseBackup } from './backup';
+
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
@@ -20,13 +23,26 @@ function b64ToBuf(b64: string): ArrayBuffer {
 
 async function sha256Hex(input: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', enc.encode(input));
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 async function deriveKey(code: string): Promise<CryptoKey> {
-  const material = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveKey']);
+  const material = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(code),
+    'PBKDF2',
+    false,
+    ['deriveKey'],
+  );
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: enc.encode('gymmiie-sync-v1'), iterations: 210000, hash: 'SHA-256' },
+    {
+      name: 'PBKDF2',
+      salt: enc.encode('gymmiie-sync-v1'),
+      iterations: 210000,
+      hash: 'SHA-256',
+    },
     material,
     { name: 'AES-GCM', length: 256 },
     false,
@@ -34,58 +50,161 @@ async function deriveKey(code: string): Promise<CryptoKey> {
   );
 }
 
-export async function encryptSnapshot(code: string, data: unknown): Promise<string> {
+export async function encryptSnapshot(
+  code: string,
+  data: unknown,
+): Promise<string> {
   const key = await deriveKey(code);
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(JSON.stringify(data)));
+  const cipher = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    enc.encode(JSON.stringify(data)),
+  );
   const combined = new Uint8Array(iv.length + cipher.byteLength);
   combined.set(iv, 0);
   combined.set(new Uint8Array(cipher), iv.length);
   return bufToB64(combined.buffer);
 }
 
-export async function decryptSnapshot(code: string, payload: string): Promise<unknown> {
+export async function decryptSnapshot(
+  code: string,
+  payload: string,
+): Promise<unknown> {
   const key = await deriveKey(code);
   const raw = new Uint8Array(b64ToBuf(payload));
   const iv = raw.slice(0, 12);
   const cipher = raw.slice(12);
-  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipher);
+  const plain = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    cipher,
+  );
   return JSON.parse(dec.decode(plain));
 }
 
-export function syncIdFrom(code: string): Promise<string> {
-  return sha256Hex(`gymmiie-id:${code.trim().toLowerCase()}`);
+export type SyncNamespace = 'v2' | 'legacy';
+
+function cleanCode(code: string): string {
+  const trimmed = code.trim();
+  if (!trimmed) throw new Error('Enter a sync code first.');
+  return trimmed;
+}
+
+export function syncIdFrom(
+  code: string,
+  namespace: SyncNamespace = 'v2',
+): Promise<string> {
+  const exact = cleanCode(code);
+  return sha256Hex(
+    namespace === 'legacy'
+      ? `gymmiie-id:${exact.toLowerCase()}`
+      : `gymmiie-id-v2:${exact}`,
+  );
 }
 
 export interface SyncInfo {
   updatedAt: string;
   bytes: number;
+  namespace: SyncNamespace;
 }
 
-export async function uploadSync(code: string, data: unknown): Promise<SyncInfo> {
-  const payload = await encryptSnapshot(code, data);
+interface SyncEnvelope extends SyncInfo {
+  payload: string;
+}
+
+async function readEnvelope(
+  code: string,
+  namespace: SyncNamespace,
+): Promise<SyncEnvelope | null> {
+  const id = await syncIdFrom(code, namespace);
+  const res = await fetch(`/api/sync/${id}`);
+  if (res.status === 404) return null;
+  if (!res.ok)
+    throw new Error(`Could not read cloud snapshot (${res.status}).`);
+  const json = (await res.json()) as Partial<SyncEnvelope> | null;
+  if (
+    !json ||
+    typeof json.payload !== 'string' ||
+    typeof json.updatedAt !== 'string' ||
+    !Number.isFinite(Date.parse(json.updatedAt)) ||
+    typeof json.bytes !== 'number' ||
+    !Number.isFinite(json.bytes) ||
+    json.bytes < 0
+  ) {
+    throw new Error(
+      'The cloud snapshot response is invalid. Your local log has not changed.',
+    );
+  }
+  return {
+    payload: json.payload,
+    updatedAt: json.updatedAt,
+    bytes: json.bytes,
+    namespace,
+  };
+}
+
+export async function getSyncInfo(
+  code: string,
+  namespace: SyncNamespace = 'v2',
+): Promise<SyncInfo | null> {
+  const envelope = await readEnvelope(code, namespace);
+  return (
+    envelope && {
+      updatedAt: envelope.updatedAt,
+      bytes: envelope.bytes,
+      namespace,
+    }
+  );
+}
+
+export async function uploadSync(
+  code: string,
+  data: unknown,
+): Promise<SyncInfo> {
+  const payload = await encryptSnapshot(cleanCode(code), parseBackup(data));
   const id = await syncIdFrom(code);
   const res = await fetch(`/api/sync/${id}`, {
     method: 'PUT',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ payload }),
   });
-  if (!res.ok) throw new Error((await res.text()) || `Upload failed (${res.status})`);
-  return res.json();
+  if (!res.ok)
+    throw new Error((await res.text()) || `Upload failed (${res.status})`);
+  return {
+    ...((await res.json()) as { updatedAt: string; bytes: number }),
+    namespace: 'v2',
+  };
 }
 
-export async function downloadSync(code: string): Promise<{ data: unknown; updatedAt: string } | null> {
-  const id = await syncIdFrom(code);
-  const res = await fetch(`/api/sync/${id}`);
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error((await res.text()) || `Download failed (${res.status})`);
-  const json = await res.json() as { payload: string; updatedAt: string };
-  const data = await decryptSnapshot(code, json.payload);
-  return { data, updatedAt: json.updatedAt };
+export async function downloadSync(
+  code: string,
+): Promise<{
+  data: AppData;
+  updatedAt: string;
+  namespace: SyncNamespace;
+} | null> {
+  const envelope =
+    (await readEnvelope(code, 'v2')) ?? (await readEnvelope(code, 'legacy'));
+  if (!envelope) return null;
+  let decoded: unknown;
+  try {
+    decoded = await decryptSnapshot(cleanCode(code), envelope.payload);
+  } catch {
+    throw new Error(
+      'Could not decrypt this snapshot. Enter the exact original code, including capital letters. Your local log has not changed.',
+    );
+  }
+  const data = parseBackup(decoded);
+  return { data, updatedAt: envelope.updatedAt, namespace: envelope.namespace };
 }
 
-export async function deleteSync(code: string): Promise<void> {
-  const id = await syncIdFrom(code);
+export async function deleteSync(
+  code: string,
+  namespace: SyncNamespace,
+): Promise<void> {
+  const id = await syncIdFrom(code, namespace);
   const res = await fetch(`/api/sync/${id}`, { method: 'DELETE' });
-  if (!res.ok && res.status !== 404) throw new Error(`Delete failed (${res.status})`);
+  if (!res.ok && res.status !== 404)
+    throw new Error(`Delete failed (${res.status})`);
 }

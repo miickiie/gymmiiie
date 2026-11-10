@@ -1,18 +1,7 @@
-/**
- * Gymmiie edge API.
- *
- * The Worker serves the built SPA from Cloudflare static assets and exposes a
- * tiny, deliberately dumb encrypted-snapshot store backed by D1.
- *
- * The client encrypts the snapshot with AES-GCM before it ever reaches us, so
- * these endpoints only ever see an opaque base64 blob plus a hash-derived id.
- * There are no accounts, cookies, emails, or readable workout data here.
- */
-
-export interface Env {
-  DB: D1Database;
-  ASSETS: Fetcher;
-}
+/// <reference path="./worker-configuration.d.ts" />
+/** Account snapshots are server-readable. The separate legacy sync API remains encrypted. */
+import { handleAccounts } from './accounts';
+import { ApiError, json as apiJson } from './http';
 
 const MAX_PAYLOAD_BYTES = 8 * 1024 * 1024; // 8 MB of ciphertext
 const ID_RE = /^[a-f0-9]{64}$/;
@@ -28,13 +17,18 @@ const json = (body: unknown, status = 200): Response =>
     },
   });
 
-const error = (message: string, status: number): Response => json({ error: message }, status);
+const error = (message: string, status: number): Response =>
+  json({ error: message }, status);
 
 function validateId(id: string | undefined): id is string {
   return typeof id === 'string' && ID_RE.test(id);
 }
 
-async function handleSync(request: Request, env: Env, id: string | undefined): Promise<Response> {
+async function handleSync(
+  request: Request,
+  env: Env,
+  id: string | undefined,
+): Promise<Response> {
   if (!validateId(id)) return error('Invalid sync id', 400);
 
   if (request.method === 'GET') {
@@ -44,7 +38,11 @@ async function handleSync(request: Request, env: Env, id: string | undefined): P
       .bind(id)
       .first<{ payload: string; updated_at: string; bytes: number }>();
     if (!row) return error('Not found', 404);
-    return json({ payload: row.payload, updatedAt: row.updated_at, bytes: row.bytes });
+    return json({
+      payload: row.payload,
+      updatedAt: row.updated_at,
+      bytes: row.bytes,
+    });
   }
 
   if (request.method === 'PUT') {
@@ -55,10 +53,13 @@ async function handleSync(request: Request, env: Env, id: string | undefined): P
       return error('Expected a JSON body', 400);
     }
     const payload = (body as { payload?: unknown } | null)?.payload;
-    if (typeof payload !== 'string' || !payload.length) return error('Missing payload', 400);
-    if (payload.length > MAX_PAYLOAD_BYTES) return error('Snapshot too large (max 8 MB)', 413);
+    if (typeof payload !== 'string' || !payload.length)
+      return error('Missing payload', 400);
+    if (payload.length > MAX_PAYLOAD_BYTES)
+      return error('Snapshot too large (max 8 MB)', 413);
     // Base64 only. Reject anything that isn't the opaque ciphertext envelope.
-    if (!/^[A-Za-z0-9+/]+={0,2}$/.test(payload)) return error('Payload must be base64', 400);
+    if (!/^[A-Za-z0-9+/]+={0,2}$/.test(payload))
+      return error('Payload must be base64', 400);
 
     const updatedAt = new Date().toISOString();
     const bytes = payload.length;
@@ -77,8 +78,13 @@ async function handleSync(request: Request, env: Env, id: string | undefined): P
   }
 
   if (request.method === 'DELETE') {
-    await env.DB.prepare('DELETE FROM sync_snapshots WHERE id = ?1').bind(id).run();
-    return new Response(null, { status: 204, headers: { 'cache-control': 'no-store' } });
+    await env.DB.prepare('DELETE FROM sync_snapshots WHERE id = ?1')
+      .bind(id)
+      .run();
+    return new Response(null, {
+      status: 204,
+      headers: { 'cache-control': 'no-store' },
+    });
   }
 
   return error('Method not allowed', 405);
@@ -86,24 +92,46 @@ async function handleSync(request: Request, env: Env, id: string | undefined): P
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
+    try {
+      const accountResponse = await handleAccounts(request, env);
+      if (accountResponse) return accountResponse;
+      const url = new URL(request.url);
 
-    if (url.pathname === '/api/health') {
-      return json({ ok: true, service: 'gymmiie-sync' });
+      if (url.pathname === '/api/health') {
+        return json({ ok: true, service: 'gymmiie-sync' });
+      }
+
+      if (url.pathname.startsWith(SYNC_PREFIX)) {
+        const id = url.pathname.slice(SYNC_PREFIX.length);
+        if (id.includes('/')) return error('Invalid sync id', 400);
+        return handleSync(request, env, id);
+      }
+
+      if (url.pathname.startsWith('/api/')) {
+        return error('Not found', 404);
+      }
+
+      // Everything else is the SPA, served from the assets binding. Unknown
+      // client-side routes fall back to index.html via not_found_handling.
+      return env.ASSETS.fetch(request);
+    } catch (error) {
+      if (error instanceof ApiError)
+        return apiJson(
+          { error: { code: error.code, message: error.message } },
+          error.status,
+          error.headers,
+        );
+      // Never log request bodies, names, telephone numbers, cookies or secrets.
+      return apiJson(
+        {
+          error: {
+            code: 'storage_unavailable',
+            message:
+              'Account storage is unavailable. Try again without clearing local data.',
+          },
+        },
+        503,
+      );
     }
-
-    if (url.pathname.startsWith(SYNC_PREFIX)) {
-      const id = url.pathname.slice(SYNC_PREFIX.length);
-      if (id.includes('/')) return error('Invalid sync id', 400);
-      return handleSync(request, env, id);
-    }
-
-    if (url.pathname.startsWith('/api/')) {
-      return error('Not found', 404);
-    }
-
-    // Everything else is the SPA, served from the assets binding. Unknown
-    // client-side routes fall back to index.html via not_found_handling.
-    return env.ASSETS.fetch(request);
   },
-};
+} satisfies ExportedHandler<Env>;

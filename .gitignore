@@ -7,3 +7,7 @@ dist
 *.local
 *.log
 *.tsbuildinfo
+
+# Browser test artifacts
+test-results/
+playwright-report/

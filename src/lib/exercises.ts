@@ -1,41 +1,63 @@
-import catalog from '../data/exercises.json';
-import type { Exercise, LoggedSession, SessionSet, Unit } from '../types';
-import { lastSetsFor, toDisplayWeight, fromDisplayWeight, weightStep, setExerciseLookup } from './stats';
+import catalog from '../data/exercises-runtime.json';
+import type {
+  Exercise,
+  ExerciseMode,
+  LoggedSession,
+  SessionSet,
+  Unit,
+} from '../types';
+import {
+  lastSetsFor,
+  toDisplayWeight,
+  fromDisplayWeight,
+  weightStep,
+  setExerciseLookup,
+  BODY_ZONES,
+} from './stats';
 import { roundTo } from './date';
+import { loadKindFor, modeFor } from './exerciseBehavior';
+export { modeFor, loadKindFor, isCompletableSet } from './exerciseBehavior';
 
+// Generated only from independent reviewed selections; unapproved source text stays out of the browser bundle.
 export const EXERCISES = catalog as Exercise[];
-
+const byId = new Map(EXERCISES.map((exercise) => [exercise.id, exercise]));
 setExerciseLookup(EXERCISES);
 
-const MODE_IDS = new Set([
-  'running', 'walking', 'treadmill-incline-walk', 'cycling', 'assault-bike', 'elliptical', 'rowing',
-  'stair-climber', 'skierg', 'jump-rope', 'battle-ropes', 'VBAWRPG', 'active-hang', 'superman-hold',
-  'cable-pallof-hold', 'hollow-body-hold', 'bear-plank', 'l-sit-hold', 'wall-sit', 'kettlebell-farmer-carry',
-  'rNGclsi', 'rNGdsup', 'cat-cow-stretch', 'doorway-chest-stretch', 'cross-body-shoulder-stretch',
-  'childs-pose', 'standing-quad-stretch', 'kneeling-hip-flexor-stretch', 'butterfly-stretch', 'wall-calf-stretch',
-  'hamstring-stretch', 'hiking', 'plank-hold', 'side-plank-hold', 'dead-hang-hold', 'outdoor-run',
-  'outdoor-cycling', 'outdoor-walk', 'outdoor-hike', 'swim', 'football', 'basketball', 'volleyball', 'tennis',
-  'padel', 'badminton', 'squash', 'table-tennis', 'handball', 'rugby', 'boxing', 'martial-arts', 'climbing',
-  'skiing', 'surfing', 'dance', 'golf', 'arch-hang', 'parallel-bar-support-hold',
-]);
-
-const CARDIO_IDS = new Set([
-  'running', 'walking', 'treadmill-incline-walk', 'cycling', 'assault-bike', 'elliptical', 'rowing',
-  'stair-climber', 'skierg', 'hiking', 'outdoor-run', 'outdoor-cycling', 'outdoor-walk', 'outdoor-hike', 'swim',
-  'football', 'basketball', 'volleyball', 'tennis', 'padel', 'badminton', 'squash', 'table-tennis', 'handball',
-  'rugby', 'boxing', 'martial-arts', 'climbing', 'skiing', 'surfing', 'dance', 'golf',
-]);
-
-export const EQUIPMENT = ['Barbell', 'Dumbbell', 'Cable', 'Machine', 'Bodyweight', 'Weighted', 'Band', 'Kettlebell', 'Rings', 'Other'];
+export const EQUIPMENT = [
+  'Barbell',
+  'Dumbbell',
+  'Cable',
+  'Machine',
+  'Bodyweight',
+  'Weighted',
+  'Band',
+  'Kettlebell',
+  'Rings',
+  'Other',
+];
 export const DIFFICULTIES = ['Beginner', 'Intermediate', 'Advanced'];
 
-export function modeOf(id: string): '' | 'cardio' | 'time' {
-  if (!MODE_IDS.has(id)) return '';
-  return CARDIO_IDS.has(id) ? 'cardio' : 'time';
+/** Compatibility lookup for the built-in catalogue; snapshots should use modeFor. */
+export function modeOf(id: string): ExerciseMode {
+  return byId.get(id)?.mode ?? '';
+}
+
+export function exerciseMatchesZone(
+  exercise: Pick<Exercise, 'primary' | 'secondary'>,
+  zone: string,
+): boolean {
+  const muscles: readonly string[] = BODY_ZONES[zone] ?? [zone];
+  return (
+    muscles.includes(exercise.primary) ||
+    exercise.secondary.some((muscle) => muscles.includes(muscle))
+  );
 }
 
 export function foldText(s: string): string {
-  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 }
 
 export function searchExercises(list: Exercise[], query: string): Exercise[] {
@@ -43,7 +65,9 @@ export function searchExercises(list: Exercise[], query: string): Exercise[] {
   if (!q) return list;
   const words = q.split(/\s+/);
   return list.filter((e) => {
-    const hay = foldText(`${e.name} ${e.aliases.join(' ')} ${e.primary} ${e.secondary.join(' ')} ${e.equipment}`);
+    const hay = foldText(
+      `${e.name} ${e.aliases.join(' ')} ${e.primary} ${e.secondary.join(' ')} ${e.equipment}`,
+    );
     return words.every((w) => hay.includes(w));
   });
 }
@@ -54,21 +78,52 @@ export function defaultPicks(
   muscles: string[],
   favorites: Record<string, boolean>,
   limit = 6,
+  archived: readonly string[] = [],
 ): Exercise[] {
-  if (!muscles.length) return [];
-  const pool = exercises.filter((e) => muscles.includes(e.primary) || e.secondary.some((m) => muscles.includes(m)));
-  if (pool.length <= limit) return pool;
-  const hasHistory = (id: string) => lastSetsFor(sessions, id).length > 0;
-  const rank = (e: Exercise) => (favorites[e.id] ? 0 : hasHistory(e.id) ? 1 : 2);
+  const count = Math.max(0, Math.floor(limit));
+  if (!muscles.length || !count) return [];
+  const hidden = new Set(archived);
+  const history = new Set(
+    sessions.flatMap((session) =>
+      session.exercises
+        .filter((e) => e.sets.some((s) => s.kind !== 'warmup'))
+        .map((e) => e.id),
+    ),
+  );
+  const rank = (e: Exercise) =>
+    favorites[e.id] ? 0 : history.has(e.id) ? 1 : 2;
+  const pool = exercises.filter(
+    (e) =>
+      e.suggestionGroup &&
+      !hidden.has(e.id) &&
+      (muscles.includes(e.primary) ||
+        e.secondary.some((m) => muscles.includes(m))),
+  );
   const picks: Exercise[] = [];
-  for (const m of muscles) {
-    const forMuscle = pool.filter((e) => e.primary === m && !picks.includes(e)).sort((a, b) => rank(a) - rank(b));
-    if (forMuscle[0]) picks.push(forMuscle[0]);
+  const usedGroups = new Set<string>();
+  const add = (exercise: Exercise | undefined) => {
+    if (!exercise || picks.length >= count) return;
+    picks.push(exercise);
+    usedGroups.add(exercise.suggestionGroup!);
+  };
+  for (const muscle of [...new Set(muscles)]) {
+    const candidates = pool
+      .filter(
+        (e) => e.primary === muscle && !usedGroups.has(e.suggestionGroup!),
+      )
+      .sort((a, b) => rank(a) - rank(b));
+    add(candidates[0]);
   }
-  const rest = pool.filter((e) => !picks.includes(e)).sort((a, b) => rank(a) - rank(b));
-  for (const e of rest) {
-    if (picks.length >= limit) break;
-    picks.push(e);
+  const remaining = pool
+    .filter((e) => !picks.includes(e))
+    .sort(
+      (a, b) =>
+        Number(!muscles.includes(a.primary)) -
+          Number(!muscles.includes(b.primary)) || rank(a) - rank(b),
+    );
+  for (const exercise of remaining) {
+    if (picks.length >= count) break;
+    if (!usedGroups.has(exercise.suggestionGroup!)) add(exercise);
   }
   return picks;
 }
@@ -77,46 +132,87 @@ export function openingSets(
   ex: Exercise,
   sessions: LoggedSession[],
   unit: Unit,
-  defaultSets = 3,
+  defaultSets?: number,
   targetReps = 10,
   warmups = true,
 ): SessionSet[] {
-  const last = lastSetsFor(sessions, ex.id);
-  const mode = modeOf(ex.id);
-  if (mode === 'cardio') {
-    const prev = last.find((s) => (s.km ?? 0) > 0);
-    return [{ reps: 0, weight: 0, done: false, kind: 'normal', sec: prev?.sec ?? 1200, km: prev?.km ?? 5 }];
-  }
-  if (mode === 'time') {
-    const prev = last.find((s) => (s.sec ?? 0) > 0);
-    return Array.from({ length: prev ? Math.min(defaultSets, last.length) : defaultSets }, () => ({
-      reps: 0, weight: 0, done: false, kind: 'normal' as const, sec: prev?.sec ? prev.sec + 5 : 30,
-    }));
-  }
-  const working = last.length
-    ? last.slice(0, Math.max(defaultSets, 1)).map((s) => ({
-        reps: s.reps, weight: s.weight, done: false, kind: 'normal' as const, rpe: undefined,
-      }))
-    : Array.from({ length: defaultSets }, () => ({ reps: targetReps, weight: 20, done: false, kind: 'normal' as const }));
-  if (!warmups || !working.length || working[0].weight <= 0) return working;
+  const mode = modeFor(ex);
+  const load = loadKindFor(ex);
+  const last = lastSetsFor(sessions, ex.id).filter((set) =>
+    mode === 'cardio'
+      ? (set.sec ?? 0) > 0 || (set.km ?? 0) > 0
+      : mode === 'time'
+        ? (set.sec ?? 0) > 0 && set.reps === 0
+        : set.reps > 0,
+  );
+  const count = Math.max(
+    1,
+    Math.min(12, Math.floor(defaultSets ?? (mode === 'cardio' ? 1 : 3))),
+  );
+  const working: SessionSet[] = Array.from({ length: count }, (_, index) => {
+    const previous = last[Math.min(index, last.length - 1)];
+    const weight = load === 'none' ? 0 : (previous?.weight ?? 0);
+    if (mode === 'cardio')
+      return {
+        reps: 0,
+        weight: 0,
+        done: false,
+        kind: 'normal',
+        sec: previous?.sec ?? 0,
+        km: previous?.km ?? 0,
+      };
+    if (mode === 'time')
+      return {
+        reps: 0,
+        weight,
+        done: false,
+        kind: 'normal',
+        sec: previous?.sec ?? 30,
+      };
+    return {
+      reps: previous?.left ?? previous?.reps ?? targetReps,
+      repsR: previous?.right,
+      weight,
+      done: false,
+      kind: 'normal',
+    };
+  });
+  if (
+    !warmups ||
+    mode ||
+    load !== 'external' ||
+    !working.length ||
+    working[0].weight <= 0
+  )
+    return working;
   const base = working[0].weight;
   const step = weightStep(unit);
-  const warm = [0.5, 0.7].map((pct) => ({
+  const warm: SessionSet[] = [0.5, 0.7].map((pct) => ({
     reps: 8,
-    weight: fromDisplayWeight(roundTo(toDisplayWeight(base * pct, unit), step), unit),
+    weight: fromDisplayWeight(
+      roundTo(toDisplayWeight(base * pct, unit), step),
+      unit,
+    ),
     done: false,
-    kind: 'warmup' as const,
+    kind: 'warmup',
   }));
   return [...warm, ...working];
 }
 
-export function makeSessionExercise(ex: Exercise, sessions: LoggedSession[], unit: Unit, sets?: number) {
+export function makeSessionExercise(
+  ex: Exercise,
+  sessions: LoggedSession[],
+  unit: Unit,
+  sets?: number,
+) {
   return {
     uid: `${ex.id}-${Math.random().toString(36).slice(2, 8)}`,
     id: ex.id,
     name: ex.name,
     primary: ex.primary,
-    sets: openingSets(ex, sessions, unit, sets ?? 3),
+    mode: modeFor(ex),
+    loadKind: loadKindFor(ex),
+    sets: openingSets(ex, sessions, unit, sets),
     linkedNext: false,
   };
 }
@@ -127,7 +223,12 @@ export interface PlateResult {
   leftover: number;
 }
 
-export function calculatePlates(totalKg: number, barKg: number, plates: number[], unit: Unit): PlateResult {
+export function calculatePlates(
+  totalKg: number,
+  barKg: number,
+  plates: number[],
+  unit: Unit,
+): PlateResult {
   const toDisplay = (kg: number) => toDisplayWeight(kg, unit);
   const target = toDisplay(totalKg);
   const bar = toDisplay(barKg);
@@ -141,7 +242,8 @@ export function calculatePlates(totalKg: number, barKg: number, plates: number[]
       perSide -= count * p;
     }
   }
-  const achievedDisplay = bar + out.reduce((n, x) => n + x.plate * x.count * 2, 0);
+  const achievedDisplay =
+    bar + out.reduce((n, x) => n + x.plate * x.count * 2, 0);
   return {
     perSide: out,
     achieved: fromDisplayWeight(achievedDisplay, unit),
@@ -149,7 +251,10 @@ export function calculatePlates(totalKg: number, barKg: number, plates: number[]
   };
 }
 
-export function warmupRamp(workKg: number, unit: Unit): { pct: number; kg: number; reps: number }[] {
+export function warmupRamp(
+  workKg: number,
+  unit: Unit,
+): { pct: number; kg: number; reps: number }[] {
   const ramp = [
     { pct: 0.4, reps: 8 },
     { pct: 0.55, reps: 5 },
@@ -160,14 +265,24 @@ export function warmupRamp(workKg: number, unit: Unit): { pct: number; kg: numbe
   const step = weightStep(unit);
   return ramp.map((r) => ({
     ...r,
-    kg: fromDisplayWeight(roundTo(toDisplayWeight(workKg * r.pct, unit), step), unit),
+    kg: fromDisplayWeight(
+      roundTo(toDisplayWeight(workKg * r.pct, unit), step),
+      unit,
+    ),
   }));
 }
 
-export function targetWeightForRpe(oneRmKg: number, reps: number, rpe: number): number | null {
+export function targetWeightForRpe(
+  oneRmKg: number,
+  reps: number,
+  rpe: number,
+): number | null {
   const index = (reps - 1) * 2 + Math.round((10 - rpe) * 2);
-  const pct = [1, .978, .955, .939, .922, .907, .892, .878, .863, .85, .837, .824, .811, .799, .786, .774,
-    .762, .751, .739, .723, .707, .694, .68, .667, .653, .64, .626, .613, .599, .586, .574][index];
+  const pct = [
+    1, 0.978, 0.955, 0.939, 0.922, 0.907, 0.892, 0.878, 0.863, 0.85, 0.837,
+    0.824, 0.811, 0.799, 0.786, 0.774, 0.762, 0.751, 0.739, 0.723, 0.707, 0.694,
+    0.68, 0.667, 0.653, 0.64, 0.626, 0.613, 0.599, 0.586, 0.574,
+  ][index];
   return pct ? oneRmKg * pct : null;
 }
 
@@ -176,21 +291,43 @@ export function bmi(kg: number, heightCm: number): number {
   return m > 0 ? kg / (m * m) : 0;
 }
 
-export function bmr(profile: { sex: string; age: number; heightCm: number; weightKg: number }): number {
-  const base = 10 * profile.weightKg + 6.25 * profile.heightCm - 5 * profile.age;
+export function bmr(profile: {
+  sex: string;
+  age: number;
+  heightCm: number;
+  weightKg: number;
+}): number {
+  const base =
+    10 * profile.weightKg + 6.25 * profile.heightCm - 5 * profile.age;
   return Math.round(profile.sex === 'female' ? base - 161 : base + 5);
 }
 
-export function tdee(profile: { sex: string; age: number; heightCm: number; weightKg: number; activity: number }): number {
+export function tdee(profile: {
+  sex: string;
+  age: number;
+  heightCm: number;
+  weightKg: number;
+  activity: number;
+}): number {
   return Math.round(bmr(profile) * profile.activity);
 }
 
-export function dotsScore(totalKg: number, bodyKg: number, sex: string): number {
+export function dotsScore(
+  totalKg: number,
+  bodyKg: number,
+  sex: string,
+): number {
   if (bodyKg <= 0 || totalKg <= 0) return 0;
-  const c = sex === 'female'
-    ? [-0.0000010706, 0.0005158568, -0.1126655495, 13.6175032, -57.96288]
-    : [-0.0000010930, 0.0007391293, -0.1918759221, 24.0900756, -307.75076];
-  const denom = c[0] * bodyKg ** 4 + c[1] * bodyKg ** 3 + c[2] * bodyKg ** 2 + c[3] * bodyKg + c[4];
+  const c =
+    sex === 'female'
+      ? [-0.0000010706, 0.0005158568, -0.1126655495, 13.6175032, -57.96288]
+      : [-0.000001093, 0.0007391293, -0.1918759221, 24.0900756, -307.75076];
+  const denom =
+    c[0] * bodyKg ** 4 +
+    c[1] * bodyKg ** 3 +
+    c[2] * bodyKg ** 2 +
+    c[3] * bodyKg +
+    c[4];
   if (denom <= 0) return 0;
   return Math.round((totalKg / denom) * 500 * 10) / 10;
 }

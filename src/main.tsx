@@ -3,17 +3,16 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
-import { useStore } from './lib/store';
+import AccountGate from './components/AccountGate';
 import { ToastProvider } from './components/ui';
-
-// Restore persisted local data before the first paint.
-void useStore.getState().hydrate();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
       <ToastProvider>
-        <App />
+        <AccountGate>
+          <App />
+        </AccountGate>
       </ToastProvider>
     </BrowserRouter>
   </React.StrictMode>,

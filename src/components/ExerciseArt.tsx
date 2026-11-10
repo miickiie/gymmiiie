@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ArtData } from '../lib/art';
 import { artEntry, loadMotion } from '../lib/art';
 
 const CYCLE_MS = 1560;
 const HOLD = 0.72;
-const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+const easeInOut = (t: number) =>
+  t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
 /**
  * Exercise animation, reproduced from GymMane's ExerciseArt timing:
@@ -36,13 +37,18 @@ export function ExerciseArt({
     let gone = false;
     setData(null);
     setFailed(false);
-    if (!artEntry(slug)) { setFailed(true); return; }
+    if (!artEntry(slug)) {
+      setFailed(true);
+      return;
+    }
     loadMotion(slug).then((d) => {
       if (gone) return;
       if (d) setData(d);
       else setFailed(true);
     });
-    return () => { gone = true; };
+    return () => {
+      gone = true;
+    };
   }, [slug]);
 
   const body = useMemo(() => {
@@ -54,7 +60,10 @@ export function ExerciseArt({
   if (body === null) {
     return (
       <div
-        className={clsx('grid place-items-center bg-[var(--surface-2)] text-mute', className)}
+        className={clsx(
+          'grid place-items-center bg-[var(--surface-2)] text-mute',
+          className,
+        )}
         style={{ height, borderRadius: radius }}
       >
         {fallback}
@@ -89,7 +98,11 @@ function MotionSvg({ data, playing }: { data: ArtData; playing: boolean }) {
   const [state, setState] = useState({ from: 0, to: 0, blend: 0 });
 
   useEffect(() => {
-    if (!playing || n < 2) { holdRef.current = { from: 0, to: 0, blend: 0 }; setState({ from: 0, to: 0, blend: 0 }); return; }
+    if (!playing || n < 2) {
+      holdRef.current = { from: 0, to: 0, blend: 0 };
+      setState({ from: 0, to: 0, blend: 0 });
+      return;
+    }
     let raf = 0;
     const t0 = performance.now();
     const tick = (now: number) => {
@@ -104,7 +117,11 @@ function MotionSvg({ data, playing }: { data: ArtData; playing: boolean }) {
       const blend = f < HOLD ? 0 : easeInOut((f - HOLD) / (1 - HOLD));
       const cur = { from, to, blend };
       const prev = holdRef.current;
-      if (cur.from !== prev.from || cur.to !== prev.to || cur.blend !== prev.blend) {
+      if (
+        cur.from !== prev.from ||
+        cur.to !== prev.to ||
+        cur.blend !== prev.blend
+      ) {
         holdRef.current = cur;
         setState(cur);
       }
@@ -115,12 +132,22 @@ function MotionSvg({ data, playing }: { data: ArtData; playing: boolean }) {
   }, [playing, n]);
 
   const stillIndex = 0;
-  const visible = !playing || n < 2 ? { from: stillIndex, to: -1, blend: 0 } : state;
+  const visible =
+    !playing || n < 2 ? { from: stillIndex, to: -1, blend: 0 } : state;
 
   return (
-    <svg viewBox={data.viewBox} className="h-full w-full text-current" aria-hidden>
+    <svg
+      viewBox={data.viewBox}
+      className="h-full w-full text-current"
+      aria-hidden
+    >
       {data.frames.map((frame, fi) => {
-        const alpha = fi === visible.from ? 1 - visible.blend : fi === visible.to && visible.blend > 0 ? visible.blend : 0;
+        const alpha =
+          fi === visible.from
+            ? 1 - visible.blend
+            : fi === visible.to && visible.blend > 0
+              ? visible.blend
+              : 0;
         return (
           <g key={fi} style={{ opacity: alpha }} className="transition-none">
             {frame.map((d, pi) => (
@@ -188,7 +215,11 @@ export function ArtThumb({
 
   if (!visible || !hasArt) {
     return (
-      <div ref={ref} className={className} style={{ width: size, height: size }}>
+      <div
+        ref={ref}
+        className={className}
+        style={{ width: size, height: size }}
+      >
         {fallback}
       </div>
     );
