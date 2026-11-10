@@ -16,7 +16,6 @@ export function useWorkoutStart() {
     const result = run();
     if (result.status === 'started') {
       setPending(null);
-      toast.push('Workout started! Your little spotter is cheering for you. Let’s take it one set at a time.', 'good');
       navigate('/session');
     } else if (result.status === 'active-exists') setPending({ run });
     else

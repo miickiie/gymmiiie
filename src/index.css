@@ -62,6 +62,25 @@ body,
   min-height: 100%;
 }
 
+@media (pointer: coarse) {
+  html,
+  body,
+  #root {
+    touch-action: pan-x pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable]:not([contenteditable='false']) {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -251,26 +270,28 @@ html.light body::before {
   color: var(--accent);
 }
 
-.input {
-  width: 100%;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  color: var(--text);
-  border-radius: 0.9rem;
-  padding: 0.7rem 0.85rem;
-  font-weight: 700;
-  outline: none;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-.input:focus {
-  border-color: var(--accent-line);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-.input::placeholder {
-  color: var(--text-mute);
-  font-weight: 600;
+@layer components {
+  .input {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 0.9rem;
+    padding: 0.7rem 0.85rem;
+    font-weight: 700;
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .input:focus {
+    border-color: var(--accent-line);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .input::placeholder {
+    color: var(--text-mute);
+    font-weight: 600;
+  }
 }
 
 .label {

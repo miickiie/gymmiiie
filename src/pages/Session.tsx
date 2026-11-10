@@ -112,7 +112,7 @@ export default function Session() {
     ) {
       if (data.settings.sound) beep(3);
       if (data.settings.vibrate) vibrate([120, 60, 120]);
-      toast.push('Rest time is up! Take a breath and start your next set when you feel ready.');
+      toast.push('Rest time is up. Start your next set when you’re ready.');
     }
     previousRest.current = restLeft;
   }, [
@@ -206,7 +206,6 @@ export default function Session() {
       return;
     }
     const done = actions.toggleSet(uid, index);
-    if (done) toast.push('Set complete! That’s one more little win. Take a breath, have some water, and keep your own pace.', 'good');
     if (data.settings.sound || data.settings.vibrate) {
       void unlockAudio();
       if (data.settings.sound) beep(1, 620, 0.07);
@@ -236,7 +235,7 @@ export default function Session() {
       }
       setFinishOpen(false);
       if (result.status === 'saved') {
-    toast.push('Workout saved. Paws up for showing up! Time to recover — you’ve earned it.', 'good');
+    toast.push('Workout saved', 'good');
         navigate(`/history/${result.id}`);
       } else {
         toast.push('No completed sets — session discarded');

@@ -11,9 +11,11 @@ import {
   Route,
   Navigate,
   useLocation,
+  useNavigationType,
   useNavigate,
 } from 'react-router-dom';
 import { useStore } from './lib/store';
+import { getLibraryView } from './lib/libraryView';
 import Layout from './components/Layout';
 import { Btn, Confirm } from './components/ui';
 import { LegacyDeviceNotice } from './components/AccountGate';
@@ -186,7 +188,7 @@ export default function App() {
   const status = useStore((s) => s.persistenceStatus);
   const theme = useStore((s) => s.data.settings.theme);
   const onboarded = useStore((s) => s.data.onboarded);
-  const { pathname } = useLocation();
+  const { pathname, key: routeKey } = useLocation();
   useEffect(() => {
     document.documentElement.classList.toggle(
       'session-route',
@@ -236,7 +238,7 @@ export default function App() {
               <Route path="/session" element={<Session />} />
               <Route path="/history" element={<History />} />
               <Route path="/history/:id" element={<SessionDetail />} />
-              <Route path="/library" element={<Library />} />
+              <Route path="/library" element={<Library key={routeKey} />} />
               <Route path="/library/:id" element={<ExerciseDetail />} />
               <Route path="/routines" element={<Routines />} />
               <Route path="/routines/:id" element={<RoutineEditor />} />
@@ -256,9 +258,12 @@ export default function App() {
   );
 }
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, key } = useLocation();
+  const navigationType = useNavigationType();
+  const accountId = useStore((s) => s.account?.id);
   useEffect(() => {
+    if (navigationType === 'POP' && pathname === '/library' && getLibraryView(key, accountId)) return;
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-  }, [pathname]);
+  }, [pathname, key, accountId, navigationType]);
   return null;
 }

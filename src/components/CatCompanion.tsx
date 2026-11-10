@@ -1,5 +1,5 @@
-import { ChevronRight, Heart, Sparkles, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { ChevronRight, Heart, X } from 'lucide-react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import './CatCompanion.css';
@@ -28,25 +28,15 @@ const ENCOURAGEMENTS = [
   'No perfect workouts required. Showing up is already a win.',
 ];
 
-function greeting(pathname: string): string {
-  if (pathname === '/session')
-    return 'Your little spotter is here! Take each set at your own pace. Tap for a pep talk.';
-  if (pathname === '/train')
-    return 'Ready when you are. Pick a workout and let’s get a little stronger together!';
-  if (pathname.startsWith('/history'))
-    return 'Look at all that effort! Every workout is a reason to be proud.';
-  if (pathname === '/progress')
-    return 'Progress has ups and downs. This cat is proud of every step you take.';
-  if (pathname === '/nutrition')
-    return 'A well-fed human is a happy human. Let’s fuel your next adventure!';
-  if (pathname.startsWith('/routines') || pathname.startsWith('/library'))
-    return 'A little planning, a little play. Let’s find moves you enjoy.';
-  return 'Hey, workout buddy! Mochi’s here to cheer you on. Tap this cat whenever you need a little encouragement.';
-}
-
-function CatFace({ happy, worried }: { happy: boolean; worried: boolean }) {
+function CatFace({ happy, worried, faceRef, eyesRef }: {
+  happy: boolean;
+  worried: boolean;
+  faceRef: RefObject<SVGSVGElement>;
+  eyesRef: RefObject<SVGGElement>;
+}) {
   return (
     <svg
+      ref={faceRef}
       viewBox="0 0 16 12"
       shapeRendering="crispEdges"
       className="gym-cat-face"
@@ -57,7 +47,8 @@ function CatFace({ happy, worried }: { happy: boolean; worried: boolean }) {
       <path d="M3 1H4V2H5V3H3Z M12 1H13V3H11V2H12Z" fill="#f0bcc6" />
       <path d="M2 3H14V4H2Z" fill="#df7f4a" />
       <path d="M7 3H9V4H7Z" fill="#f9d7a5" />
-      <g className={happy ? 'gym-cat-eyes is-happy' : 'gym-cat-eyes'} fill="#383e48">
+      <g ref={eyesRef} className="gym-cat-gaze">
+        <g className={happy ? 'gym-cat-eyes is-happy' : 'gym-cat-eyes'} fill="#383e48">
         {happy ? (
           <path d="M3 5H5V6H3Z M2 6H3V7H2Z M5 6H6V7H5Z M11 5H13V6H11Z M10 6H11V7H10Z M13 6H14V7H13Z" />
         ) : (
@@ -66,6 +57,7 @@ function CatFace({ happy, worried }: { happy: boolean; worried: boolean }) {
             {worried && <path d="M3 4H4V5H3Z M12 4H13V5H12Z" />}
           </>
         )}
+        </g>
       </g>
       <path d="M7 7H9V8H7Z" fill="#e59ca8" />
       <path d="M1 8H3V9H1Z M13 8H15V9H13Z" fill="#f2bac3" />
@@ -82,25 +74,64 @@ export function CatCompanion({
   host,
 }: CatCompanionProps) {
   const { pathname } = useLocation();
-  const [dismissed, setDismissed] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [petted, setPetted] = useState(false);
   const encouragementIndex = useRef(0);
   const catButton = useRef<HTMLButtonElement>(null);
   const bubble = useRef<HTMLDivElement>(null);
-  const visible = Boolean(message) || !dismissed;
+  const face = useRef<SVGSVGElement>(null);
+  const eyes = useRef<SVGGElement>(null);
+  const gazeTarget = useRef<{ x: number; y: number }>();
+  const visible = Boolean(message);
   const tone = message?.tone ?? 'default';
   const happy = petted || tone === 'good';
   const paused = hovered || focused;
 
   useEffect(() => {
-    setDismissed(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (message) setDismissed(true);
-  }, [message]);
+    let frame: number | undefined;
+    const updateEyes = () => {
+      frame = undefined;
+      if (!face.current || !eyes.current) return;
+      const target = gazeTarget.current;
+      const box = face.current.getBoundingClientRect();
+      const x = target ? Math.max(-1, Math.min(1, (target.x - box.left - box.width / 2) / Math.max(1, box.width))) * 0.7 : 0;
+      const y = target ? Math.max(-1, Math.min(1, (target.y - box.top - box.height / 2) / Math.max(1, box.height))) * 0.5 : 0;
+      eyes.current.setAttribute('transform', `translate(${x} ${y})`);
+    };
+    const schedule = () => {
+      if (frame === undefined) frame = window.requestAnimationFrame(updateEyes);
+    };
+    const point = (event: PointerEvent) => {
+      if (event.type === 'pointermove' && event.pointerType !== 'mouse') return;
+      gazeTarget.current = { x: event.clientX, y: event.clientY };
+      schedule();
+    };
+    const focus = (event: FocusEvent) => {
+      if (!(event.target instanceof Element)) return;
+      const box = event.target.getBoundingClientRect();
+      gazeTarget.current = { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+      schedule();
+    };
+    const reset = () => {
+      gazeTarget.current = undefined;
+      schedule();
+    };
+    document.addEventListener('pointermove', point, { passive: true });
+    document.addEventListener('pointerdown', point, { passive: true, capture: true });
+    document.addEventListener('focusin', focus);
+    window.addEventListener('blur', reset);
+    window.addEventListener('resize', schedule);
+    schedule();
+    return () => {
+      document.removeEventListener('pointermove', point);
+      document.removeEventListener('pointerdown', point, true);
+      document.removeEventListener('focusin', focus);
+      window.removeEventListener('blur', reset);
+      window.removeEventListener('resize', schedule);
+      if (frame !== undefined) window.cancelAnimationFrame(frame);
+    };
+  }, [host, visible]);
 
   useEffect(() => {
     setHovered(false);
@@ -108,9 +139,9 @@ export function CatCompanion({
   }, [host]);
 
   useEffect(() => {
-    if (paused || !visible || message?.persistent) return;
+    if (paused || !message || message.persistent) return;
     const timeout = window.setTimeout(
-      message ? onDismiss : () => setDismissed(true),
+      onDismiss,
       message?.tone === 'bad' ? 9000 : 6500,
     );
     return () => window.clearTimeout(timeout);
@@ -129,7 +160,6 @@ export function CatCompanion({
         : catButton.current;
       target?.focus();
     }
-    setDismissed(true);
     if (message) onDismiss();
   };
 
@@ -137,7 +167,6 @@ export function CatCompanion({
     const next = ENCOURAGEMENTS[encouragementIndex.current % ENCOURAGEMENTS.length];
     encouragementIndex.current += 1;
     setPetted(true);
-    setDismissed(true);
     onEncourage(next);
   };
 
@@ -164,14 +193,11 @@ export function CatCompanion({
             if (event.pointerType === 'mouse') setHovered(false);
           }}
         >
-          <div className="gym-cat-bubble-heading">
-            <span><Sparkles size={12} aria-hidden="true" /> Mochi says</span>
             <button type="button" className="gym-cat-dismiss" aria-label="Dismiss Mochi’s message" onClick={dismiss} disabled={message?.action?.disabled}>
               <X size={15} aria-hidden="true" />
             </button>
-          </div>
           <p role={tone === 'bad' ? 'alert' : 'status'} aria-atomic="true">
-            {message?.msg ?? greeting(pathname)}
+            {message?.msg}
           </p>
           {message?.action && (
             <div className="gym-cat-actions" aria-busy={message.action.disabled}>
@@ -199,8 +225,7 @@ export function CatCompanion({
         aria-expanded={visible}
       >
         <span className="gym-cat-heart" aria-hidden="true"><Heart size={17} fill="currentColor" /></span>
-        <span className="gym-cat-sprite"><CatFace happy={happy} worried={tone === 'bad'} /></span>
-        <span className="gym-cat-name">Mochi <span aria-hidden="true">♥</span></span>
+        <span className="gym-cat-sprite"><CatFace happy={happy} worried={tone === 'bad'} faceRef={face} eyesRef={eyes} /></span>
       </button>
     </aside>
   );

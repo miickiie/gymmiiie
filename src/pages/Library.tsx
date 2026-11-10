@@ -9,8 +9,9 @@ import {
   Star,
   X,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getLibraryView, saveLibraryView } from '../lib/libraryView';
 import { ArtThumb } from '../components/ExerciseArt';
 import { ExerciseIcon } from '../components/ExerciseTile';
 import {
@@ -39,21 +40,42 @@ type Sort = 'az' | 'muscle';
 
 export default function Library() {
   const navigate = useNavigate();
+  const { key } = useLocation();
+  const accountId = useStore((s) => s.account?.id);
+  const [savedView] = useState(() => getLibraryView(key, accountId));
+  const filterStrip = useRef<HTMLDivElement>(null);
   const toast = useToast();
   const data = useStore((s) => s.data);
   const toggleFavorite = useStore((s) => s.toggleFavorite);
   const addCustomExercise = useStore((s) => s.addCustomExercise);
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState(savedView?.q ?? '');
   const dq = useDebounced(q, 160);
-  const [zone, setZone] = useState<string | null>(null);
-  const [muscle, setMuscle] = useState<MuscleId | null>(null);
-  const [equipment, setEquipment] = useState<string | null>(null);
-  const [fav, setFav] = useState(false);
-  const [archived, setArchived] = useState(false);
-  const [sort, setSort] = useState<Sort>('az');
-  const [limit, setLimit] = useState(80);
+  const [zone, setZone] = useState<string | null>(savedView?.zone ?? null);
+  const [muscle, setMuscle] = useState<MuscleId | null>(savedView?.muscle ?? null);
+  const [equipment, setEquipment] = useState<string | null>(savedView?.equipment ?? null);
+  const [fav, setFav] = useState(savedView?.fav ?? false);
+  const [archived, setArchived] = useState(savedView?.archived ?? false);
+  const [sort, setSort] = useState<Sort>(savedView?.sort ?? 'az');
+  const [limit, setLimit] = useState(savedView?.limit ?? 80);
   const [createOpen, setCreateOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const view = useRef({ q, zone, muscle, equipment, fav, archived, sort, limit });
+  view.current = { q, zone, muscle, equipment, fav, archived, sort, limit };
+
+  useLayoutEffect(() => {
+    if (savedView) {
+      window.scrollTo({ top: savedView.scrollY, behavior: 'instant' as ScrollBehavior });
+      if (filterStrip.current) filterStrip.current.scrollLeft = savedView.filterScrollLeft;
+    }
+    const strip = filterStrip.current;
+    return () => {
+      saveLibraryView(key, accountId, {
+        ...view.current,
+        scrollY: window.scrollY,
+        filterScrollLeft: strip?.scrollLeft ?? 0,
+      });
+    };
+  }, [key, accountId, savedView]);
 
   const all = useMemo(() => allExercises(), [data.customExercises]);
   const customIds = new Set(data.customExercises.map((e) => e.id));
@@ -158,7 +180,7 @@ export default function Library() {
             <SlidersHorizontal size={17} />
           </Btn>
         </div>
-        <div className="scroll-x mt-2 pb-1">
+      <div ref={filterStrip} className="scroll-x mt-2 pb-1">
           <Chip on={fav} onClick={() => setFav(!fav)}>
             <Star size={12} /> Favourites{' '}
             {Object.keys(data.favorites).length || ''}
@@ -215,6 +237,7 @@ export default function Library() {
                 >
                   <button
                     onClick={() => navigate(`/library/${ex.id}`)}
+                    aria-label={`View exercise: ${ex.name}`}
                     className="flex min-w-0 flex-1 items-center gap-3 text-left"
                   >
                     <ArtThumb

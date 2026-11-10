@@ -155,6 +155,7 @@ export default function ExerciseDetail() {
       <div className="mb-3 flex items-center gap-2">
         <button
           onClick={() => navigate(-1)}
+          aria-label="Back"
           className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
         >
           <ArrowLeft size={18} />

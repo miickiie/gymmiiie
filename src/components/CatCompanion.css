@@ -2,7 +2,7 @@
   --cat-tint: var(--accent);
   position: fixed;
   right: max(1rem, env(safe-area-inset-right));
-  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 0.75rem);
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 0.25rem);
   z-index: 45;
   display: flex;
   align-items: flex-end;
@@ -12,7 +12,7 @@
 }
 
 .gym-cat-companion.is-training {
-  bottom: calc(10rem + env(safe-area-inset-bottom));
+  bottom: calc(9rem + env(safe-area-inset-bottom));
 }
 
 .gym-cat-companion[data-tone='good'] { --cat-tint: var(--good); }
@@ -21,7 +21,7 @@
 .gym-cat-bubble {
   position: relative;
   width: min(17.5rem, calc(100vw - 7.75rem));
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.5rem;
   padding: 0.8rem 0.9rem 0.9rem;
   border: 1px solid color-mix(in srgb, var(--cat-tint) 45%, var(--line-strong));
   border-radius: 1.1rem 1.1rem 0.3rem 1.1rem;
@@ -46,27 +46,9 @@
   transform: rotate(45deg);
 }
 
-.gym-cat-bubble-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.4rem;
-}
-
-.gym-cat-bubble-heading > span {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  color: var(--cat-tint);
-  font-size: 0.65rem;
-  font-weight: 900;
-  letter-spacing: 0.045em;
-  text-transform: uppercase;
-}
-
 .gym-cat-bubble p {
   margin: 0;
+  padding-right: 1.1rem;
   font-size: 0.8125rem;
   font-weight: 700;
   line-height: 1.55;
@@ -78,12 +60,14 @@
 .gym-cat-companion[data-tone='bad'] .gym-cat-bubble p { pointer-events: auto; }
 
 .gym-cat-dismiss {
+  position: absolute;
+  top: 4px;
+  right: 4px;
   pointer-events: auto;
   display: grid;
   place-items: center;
   width: 28px;
   height: 28px;
-  margin: -5px -5px -5px 0;
   border-radius: 50%;
   color: var(--text-dim);
 }
@@ -153,19 +137,6 @@
 .gym-cat-button:active .gym-cat-sprite { transform: scale(0.92); }
 .gym-cat-button.is-happy .gym-cat-sprite { animation: gym-cat-hop 500ms ease-in-out 3; }
 
-.gym-cat-name {
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  padding: 2px 9px;
-  background: var(--surface);
-  color: var(--text-dim);
-  font-size: 0.6rem;
-  font-weight: 900;
-  line-height: 1.4;
-  box-shadow: var(--shadow);
-}
-
-.gym-cat-name span { color: var(--accent); }
 .gym-cat-heart { position: absolute; top: -8px; color: #e59ca8; opacity: 0; }
 .gym-cat-button.is-happy .gym-cat-heart { animation: gym-cat-love 1.8s ease-out both; }
 .gym-cat-button:focus-visible, .gym-cat-dismiss:focus-visible, .gym-cat-next:focus-visible {
@@ -207,8 +178,8 @@
 @keyframes gym-cat-love { 0% { opacity: 0; transform: translateY(8px) scale(0.5); } 20%, 60% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px) scale(1.15); } }
 
 @media (min-width: 1024px) {
-  .gym-cat-companion { right: 1.5rem; bottom: 1.5rem; }
-  .gym-cat-companion.is-training:not(.in-dialog) { bottom: 7rem; }
+  .gym-cat-companion { right: 1.5rem; bottom: 1rem; }
+  .gym-cat-companion.is-training:not(.in-dialog) { bottom: 6rem; }
   .gym-cat-button { flex-basis: 80px; width: 80px; }
   .gym-cat-sprite { width: 80px; }
 }
