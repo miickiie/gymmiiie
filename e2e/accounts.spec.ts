@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { parseBackup } from '../src/lib/backup';
-import { seed, snapshot, startWithPushup } from './fixtures';
+import { enterNumber, seed, snapshot, startWithPushup } from './fixtures';
 
 const origin = 'http://127.0.0.1:4173';
 function identity(label: string): { name: string; telephone: string } {
@@ -102,7 +102,7 @@ test('saved tracking loads on another browser without a local cache', async ({
     user,
   );
   await startWithPushup(page);
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('16');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '16');
   await page
     .getByRole('button', { name: 'Complete set 1', exact: true })
     .click();
@@ -153,7 +153,7 @@ test('switching A to B and back preserves each account and its active draft', as
     userA,
   );
   await startWithPushup(page);
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('23');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '23');
   const accountB = await seed(
     page,
     (data) => {
@@ -191,7 +191,7 @@ test('an old tab cannot upload its draft to a different account after shared coo
     userA,
   );
   await startWithPushup(page);
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('31');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '31');
   const otherPage = await page.context().newPage();
   const accountB = await seed(
     otherPage,
@@ -239,7 +239,7 @@ test('offline edits stay with the cached account and sync after reconnection', a
   await expect(
     page.getByLabel('Set 1 repetitions', { exact: true }),
   ).toBeVisible();
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('29');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '29');
   await expect
     .poll(
       async () =>
@@ -293,7 +293,7 @@ test('older device tracking stays separate until its import is explicitly confir
 }) => {
   await seed(page);
   await startWithPushup(page);
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('15');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '15');
   await expect
     .poll(
       async () =>
@@ -373,7 +373,7 @@ test('session loss hides private tracking while preserving the account draft for
   const user = identity('Session recovery athlete');
   const account = await seed(page, undefined, user);
   await startWithPushup(page);
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('28');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '28');
   await context.clearCookies();
   await expect(
     page.getByRole('heading', { name: 'Welcome to Gymmiie', exact: true }),
@@ -399,7 +399,7 @@ test('an online sign-out flushes the latest tracking before another device signs
   const user = identity('Fast sign-out athlete');
   const account = await seed(page, undefined, user);
   await startWithPushup(page);
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('34');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '34');
   await signOut(page);
   const other = await browser.newContext({ baseURL: origin });
   try {
@@ -440,7 +440,7 @@ test('offline sign-out keeps a recoverable draft and does not reopen it automati
       );
   });
   await context.setOffline(true);
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('26');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '26');
   await page.getByRole('button', { name: 'Account menu', exact: true }).click();
   await page
     .getByRole('dialog', { name: 'Your account', exact: true })

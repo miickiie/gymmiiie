@@ -3,7 +3,7 @@ import { writeFile, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { parseBackup } from '../src/lib/backup';
-import { seed, snapshot, startWithPushup } from './fixtures';
+import { enterNumber, seed, snapshot, startWithPushup } from './fixtures';
 
 test('update recovery bypasses stale offline screens and preserves saved data', async ({
   page,
@@ -28,7 +28,7 @@ self.addEventListener('fetch', event => {
   try {
     await seed(page);
     await startWithPushup(page);
-    await page.getByLabel('Set 1 repetitions', { exact: true }).fill('19');
+    await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '19');
     await expect
       .poll(async () =>
         parseBackup(await snapshot(page)).active?.exercises[0]?.sets[0]?.reps,

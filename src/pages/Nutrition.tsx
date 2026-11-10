@@ -23,6 +23,7 @@ import {
   Chip,
   EmptyState,
   Field,
+  NumericInput,
   PageHeader,
   Ring,
   SectionHeader,
@@ -820,15 +821,15 @@ function AddFoodSheet({
               </p>
             </div>
             <div className="relative w-24">
-              <input
+              <NumericInput
                 className="input py-2 pr-8 text-right text-xs"
+                unit="g"
                 aria-label="Portion in grams"
                 min="0.1"
                 step="any"
-                type="number"
                 inputMode="decimal"
                 value={grams}
-                onChange={(e) => setGrams(e.target.value)}
+                onValueChange={setGrams}
               />
               <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-mute">
                 g
@@ -885,15 +886,15 @@ function AddFoodSheet({
           <div className="grid grid-cols-4 gap-1.5">
             {(['kcal', 'protein', 'carbs', 'fat'] as const).map((k) => (
               <label key={k} className="relative">
-                <input
+                <NumericInput
                   className="input py-2 pr-7 text-right text-xs"
+                  unit={k === 'kcal' ? 'cal' : 'g'}
                   aria-label={`${k} per 100 grams`}
                   min="0"
                   step="any"
-                  type="number"
                   placeholder={k}
                   value={cf[k]}
-                  onChange={(e) => setCf({ ...cf, [k]: e.target.value })}
+                  onValueChange={(raw) => setCf({ ...cf, [k]: raw })}
                 />
                 <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] font-black uppercase text-mute">
                   {k === 'kcal' ? 'cal' : 'g'}
@@ -1134,12 +1135,12 @@ function GoalsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
         {fields.map((f) => (
           <Field key={f.key} label={f.label}>
             <div className="relative">
-              <input
+              <NumericInput
                 className="input num pr-10 text-right"
-                type="number"
+                unit={f.unit}
                 value={g[f.key]}
-                onChange={(e) =>
-                  setG({ ...g, [f.key]: Math.max(0, Number(e.target.value)) })
+                onValueChange={(raw) =>
+                  setG({ ...g, [f.key]: Math.max(0, Number(raw)) })
                 }
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-mute">

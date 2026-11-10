@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 import { defaultData } from '../src/lib/defaults';
 import { accountDataKey } from '../src/lib/db';
@@ -6,6 +6,23 @@ import type { AppData } from '../src/types';
 import type { Account } from '../src/lib/accounts';
 
 const accounts = new WeakMap<Page, Account>();
+
+export async function enterNumber(input: Locator, value: string): Promise<void> {
+  const readonly = await input.evaluate((element) => element instanceof HTMLInputElement && element.readOnly);
+  if (!readonly) {
+    await input.fill(value);
+    return;
+  }
+  await input.click();
+  const pad = input.page().getByRole('dialog', { name: 'Number pad', exact: true });
+  await pad.getByRole('button', { name: 'Clear number', exact: true }).click();
+  for (const digit of value.replace(/^-/, '')) {
+    await pad.getByRole('button', { name: digit === '.' ? 'Decimal point' : digit, exact: true }).click();
+  }
+  if (value.startsWith('-')) await pad.getByRole('button', { name: 'Change sign', exact: true }).click();
+  await pad.getByRole('button', { name: 'Apply number', exact: true }).click();
+  await expect(pad).toHaveCount(0);
+}
 
 export async function seed(
   page: Page,

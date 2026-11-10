@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { parseBackup } from '../src/lib/backup';
-import { seed, snapshot, startWithPushup } from './fixtures';
+import { enterNumber, seed, snapshot, startWithPushup } from './fixtures';
 
 test.beforeEach(async ({ page }) => {
   await seed(page);
@@ -22,7 +22,7 @@ test('logs mobile-accessible effort/notes and durably saves a workout', async ({
   await expect(page.getByLabel('Set 1 weight', { exact: true })).toHaveValue(
     '0',
   );
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('12');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '12');
   await page
     .getByRole('button', { name: 'Set 1 details', exact: true })
     .click();
@@ -80,7 +80,7 @@ test('requires an explicit decision before replacing an active workout', async (
   page,
 }) => {
   await startWithPushup(page);
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('17');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '17');
   await page.goto('/train');
   await page
     .getByRole('button', { name: 'Empty workout', exact: true })

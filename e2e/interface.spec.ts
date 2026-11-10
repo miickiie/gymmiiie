@@ -4,7 +4,7 @@ const FOODS = JSON.parse(
   readFileSync(new URL('../src/data/foods.json', import.meta.url), 'utf8'),
 ) as { id: string; name: string; kcal: number }[];
 import { parseBackup } from '../src/lib/backup';
-import { seed, snapshot } from './fixtures';
+import { enterNumber, seed, snapshot } from './fixtures';
 
 test.beforeEach(async ({ page }) => {
   await seed(page);
@@ -15,7 +15,8 @@ test('nested exercise picker traps focus and Escape returns to the note draft', 
 }, testInfo) => {
   await page.goto('/notes');
   const newNote = page.getByRole('button', { name: 'New note', exact: true });
-  await newNote.click();
+  await newNote.focus();
+  await newNote.press('Enter');
   const note = page.getByRole('dialog', { name: 'New note', exact: true });
   await note
     .getByRole('textbox', { name: 'Note', exact: true })
@@ -24,7 +25,8 @@ test('nested exercise picker traps focus and Escape returns to the note draft', 
     name: 'Attach exercise',
     exact: true,
   });
-  await attach.click();
+  await attach.focus();
+  await attach.press('Enter');
   const picker = page.getByRole('dialog', {
     name: 'Attach exercise',
     exact: true,
@@ -78,12 +80,12 @@ test('food shortcut selects its food and invalid portions cannot change nutritio
   });
   await expect(portion).toBeVisible();
   for (const invalid of ['-25', '0']) {
-    await portion.fill(invalid);
+    await enterNumber(portion, invalid);
     await picker.getByRole('button', { name: 'Add', exact: true }).click();
     await expect(picker.getByRole('alert')).toContainText('greater than zero');
     expect(parseBackup(await snapshot(page)).nutrition.entries).toHaveLength(0);
   }
-  await portion.fill('50');
+  await enterNumber(portion, '50');
   await picker.getByRole('button', { name: 'Add', exact: true }).click();
   await expect(picker).toHaveCount(0);
   await expect
@@ -116,18 +118,14 @@ test('negative custom macros are rejected and correcting them permits a food ent
   await picker
     .getByPlaceholder('Food name', { exact: true })
     .fill('Test recovery meal');
-  await picker
-    .getByRole('spinbutton', { name: 'kcal per 100 grams', exact: true })
-    .fill('100');
-  await picker
-    .getByRole('spinbutton', { name: 'protein per 100 grams', exact: true })
-    .fill('-4');
-  await picker
-    .getByRole('spinbutton', { name: 'carbs per 100 grams', exact: true })
-    .fill('12');
-  await picker
-    .getByRole('spinbutton', { name: 'fat per 100 grams', exact: true })
-    .fill('3');
+  await enterNumber(picker
+    .getByRole('spinbutton', { name: 'kcal per 100 grams', exact: true }), '100');
+  await enterNumber(picker
+    .getByRole('spinbutton', { name: 'protein per 100 grams', exact: true }), '-4');
+  await enterNumber(picker
+    .getByRole('spinbutton', { name: 'carbs per 100 grams', exact: true }), '12');
+  await enterNumber(picker
+    .getByRole('spinbutton', { name: 'fat per 100 grams', exact: true }), '3');
   await picker
     .getByRole('button', { name: 'Save custom food', exact: true })
     .click();
@@ -135,18 +133,16 @@ test('negative custom macros are rejected and correcting them permits a food ent
   expect(parseBackup(await snapshot(page)).nutrition.customFoods).toHaveLength(
     0,
   );
-  await picker
-    .getByRole('spinbutton', { name: 'protein per 100 grams', exact: true })
-    .fill('5');
+  await enterNumber(picker
+    .getByRole('spinbutton', { name: 'protein per 100 grams', exact: true }), '5');
   await picker
     .getByRole('button', { name: 'Save custom food', exact: true })
     .click();
   await expect(
     picker.getByPlaceholder('Food name', { exact: true }),
   ).toHaveCount(0);
-  await picker
-    .getByRole('spinbutton', { name: 'Portion in grams', exact: true })
-    .fill('100');
+  await enterNumber(picker
+    .getByRole('spinbutton', { name: 'Portion in grams', exact: true }), '100');
   await picker.getByRole('button', { name: 'Add', exact: true }).click();
   await expect(picker).toHaveCount(0);
   await expect

@@ -45,6 +45,7 @@ import {
   Confirm,
   Field,
   NumField,
+  NumericInput,
   PageHeader,
   SectionHeader,
   Segmented,
@@ -474,12 +475,11 @@ export default function SettingsPage() {
               ))}
             </div>
             <div className="mt-2 flex gap-2">
-              <input
+              <NumericInput
                 className="input !py-1.5 text-sm"
-                type="number"
                 placeholder="Add plate"
                 value={newPlate}
-                onChange={(e) => setNewPlate(e.target.value)}
+                onValueChange={setNewPlate}
               />
               <Btn
                 size="sm"

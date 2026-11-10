@@ -160,7 +160,7 @@ export default function Dashboard() {
         </Card>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Card className="relative overflow-hidden p-5">
           <div className="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full bg-[var(--accent)] opacity-[0.09] blur-2xl" />
           <div className="flex flex-wrap items-center gap-5">
@@ -235,7 +235,7 @@ export default function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="min-w-0 p-5">
           <SectionHeader
             title="This week"
             action={
@@ -256,12 +256,12 @@ export default function Dashboard() {
               const planned = !!planId;
               const isToday = key === today;
               return (
-                <div key={key} className="flex flex-col items-center gap-1.5">
+                <div key={key} className="flex min-w-0 flex-col items-center gap-1.5">
                   <span className="text-[9px] font-black uppercase text-mute">
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'][d.getDay()]}
                   </span>
                   <div
-                    className={`grid h-9 w-9 place-items-center rounded-xl border text-xs font-black transition ${done ? 'border-transparent bg-[var(--good)] text-black' : off ? 'border-line bg-[var(--surface-2)] text-mute' : planned ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]' : isToday ? 'border-strong bg-[var(--surface-2)]' : 'border-line bg-[var(--surface-2)] text-dim'}`}
+                    className={`grid aspect-square w-full max-w-9 place-items-center rounded-xl border text-xs font-black transition ${done ? 'border-transparent bg-[var(--good)] text-black' : off ? 'border-line bg-[var(--surface-2)] text-mute' : planned ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]' : isToday ? 'border-strong bg-[var(--surface-2)]' : 'border-line bg-[var(--surface-2)] text-dim'}`}
                   >
                     {done ? (
                       <Check size={15} strokeWidth={3} />
@@ -333,7 +333,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+      <div className="mt-6 grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
         <div>
           <SectionHeader
             title="Today’s plan"

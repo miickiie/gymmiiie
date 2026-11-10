@@ -26,6 +26,7 @@ import {
   Card,
   EmptyState,
   LineChart,
+  NumericInput,
   PageHeader,
   Ring,
   SectionHeader,
@@ -585,13 +586,13 @@ function BodyTab() {
             <label className="min-w-[120px] flex-1">
               <span className="label mb-1 block">Weight</span>
               <div className="relative">
-                <input
+                <NumericInput
                   className="input pr-10 text-right num"
-                  type="number"
+                  unit={unit}
                   inputMode="decimal"
                   step="0.1"
                   value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
+                  onValueChange={setWeight}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-mute">
                   {unit}
@@ -601,14 +602,14 @@ function BodyTab() {
             <label className="min-w-[120px] flex-1">
               <span className="label mb-1 block">Goal</span>
               <div className="relative">
-                <input
+                <NumericInput
                   className="input pr-10 text-right num"
-                  type="number"
+                  unit={unit}
                   inputMode="decimal"
                   step="0.1"
                   placeholder="optional"
                   value={goal}
-                  onChange={(e) => setGoal(e.target.value)}
+                  onValueChange={setGoal}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-mute">
                   {unit}
@@ -701,14 +702,14 @@ function BodyTab() {
             </label>
             <label>
               <span className="label mb-1 block">Value</span>
-              <input
+              <NumericInput
                 className="input num"
-                type="number"
+                unit="cm"
                 inputMode="decimal"
                 step="0.1"
                 placeholder="cm"
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onValueChange={setValue}
               />
             </label>
             <label>

@@ -29,6 +29,7 @@ import {
   Confirm,
   EmptyState,
   Field,
+  NumericInput,
   Sheet,
   useToast,
 } from '../components/ui';
@@ -1052,22 +1053,21 @@ function SetInput({
   const [text, setText] = useState<string | null>(null);
   return (
     <div className="relative">
-      <input
+      <NumericInput
         aria-label={label}
-        type="number"
+        unit={suffix}
         inputMode="decimal"
         min={0}
         step={step}
         className="input min-h-11 !py-2 !pr-9 !text-right !text-sm font-black"
         value={text ?? String(Math.round(value * 10) / 10)}
         onFocus={(event) => event.target.select()}
-        onChange={(event) => {
-          const input = event.target.value;
-          setText(input);
-          const number = input === '' ? 0 : Number(input);
+        onValueChange={(raw) => {
+          setText(raw);
+          const number = raw === '' ? 0 : Number(raw);
           if (Number.isFinite(number) && number >= 0) onChange(number);
         }}
-        onBlur={() => setText(null)}
+        onValueCommit={() => setText(null)}
       />
       <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-mute">
         {suffix}

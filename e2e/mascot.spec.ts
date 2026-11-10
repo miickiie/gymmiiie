@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { seed, startWithPushup } from './fixtures';
+import { enterNumber, seed, startWithPushup } from './fixtures';
 
 test.beforeEach(async ({ page }) => {
   await seed(page);
@@ -28,7 +28,7 @@ test('workouts stay quiet until a meaningful notification or a cat tap', async (
   await startWithPushup(page);
   const companion = page.getByRole('complementary', { name: 'Mochi, your workout cat' });
   await expect(companion.getByRole('status')).toHaveCount(0);
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('12');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '12');
   await page.getByRole('button', { name: 'Complete set 1', exact: true }).click();
   await expect(companion.getByRole('status')).toHaveCount(0);
   await page.getByRole('button', { name: 'Pet Mochi for workout encouragement' }).click();

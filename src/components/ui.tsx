@@ -12,6 +12,7 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { CatCompanion } from './CatCompanion';
+import { NumberPad } from './NumberPad';
 import { useAppUpdate } from '../lib/useAppUpdate';
 
 /* ------------------------------------------------------------------ */
@@ -336,6 +337,90 @@ export function Field({
   );
 }
 
+export function NumericInput({
+  value,
+  onValueChange,
+  onValueCommit,
+  unit,
+  onBlur,
+  onClick,
+  onPointerDown,
+  onKeyDown,
+  readOnly,
+  disabled,
+  ...props
+}: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'onChange'> & {
+  value: string | number;
+  onValueChange: (value: string) => void;
+  onValueCommit?: (value: string) => void;
+  unit?: string;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  const [mobile, setMobile] = useState(() => window.matchMedia('(pointer: coarse)').matches);
+  const [open, setOpen] = useState(false);
+  const [label, setLabel] = useState('Enter a number');
+  useEffect(() => {
+    const query = window.matchMedia('(pointer: coarse)');
+    const update = () => setMobile(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+  const openPad = () => {
+    if (!mobile || readOnly || disabled || !input.current) return;
+    const field = input.current;
+    setLabel(field.getAttribute('aria-label') || field.labels?.[0]?.querySelector('.label')?.textContent?.trim() || field.placeholder || 'Enter a number');
+    field.focus({ preventScroll: true });
+    setOpen(true);
+  };
+  return (
+    <>
+      <input
+        {...props}
+        ref={input}
+        type="number"
+        value={value}
+        disabled={disabled}
+        readOnly={readOnly || mobile}
+        inputMode={mobile ? 'none' : props.inputMode ?? 'decimal'}
+        aria-haspopup={mobile ? 'dialog' : undefined}
+        aria-expanded={mobile ? open : undefined}
+        onChange={(event) => onValueChange(event.target.value)}
+        onBlur={(event) => {
+          if (!mobile) {
+            onValueCommit?.(event.target.value);
+            onBlur?.(event);
+          }
+        }}
+        onPointerDown={(event) => {
+          onPointerDown?.(event);
+          if (mobile && !readOnly && !disabled) event.preventDefault();
+        }}
+        onClick={(event) => { onClick?.(event); openPad(); }}
+        onKeyDown={(event) => {
+          onKeyDown?.(event);
+          if (mobile && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            openPad();
+          }
+        }}
+      />
+      <Sheet open={open} onClose={() => setOpen(false)} title="Number pad" placement="bottom">
+        <NumberPad
+          value={value}
+          label={label}
+          unit={unit}
+          onCancel={() => setOpen(false)}
+          onApply={(raw) => {
+            onValueChange(raw);
+            onValueCommit?.(raw);
+            setOpen(false);
+          }}
+        />
+      </Sheet>
+    </>
+  );
+}
+
 export function NumField({
   value,
   onChange,
@@ -359,8 +444,8 @@ export function NumField({
 
   return (
     <div className={clsx('relative', className)}>
-      <input
-        type="number"
+      <NumericInput
+        unit={unit}
         inputMode="decimal"
         className="input !pr-12 text-right num"
         value={draft ?? value}
@@ -368,15 +453,13 @@ export function NumField({
         max={max}
         step={step}
         placeholder={placeholder}
-        onChange={(e) => {
-          const raw = e.target.value;
+        onValueChange={(raw) => {
           setDraft(raw);
           const next = Number(raw);
           if (raw !== '' && Number.isFinite(next) && next >= min && next <= max)
             onChange(next);
         }}
-        onBlur={(e) => {
-          const raw = e.target.value;
+        onValueCommit={(raw) => {
           const next = Number(raw);
           if (raw !== '' && Number.isFinite(next))
             onChange(Math.max(min, Math.min(max, next)));
@@ -477,6 +560,7 @@ export function Sheet({
   footer,
   size = 'md',
   dismissible = true,
+  placement = 'auto',
 }: {
   open: boolean;
   onClose: () => void;
@@ -485,6 +569,7 @@ export function Sheet({
   footer?: React.ReactNode;
   size?: 'md' | 'lg';
   dismissible?: boolean;
+  placement?: 'auto' | 'bottom';
 }) {
   const id = useId();
   const layerRef = useRef<HTMLDivElement>(null);
@@ -589,7 +674,7 @@ export function Sheet({
   return createPortal(
     <div
       ref={layerRef}
-      className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center"
+      className={clsx('fixed inset-0 z-[80] flex items-end justify-center', placement === 'auto' && 'sm:items-center')}
     >
       <div
         aria-hidden="true"
@@ -606,7 +691,8 @@ export function Sheet({
         tabIndex={-1}
         className={clsx(
           'animate-fadeUp relative flex max-h-[92dvh] w-full flex-col overflow-hidden border border-line bg-[var(--surface)] shadow-2xl',
-          'rounded-t-[2rem] sm:rounded-[2rem]',
+          'rounded-t-[2rem]',
+          placement === 'auto' && 'sm:rounded-[2rem]',
           size === 'md' ? 'sm:max-w-lg' : 'sm:max-w-2xl',
         )}
       >

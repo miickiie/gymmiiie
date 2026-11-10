@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { seed, startWithPushup } from './fixtures';
+import { enterNumber, seed, startWithPushup } from './fixtures';
 
 const NEXT_VERSION = 'ffffffffffffffffffff';
 
@@ -47,7 +47,7 @@ test('refreshing after a resume check preserves an active workout and sign-in', 
   while (await page.getByRole('button', { name: 'Dismiss Mochi’s message' }).isVisible()) {
     await page.getByRole('button', { name: 'Dismiss Mochi’s message' }).click();
   }
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('19');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '19');
   await page.route('**/api/app-version', (route) => route.fulfill({ json: { version: NEXT_VERSION } }));
   await page.evaluate(() => {
     localStorage.setItem('update-preservation-check', 'keep');

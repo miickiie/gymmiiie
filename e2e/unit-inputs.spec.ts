@@ -1,5 +1,5 @@
 import { expect, test, type Locator } from '@playwright/test';
-import { seed, startWithPushup } from './fixtures';
+import { enterNumber, seed, startWithPushup } from './fixtures';
 
 async function expectUnitSpacing(scope: Locator): Promise<void> {
   const fields = await scope.locator('input[type="number"]').evaluateAll((inputs) =>
@@ -38,8 +38,8 @@ test('daily nutrition goals reserve space for kcal, grams, and millilitres at ph
     await page.getByRole('button', { name: 'Goals', exact: true }).click();
     const goals = page.getByRole('dialog', { name: 'Daily goals', exact: true });
     await expect(goals.getByRole('spinbutton')).toHaveCount(7);
-    await goals.getByRole('spinbutton', { name: /^Calories\b/ }).fill('12000');
-    await goals.getByRole('spinbutton', { name: /^Water\b/ }).fill('5000');
+    await enterNumber(goals.getByRole('spinbutton', { name: /^Calories\b/ }), '12000');
+    await enterNumber(goals.getByRole('spinbutton', { name: /^Water\b/ }), '5000');
     await expectUnitSpacing(goals);
     if (width === 390) await page.screenshot({ path: testInfo.outputPath('nutrition-goals-units.png'), animations: 'disabled' });
     await goals.getByRole('button', { name: 'Save goals', exact: true }).click();
@@ -58,7 +58,7 @@ test('food portions and custom food macros keep their units separate in narrow d
   await expectUnitSpacing(food);
   await food.getByRole('button', { name: 'New food', exact: true }).click();
   for (const nutrient of ['kcal', 'protein', 'carbs', 'fat']) {
-    await food.getByRole('spinbutton', { name: `${nutrient} per 100 grams`, exact: true }).fill('100');
+    await enterNumber(food.getByRole('spinbutton', { name: `${nutrient} per 100 grams`, exact: true }), '100');
   }
   await expectUnitSpacing(food);
 });
@@ -75,7 +75,7 @@ test('shared profile fields preserve unit spacing and editable numbers', async (
   await page.goto('/settings');
   const content = page.getByRole('region', { name: 'Page content' });
   const weight = content.getByRole('spinbutton', { name: /^Weight\b/ });
-  await weight.fill('82.5');
+  await enterNumber(weight, '82.5');
   await weight.blur();
   await expect(weight).toHaveValue('82.5');
   await expectUnitSpacing(content);
@@ -94,6 +94,6 @@ test('calculator units including reps and percent never overlap', async ({ page 
 test('workout weights and repetitions reserve space for their longest suffix on narrow screens', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 });
   await startWithPushup(page);
-  await page.getByLabel('Set 1 repetitions', { exact: true }).fill('100');
+  await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '100');
   await expectUnitSpacing(page.getByRole('region', { name: 'Page content' }));
 });
