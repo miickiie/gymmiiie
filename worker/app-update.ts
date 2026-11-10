@@ -1,4 +1,4 @@
-export function appUpdateResponse(): Response {
+export function appUpdateResponse(autoStart = false): Response {
   const nonce = crypto.randomUUID();
   return new Response(
     `<!doctype html>
@@ -27,7 +27,7 @@ export function appUpdateResponse(): Response {
   <script nonce="${nonce}">
     const button = document.getElementById('update');
     const status = document.getElementById('status');
-    button.addEventListener('click', async () => {
+    const update = async () => {
       button.disabled = true;
       status.textContent = 'Loading the latest Gymmiie…';
       try {
@@ -42,7 +42,9 @@ export function appUpdateResponse(): Response {
         status.textContent = 'The update could not finish. Check your connection and try again.';
         button.disabled = false;
       }
-    });
+    };
+    button.addEventListener('click', update);
+    ${autoStart ? 'void update();' : ''}
   </script>
 </body>
 </html>`,

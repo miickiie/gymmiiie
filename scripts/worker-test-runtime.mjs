@@ -8,6 +8,8 @@ const projectRoot = fileURLToPath(new URL('../', import.meta.url));
 /** Native workerd + SQLite D1, isolated per call. Never loads Wrangler or env files. */
 export async function createWorkerTestRuntime({
   registrationPassphrase = 'test-invite',
+  assets = () =>
+    new Response('Test assets are served by the Node test server.', { status: 404 }),
 } = {}) {
   const compiled = await build({
     absWorkingDir: projectRoot,
@@ -31,10 +33,7 @@ export async function createWorkerTestRuntime({
           : { REGISTRATION_PASSPHRASE: registrationPassphrase },
       telemetry: { enabled: false },
       serviceBindings: {
-        ASSETS: () =>
-          new Response('Test assets are served by the Node test server.', {
-            status: 404,
-          }),
+        ASSETS: assets,
       },
     }),
   );

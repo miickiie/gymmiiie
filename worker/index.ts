@@ -102,7 +102,36 @@ export default {
         if (request.method !== 'GET') {
           return new Response(null, { status: 405, headers: { Allow: 'GET' } });
         }
-        return appUpdateResponse();
+        return appUpdateResponse(url.searchParams.get('refresh') === '1');
+      }
+
+      if (url.pathname === '/api/app-version') {
+        if (request.method !== 'GET') {
+          return new Response(null, {
+            status: 405,
+            headers: { Allow: 'GET', 'Cache-Control': 'no-store' },
+          });
+        }
+        const asset = await env.ASSETS.fetch(
+          new URL('/app-version.json', request.url),
+        );
+        if (
+          !asset.ok ||
+          !asset.headers.get('Content-Type')?.includes('application/json')
+        ) {
+          return json({ error: 'version_unavailable' }, 503);
+        }
+        const metadata: unknown = await asset.json();
+        if (
+          !metadata ||
+          typeof metadata !== 'object' ||
+          !('version' in metadata) ||
+          typeof metadata.version !== 'string' ||
+          !/^[a-f0-9]{20}$/.test(metadata.version)
+        ) {
+          return json({ error: 'version_unavailable' }, 503);
+        }
+        return json({ version: metadata.version });
       }
 
       if (url.pathname === '/api/health') {

@@ -12,6 +12,7 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { CatCompanion } from './CatCompanion';
+import { useAppUpdate } from '../lib/useAppUpdate';
 
 /* ------------------------------------------------------------------ */
 /* Toast                                                               */
@@ -22,6 +23,8 @@ interface ToastItem {
   id: number;
   msg: string;
   tone: Tone;
+  persistent?: boolean;
+  action?: { label: string; onClick: () => void; disabled: boolean };
 }
 const ToastCtx = createContext<{
   push: (msg: string, tone?: Tone) => void;
@@ -35,6 +38,7 @@ const ToastCtx = createContext<{
 export const useToast = () => useContext(ToastCtx);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const update = useAppUpdate();
   const [items, setItems] = useState<ToastItem[]>([]);
   const [catHosts, setCatHosts] = useState<HTMLElement[]>([]);
   const mountCat = useCallback((host: HTMLElement) => {
@@ -49,13 +53,24 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setItems((xs) => tone === 'bad' ? [item, ...xs] : [...xs, item]);
   }, []);
   const encourage = useCallback((msg: string) => push(msg, 'good'), [push]);
+  const updateNotice: ToastItem | undefined = update.version ? {
+    id: -1,
+    msg: update.error || 'Psst! A newer Gymmiie is ready. Want to refresh and check it out? Mochi will keep your saved workout safe.',
+    tone: update.error ? 'bad' : 'default',
+    persistent: true,
+    action: {
+      label: update.refreshing ? 'Refreshing…' : 'Refresh app',
+      onClick: () => { void update.refresh(); },
+      disabled: update.refreshing,
+    },
+  } : undefined;
   return (
     <ToastCtx.Provider value={{ push, clear, mountCat }}>
       {children}
       <CatCompanion
-        message={items[0]}
-        pending={Math.max(0, items.length - 1)}
-        onDismiss={dismiss}
+        message={items[0] ?? updateNotice}
+        pending={Math.max(0, items.length - 1) + (items.length && updateNotice ? 1 : 0)}
+        onDismiss={items.length ? dismiss : update.dismiss}
         onEncourage={encourage}
         host={catHosts.at(-1)}
       />

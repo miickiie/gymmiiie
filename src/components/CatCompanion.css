@@ -109,6 +109,20 @@
   background: var(--surface-3);
 }
 
+.gym-cat-actions { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.65rem; }
+.gym-cat-action, .gym-cat-later {
+  pointer-events: auto;
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+.gym-cat-action { background: var(--accent); color: var(--bg); }
+.gym-cat-later { color: var(--text-dim); }
+.gym-cat-action:disabled, .gym-cat-later:disabled, .gym-cat-dismiss:disabled { opacity: 0.6; cursor: wait; }
+.gym-cat-action:focus-visible, .gym-cat-later:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
 .gym-cat-button {
   position: relative;
   display: flex;

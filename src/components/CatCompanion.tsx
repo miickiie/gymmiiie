@@ -8,6 +8,8 @@ interface CatMessage {
   id: number;
   msg: string;
   tone: 'default' | 'good' | 'bad';
+  persistent?: boolean;
+  action?: { label: string; onClick: () => void; disabled: boolean };
 }
 
 interface CatCompanionProps {
@@ -106,7 +108,7 @@ export function CatCompanion({
   }, [host]);
 
   useEffect(() => {
-    if (paused || !visible) return;
+    if (paused || !visible || message?.persistent) return;
     const timeout = window.setTimeout(
       message ? onDismiss : () => setDismissed(true),
       message?.tone === 'bad' ? 9000 : 6500,
@@ -164,13 +166,23 @@ export function CatCompanion({
         >
           <div className="gym-cat-bubble-heading">
             <span><Sparkles size={12} aria-hidden="true" /> Mochi says</span>
-            <button type="button" className="gym-cat-dismiss" aria-label="Dismiss Mochi’s message" onClick={dismiss}>
+            <button type="button" className="gym-cat-dismiss" aria-label="Dismiss Mochi’s message" onClick={dismiss} disabled={message?.action?.disabled}>
               <X size={15} aria-hidden="true" />
             </button>
           </div>
           <p role={tone === 'bad' ? 'alert' : 'status'} aria-atomic="true">
             {message?.msg ?? greeting(pathname)}
           </p>
+          {message?.action && (
+            <div className="gym-cat-actions" aria-busy={message.action.disabled}>
+              <button type="button" className="gym-cat-action" onClick={message.action.onClick} disabled={message.action.disabled}>
+                {message.action.label}
+              </button>
+              <button type="button" className="gym-cat-later" onClick={dismiss} disabled={message.action.disabled}>
+                Later
+              </button>
+            </div>
+          )}
           {pending > 0 && (
             <button type="button" className="gym-cat-next" onClick={dismiss}>
               Next message <span>{pending}</span> <ChevronRight size={14} aria-hidden="true" />

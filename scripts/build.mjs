@@ -13,6 +13,19 @@ execFileSync(process.execPath, ['scripts/build-art.mjs', '--check'], {
 });
 await build({ root, envDir: false, build: { manifest: true } });
 const manifest = await offlineManifest(output);
+const indexPath = resolve(output, 'index.html');
+const html = await readFile(indexPath, 'utf8');
+await writeFile(
+  indexPath,
+  html.replace(
+    '</head>',
+    `  <meta name="gymmiie-build" content="${manifest.version}">\n</head>`,
+  ),
+);
+await writeFile(
+  resolve(output, 'app-version.json'),
+  JSON.stringify({ version: manifest.version }),
+);
 const workerPath = resolve(output, 'sw.js');
 const worker = await readFile(workerPath, 'utf8');
 await writeFile(

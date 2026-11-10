@@ -10,6 +10,17 @@ const directory = resolve('dist');
 const testInvite = 'test-invite';
 const runtime = await createWorkerTestRuntime({
   registrationPassphrase: testInvite,
+  assets: async (request) => {
+    if (new URL(request.url).pathname !== '/app-version.json')
+      return new Response(null, { status: 404 });
+    try {
+      return new Response(await readFile(resolve(directory, 'app-version.json')), {
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      });
+    } catch {
+      return new Response(null, { status: 404 });
+    }
+  },
 });
 const types = {
   '.html': 'text/html; charset=utf-8',
