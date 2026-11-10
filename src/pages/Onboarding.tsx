@@ -216,10 +216,10 @@ export default function Onboarding() {
                   <Field label="Age">
                     <NumField
                       value={age}
-                      onChange={(v) =>
-                        setAge(Math.max(13, Math.min(100, Math.round(v))))
-                      }
+                      onChange={(v) => setAge(Math.round(v))}
                       unit="yrs"
+                      min={13}
+                      max={100}
                     />
                   </Field>
                 </div>
@@ -227,17 +227,18 @@ export default function Onboarding() {
                   <Field label="Height">
                     <NumField
                       value={height}
-                      onChange={(v) =>
-                        setHeight(Math.max(100, Math.min(250, v)))
-                      }
+                      onChange={setHeight}
                       unit="cm"
+                      min={100}
+                      max={250}
                     />
                   </Field>
                   <Field label="Weight">
                     <NumField
                       value={weight}
-                      onChange={(v) => setWeight(Math.max(20, v))}
+                      onChange={setWeight}
                       unit={unit}
+                      min={20}
                       step={unit === 'lb' ? 1 : 0.5}
                     />
                   </Field>

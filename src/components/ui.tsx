@@ -345,21 +345,32 @@ export function NumField({
   placeholder?: string;
   className?: string;
 }) {
+  const [draft, setDraft] = useState<string | null>(null);
+
   return (
     <div className={clsx('relative', className)}>
       <input
         type="number"
         inputMode="decimal"
-        className="input pr-12 text-right num"
-        value={value}
+        className="input !pr-12 text-right num"
+        value={draft ?? value}
         min={min}
         max={max}
         step={step}
         placeholder={placeholder}
         onChange={(e) => {
-          const next = e.target.value === '' ? 0 : Number(e.target.value);
-          if (Number.isFinite(next))
+          const raw = e.target.value;
+          setDraft(raw);
+          const next = Number(raw);
+          if (raw !== '' && Number.isFinite(next) && next >= min && next <= max)
+            onChange(next);
+        }}
+        onBlur={(e) => {
+          const raw = e.target.value;
+          const next = Number(raw);
+          if (raw !== '' && Number.isFinite(next))
             onChange(Math.max(min, Math.min(max, next)));
+          setDraft(null);
         }}
         onFocus={(e) => e.target.select()}
       />

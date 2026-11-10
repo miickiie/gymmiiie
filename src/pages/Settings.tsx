@@ -240,19 +240,19 @@ export default function SettingsPage() {
               <Field label="Age">
                 <NumField
                   value={profile.age}
-                  onChange={(v) =>
-                    setProfile({ age: Math.max(13, Math.min(100, v)) })
-                  }
+                  onChange={(v) => setProfile({ age: v })}
                   unit="yrs"
+                  min={13}
+                  max={100}
                 />
               </Field>
               <Field label="Height">
                 <NumField
                   value={profile.heightCm}
-                  onChange={(v) =>
-                    setProfile({ heightCm: Math.max(100, Math.min(250, v)) })
-                  }
+                  onChange={(v) => setProfile({ heightCm: v })}
                   unit="cm"
+                  min={100}
+                  max={250}
                 />
               </Field>
               <Field label="Weight">
