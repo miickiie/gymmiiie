@@ -140,10 +140,7 @@ export function CatCompanion({
 
   useEffect(() => {
     if (paused || !message || message.persistent) return;
-    const timeout = window.setTimeout(
-      onDismiss,
-      message?.tone === 'bad' ? 9000 : 6500,
-    );
+    const timeout = window.setTimeout(onDismiss, 4000);
     return () => window.clearTimeout(timeout);
   }, [message, onDismiss, paused, visible]);
 
