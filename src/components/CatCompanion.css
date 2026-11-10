@@ -1,0 +1,205 @@
+.gym-cat-companion {
+  --cat-tint: var(--accent);
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 0.75rem);
+  z-index: 45;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.65rem;
+  max-width: calc(100vw - 2rem);
+  pointer-events: none;
+}
+
+.gym-cat-companion.is-training {
+  bottom: calc(10rem + env(safe-area-inset-bottom));
+}
+
+.gym-cat-companion[data-tone='good'] { --cat-tint: var(--good); }
+.gym-cat-companion[data-tone='bad'] { --cat-tint: var(--bad); }
+
+.gym-cat-bubble {
+  position: relative;
+  width: min(17.5rem, calc(100vw - 7.75rem));
+  margin-bottom: 1.25rem;
+  padding: 0.8rem 0.9rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--cat-tint) 45%, var(--line-strong));
+  border-radius: 1.1rem 1.1rem 0.3rem 1.1rem;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  transform-origin: right bottom;
+  animation: gym-cat-speech 220ms ease-out both;
+}
+
+.gym-cat-bubble::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  bottom: 13px;
+  width: 10px;
+  height: 10px;
+  background: var(--surface);
+  border-right: 1px solid color-mix(in srgb, var(--cat-tint) 45%, var(--line-strong));
+  border-top: 1px solid color-mix(in srgb, var(--cat-tint) 45%, var(--line-strong));
+  transform: rotate(45deg);
+}
+
+.gym-cat-bubble-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.gym-cat-bubble-heading > span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--cat-tint);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.gym-cat-bubble p {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  max-height: min(14rem, max(4rem, calc(100dvh - 18rem)));
+  overflow-y: auto;
+}
+
+.gym-cat-companion[data-tone='bad'] .gym-cat-bubble p { pointer-events: auto; }
+
+.gym-cat-dismiss {
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: -5px -5px -5px 0;
+  border-radius: 50%;
+  color: var(--text-dim);
+}
+
+.gym-cat-dismiss:hover { background: var(--surface-3); color: var(--text); }
+
+.gym-cat-next {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 32px;
+  margin-top: 0.5rem;
+  color: var(--cat-tint);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.gym-cat-next span {
+  min-width: 17px;
+  padding: 0 4px;
+  border-radius: 5px;
+  background: var(--surface-3);
+}
+
+.gym-cat-button {
+  position: relative;
+  display: flex;
+  flex: 0 0 68px;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width: 68px;
+  padding-top: 10px;
+  border-radius: 1rem;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gym-cat-sprite {
+  display: block;
+  width: 64px;
+  transform-origin: center bottom;
+  animation: gym-cat-breathe 4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 0 rgb(0 0 0 / 0.12));
+}
+
+.gym-cat-face { display: block; width: 100%; overflow: visible; }
+.gym-cat-eyes { transform-origin: 8px 6px; animation: gym-cat-blink 5.5s infinite; }
+.gym-cat-eyes.is-happy { animation: none; }
+.gym-cat-button:hover .gym-cat-sprite { transform: rotate(-7deg) translateY(-3px); animation: none; }
+.gym-cat-button:active .gym-cat-sprite { transform: scale(0.92); }
+.gym-cat-button.is-happy .gym-cat-sprite { animation: gym-cat-hop 500ms ease-in-out 3; }
+
+.gym-cat-name {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 2px 9px;
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 0.6rem;
+  font-weight: 900;
+  line-height: 1.4;
+  box-shadow: var(--shadow);
+}
+
+.gym-cat-name span { color: var(--accent); }
+.gym-cat-heart { position: absolute; top: -8px; color: #e59ca8; opacity: 0; }
+.gym-cat-button.is-happy .gym-cat-heart { animation: gym-cat-love 1.8s ease-out both; }
+.gym-cat-button:focus-visible, .gym-cat-dismiss:focus-visible, .gym-cat-next:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.gym-cat-dialog-host:empty { display: none; }
+.gym-cat-dialog-host {
+  flex-shrink: 0;
+  max-height: 35dvh;
+  overflow-y: auto;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.gym-cat-companion.in-dialog {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+.gym-cat-companion.in-dialog .gym-cat-bubble {
+  width: auto;
+  flex: 1;
+  margin-bottom: 0;
+  box-shadow: none;
+  max-height: none;
+  pointer-events: auto;
+}
+.gym-cat-companion.in-dialog .gym-cat-button { flex-basis: 56px; width: 56px; }
+.gym-cat-companion.in-dialog .gym-cat-sprite { width: 56px; }
+
+@keyframes gym-cat-speech { from { opacity: 0; transform: translateY(5px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes gym-cat-breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes gym-cat-blink { 0%, 43%, 47%, 100% { transform: scaleY(1); } 45% { transform: scaleY(0.08); } }
+@keyframes gym-cat-hop { 0%, 100% { transform: translateY(0) rotate(0); } 45% { transform: translateY(-7px) rotate(-5deg); } 70% { transform: translateY(-2px) rotate(4deg); } }
+@keyframes gym-cat-love { 0% { opacity: 0; transform: translateY(8px) scale(0.5); } 20%, 60% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px) scale(1.15); } }
+
+@media (min-width: 1024px) {
+  .gym-cat-companion { right: 1.5rem; bottom: 1.5rem; }
+  .gym-cat-companion.is-training:not(.in-dialog) { bottom: 7rem; }
+  .gym-cat-button { flex-basis: 80px; width: 80px; }
+  .gym-cat-sprite { width: 80px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gym-cat-companion *, .gym-cat-companion *::after { animation: none !important; transition: none !important; }
+  .gym-cat-button:hover .gym-cat-sprite { transform: none; }
+}

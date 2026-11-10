@@ -11,6 +11,7 @@ import React, {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { CatCompanion } from './CatCompanion';
 
 /* ------------------------------------------------------------------ */
 /* Toast                                                               */
@@ -25,45 +26,39 @@ interface ToastItem {
 const ToastCtx = createContext<{
   push: (msg: string, tone?: Tone) => void;
   clear: () => void;
+  mountCat: (host: HTMLElement) => () => void;
 }>({
   push: () => {},
   clear: () => {},
+  mountCat: () => () => {},
 });
 export const useToast = () => useContext(ToastCtx);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
+  const [catHosts, setCatHosts] = useState<HTMLElement[]>([]);
+  const mountCat = useCallback((host: HTMLElement) => {
+    setCatHosts((hosts) => [...hosts, host]);
+    return () => setCatHosts((hosts) => hosts.filter((item) => item !== host));
+  }, []);
   const clear = useCallback(() => setItems([]), []);
+  const dismiss = useCallback(() => setItems((xs) => xs.slice(1)), []);
   const push = useCallback((msg: string, tone: Tone = 'default') => {
     const id = Date.now() + Math.random();
-    setItems((xs) => [...xs, { id, msg, tone }]);
-    setTimeout(() => setItems((xs) => xs.filter((x) => x.id !== id)), 2600);
+    const item = { id, msg, tone };
+    setItems((xs) => tone === 'bad' ? [item, ...xs] : [...xs, item]);
   }, []);
+  const encourage = useCallback((msg: string) => push(msg, 'good'), [push]);
   return (
-    <ToastCtx.Provider value={{ push, clear }}>
+    <ToastCtx.Provider value={{ push, clear, mountCat }}>
       {children}
-      <div
-        aria-live="polite"
-        aria-atomic="false"
-        className="pointer-events-none fixed inset-x-0 top-3 z-[100] flex flex-col items-center gap-2 px-3"
-      >
-        {items.map((t) => (
-          <div
-            key={t.id}
-            className={clsx(
-              'animate-fadeUp rounded-full border px-4 py-2 text-sm font-extrabold shadow-card backdrop-blur',
-              t.tone === 'good' &&
-                'border-[color-mix(in_srgb,var(--good)_35%,transparent)] bg-[var(--good-soft)] text-[var(--good)]',
-              t.tone === 'bad' &&
-                'border-[color-mix(in_srgb,var(--bad)_35%,transparent)] bg-[var(--bad-soft)] text-[var(--bad)]',
-              t.tone === 'default' &&
-                'border-line bg-[var(--surface-2)] text-[var(--text)]',
-            )}
-          >
-            {t.msg}
-          </div>
-        ))}
-      </div>
+      <CatCompanion
+        message={items[0]}
+        pending={Math.max(0, items.length - 1)}
+        onDismiss={dismiss}
+        onEncourage={encourage}
+        host={catHosts.at(-1)}
+      />
     </ToastCtx.Provider>
   );
 }
@@ -479,6 +474,8 @@ export function Sheet({
   const id = useId();
   const layerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const catHostRef = useRef<HTMLDivElement>(null);
+  const { mountCat } = useContext(ToastCtx);
   const openerRef = useRef<HTMLElement | null>(null);
   const wasOpenRef = useRef(false);
   // Capture before React mounts an auto-focused input inside the portal.
@@ -569,6 +566,10 @@ export function Sheet({
     };
   }, [open, id]);
 
+  useLayoutEffect(() => {
+    if (open && catHostRef.current) return mountCat(catHostRef.current);
+  }, [open, mountCat]);
+
   if (!open) return null;
   return createPortal(
     <div
@@ -614,6 +615,7 @@ export function Sheet({
             {footer}
           </div>
         )}
+        <div ref={catHostRef} className="gym-cat-dialog-host" />
       </div>
     </div>,
     document.body,
