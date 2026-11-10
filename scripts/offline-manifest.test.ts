@@ -14,9 +14,11 @@ describe('build-specific offline manifest', () => {
       [
         'index.html',
         'manifest.webmanifest',
-        'icon.svg',
         'icon-192.png',
         'icon-512.png',
+        'icon-512-maskable.png',
+        'apple-touch-icon.png',
+        'favicon-32.png',
         'assets/main.js',
         'assets/lazy-route.js',
         'assets/food-data.js',

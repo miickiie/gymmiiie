@@ -4,7 +4,7 @@
 
 Gymmiie keeps each user’s training log under an account identified by name and international telephone number. Logs are cached separately on each device and synchronized to the server when connected. There are no ads or trackers. An optional code-protected encrypted backup remains separate from account sync.
 
-![Gymmiie](public/icon.svg)
+![Gymmiie](public/icon-192.png)
 
 ## Highlights
 
@@ -76,7 +76,7 @@ npm run preview      # preview the production build
 npm test             # domain, persistence and recovery regressions
 npm run test:e2e     # production browser flows on desktop and mobile
 npm run audit:exercises # exercise integrity and review coverage
-npm run icons        # regenerate PNG PWA icons from public/icon.svg
+npm run icons        # regenerate PWA icons from scripts/assets/peekaboo.png
 ```
 
 ## Deploy to Cloudflare

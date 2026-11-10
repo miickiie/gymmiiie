@@ -146,7 +146,7 @@ async function fixture() {
 }
 
 async function seed(page, origin, data, authenticated) {
-  await page.goto(`${origin}/icon.svg`);
+  await page.goto(`${origin}/icon-192.png`);
   if (authenticated) {
     // Exercise real account/session and owner-data APIs, sharing the browser's
     // cookie jar. No application-only test route or login bypass is involved.
