@@ -6,10 +6,17 @@ export interface ArtEntry {
   url: string;
 }
 
+interface ArtPath {
+  d: string;
+  fill: string;
+  fillRule: 'evenodd' | 'nonzero';
+  opacity: number;
+}
+
 interface ArtData {
   viewBox: string;
-  /** d strings per frame, each frame may contain several subpaths */
-  frames: string[][];
+  /** Ordered painted paths; a source background and its figure keep distinct fills. */
+  frames: ArtPath[][];
 }
 
 // Original catalog mappings and reviewed corrections; known conflicts are excluded.
@@ -33,6 +40,11 @@ export type { ArtData };
 
 const cache = new Map<string, Promise<ArtData | null>>();
 
+function pathOpacity(value: string | null): number {
+  const opacity = Number(value?.trim() || '1');
+  return Number.isFinite(opacity) ? Math.max(0, Math.min(1, opacity)) : 1;
+}
+
 function parseMotion(svgText: string): ArtData | null {
   try {
     const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
@@ -43,8 +55,14 @@ function parseMotion(svgText: string): ArtData | null {
     if (!groups.length) return null;
     const frames = groups.map((g) =>
       Array.from(g.querySelectorAll('path'))
-        .map((p) => p.getAttribute('d') || '')
-        .filter(Boolean),
+        .map((p): ArtPath => ({
+          d: p.getAttribute('d') || '',
+          fill: p.getAttribute('fill') || 'currentColor',
+          fillRule:
+            p.getAttribute('fill-rule') === 'evenodd' ? 'evenodd' : 'nonzero',
+          opacity: pathOpacity(p.getAttribute('opacity')),
+        }))
+        .filter((path) => path.d),
     );
     if (frames.some((f) => !f.length)) return null;
     return { viewBox, frames };

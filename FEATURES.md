@@ -81,6 +81,7 @@ for the signed-in account, with device caching and automatic account synchroniza
 - Exercise animations (CC BY-SA 4.0) from Workout Guide by Bryl Lim, Everkinetic and GymMane-derived poses, with lazy thumbnails. Existing mappings cover 445 exercises using 384 SVG assets; missing or confirmed incompatible mappings use an equipment icon.
 - Original exercise-specific instructions are available for all 466 built-in exercises, with 16 reviewed guides taking priority. Known mismatched generated instructions remain excluded; independent review metadata and custom authored instructions are preserved.
 - Form guides are accessible from exercise details and live workouts.
+- Layered Everkinetic illustrations preserve source fills, fill rules and opacity, keeping figures distinct from their backgrounds in light and dark mode. Monochrome illustrations retain theme-aware coloring.
 
 ## Progress
 

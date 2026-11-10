@@ -150,8 +150,14 @@ function MotionSvg({ data, playing }: { data: ArtData; playing: boolean }) {
               : 0;
         return (
           <g key={fi} style={{ opacity: alpha }} className="transition-none">
-            {frame.map((d, pi) => (
-              <path key={pi} d={d} fill="currentColor" fillRule="evenodd" />
+            {frame.map((path, pi) => (
+              <path
+                key={pi}
+                d={path.d}
+                fill={path.fill}
+                fillRule={path.fillRule}
+                opacity={path.opacity}
+              />
             ))}
           </g>
         );

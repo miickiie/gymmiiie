@@ -194,7 +194,9 @@ Exercise animations are bundled under **CC BY-SA 4.0**, sourced from
 data. Available original mappings are displayed except confirmed incompatible artwork;
 per-asset provenance is listed in [public/art/ATTRIBUTION.md](public/art/ATTRIBUTION.md).
 Original GymMane instructions are available for every built-in exercise, with 16
-reviewed guides taking priority. Artwork and instruction review remain independent;
+reviewed guides taking priority. Everkinetic illustrations retain their original
+light and dark paint layers; monochrome artwork follows the app theme.
+Artwork and instruction review remain independent;
 restoring existing content does not imply new approval. Known mismatched generated
 instruction candidates remain excluded. Nunito is used under the SIL Open Font License via
 Google Fonts. Nutrition values are approximate and not medical advice.

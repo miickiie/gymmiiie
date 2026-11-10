@@ -10,12 +10,22 @@ All exercise animation artwork in this directory is licensed under
    Frames are Bryl Lim's own work; first poses of Everkinetic-derived artwork are
    recorded upstream in `packages/workout-guide/manifest.json`.
 2. **Everkinetic** — <https://github.com/everkinetic/data>
-   Two-frame (relaxation → tension) poses, plus the canonical step-by-step
-   instructions shown in the app's exercise pages.
+   Two-frame (relaxation → tension) source poses. Historical generated
+   instruction candidates are retained separately for review.
    Database: <https://db.everkinetic.com>
 3. **GymMane by InlitX** — <https://github.com/InlitX/gymmane>
    Everkinetic-derived pose data, used only for exercises neither Workout Guide
    nor Everkinetic cover.
+
+## Original SVG paint layers
+
+The 76 active Everkinetic assets preserve original white background and dark figure
+layers from [everkinetic/data at revision 446bb9a3d0c3beb6b84f7c9d77dfc8af707a2ab6](https://github.com/everkinetic/data/tree/446bb9a3d0c3beb6b84f7c9d77dfc8af707a2ab6/src/exercises).
+The 75 unique source IDs provide 150 phase files at
+`src/exercises/<id>/<id>-relaxation.svg` and `src/exercises/<id>/<id>-tension.svg`.
+Each regenerated SVG records its source revision and paths. Source fills, fill rules,
+path order and opacity are retained; asset IDs, exercise mapping decisions and
+licenses are unchanged. Existing monochrome artwork continues to follow the app theme.
 
 ## Per-slug provenance
 

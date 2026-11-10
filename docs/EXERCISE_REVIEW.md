@@ -30,12 +30,19 @@ Known mismatched generated instructions remain excluded, including Face Pull rec
 
 All 466 exercises now show instructions. Existing artwork mappings cover 445 exercises using 384 SVG assets, including original shared and legacy mappings without granting new approval. Seventeen exercises originally have no artwork. Four confirmed incompatible mappings remain excluded: `NlfIbzq`, `wide-grip-barbell-curl`, `machine-biceps-curl`, and `cable-bent-over-rear-delt-raise`; these use equipment icons. The squat artwork's depth, deadlift range, lunge stepping and plank support variation remain unverified even though their original animations are available again.
 
+## SVG paint preservation
+
+The 76 active Everkinetic assets are regenerated from 150 original phase SVGs (75 unique source IDs), pinned to `everkinetic/data` commit `446bb9a3d0c3beb6b84f7c9d77dfc8af707a2ab6`. Original white background layers, dark figure paths, path order, fill rules and opacity are retained. Flattening all paths to one theme color had made figures indistinguishable from their backgrounds; Band Chest Fly (`0050`) demonstrated the issue. Other monochrome assets still use the app's current text color.
+
+This restores paint semantics, not new exercise mappings or semantic approval. Asset IDs, frame counts, provenance and review statuses remain unchanged; all existing licenses and attribution remain in place.
+
 ## Maintaining the review
 
 - `src/data/exercises.json` and the two `*-candidates.json` files preserve source material for tooling and review. They are excluded from runtime imports.
 - `src/data/exercise-review.json` holds an explicit status for every exercise, independent instruction/art decisions, selected field checks, unresolved flags and source references. Changing a shared asset or source attribution never approves another exercise.
 - `node scripts/audit-exercises.mjs` checks IDs, taxonomy, source/reference shapes, evidence and approved assets; it reports unresolved coverage separately.
 - `node scripts/build-art.mjs` deterministically emits the runtime catalog with original steps and reviewed corrections, an index of available artwork excluding confirmed conflicts, and the separate 16-guide reviewed override index. `--check` verifies checked-in artifacts without rewriting them. The application build runs this check.
+- Paint maintenance uses `python3 scripts/restore-art-paints.py --sources /path/to/source-cache`, with `--check` for verification. It reads a separately fetched cache and its `source-fetch-receipt.json`, checks the pinned revision and each Git blob SHA, validates both frames before writing any asset, and preserves source layers. It never accesses the network. Normal application builds need neither Python nor the source cache. Catalog extraction and `build-art.mjs` do not regenerate or flatten SVG paths.
 - Extraction requires review entries for the resulting catalog before replacing source data. The generator does not invent new fuzzy mappings or approve existing ones, and does not need the absent upstream `.reference` checkout.
 
 New session exercise snapshots save optional mode/load meaning. Legacy logs infer their mode from their own recorded metrics and keep unknown load classification unknown. Records use longest hold duration and longest cardio distance (or duration when no distance exists); no pace/racing comparison is inferred. Assistance is not counted as lifted tonnage, and bodyweight added load is not presented as a full-body estimated 1RM.

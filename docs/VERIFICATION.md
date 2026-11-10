@@ -22,6 +22,12 @@ Every one of the 466 exercise IDs has an audit record and structural checks. Ind
 
 The complete catalog remains selectable. Original exercise-specific instructions are restored for all 466 exercises, with 16 reviewed guides taking priority. Existing artwork is restored for 445 exercises using 384 assets; 17 missing mappings and four confirmed incompatible mappings use equipment icons. Known mismatched generated instruction candidates remain excluded. Independent approval counts are unchanged. Raw candidate files remain tooling inputs rather than runtime imports. All 388 retained SVG files keep their original attribution and licenses. See [EXERCISE_REVIEW.md](EXERCISE_REVIEW.md) for sources and field-level status.
 
+## Exercise illustration contrast
+
+The original Band Chest Fly SVG contains separate white background and dark figure paths. The old single-color renderer collapsed those layers into an almost uniformly white image in dark mode. The shared renderer now retains original per-path fill, fill rule and opacity, and the 76 active Everkinetic assets are regenerated from a pinned, blob-verified upstream source cache. Other monochrome assets still use `currentColor`.
+
+Focused browser regression checks cover actual rendered foreground/background contrast in light and dark mode on desktop and mobile. Artwork bytes contribute to the service-worker build version; updated artwork is fetched with reload semantics, while existing workouts retain the active build until normal update activation.
+
 ## Performance
 
 The original clean HEAD was built in an isolated temporary checkout using the same installed Vite version, with environment-file loading disabled. The measurements below describe the account build before exercise-content restoration.
