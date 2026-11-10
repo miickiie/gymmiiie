@@ -1,0 +1,23 @@
+{
+  "name": "Gymmiie — Lift. Log it. Grow.",
+  "short_name": "Gymmiie",
+  "description": "An offline-first gym log for the web. Tap muscles, log sets, watch the numbers go up.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0a09",
+  "theme_color": "#0b0a09",
+  "categories": ["health", "fitness", "lifestyle"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Start workout", "short_name": "Train", "url": "/train", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Progress", "short_name": "Progress", "url": "/progress", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Nutrition", "short_name": "Food", "url": "/nutrition", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
