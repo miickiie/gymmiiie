@@ -17,6 +17,24 @@ const frameState = (motion: Locator) =>
       frames.map((frame) => (frame as SVGElement).style.opacity).join(','),
     );
 
+async function expectThumbnailKeepsLabel(row: Locator, name: string) {
+  const artwork = motionIn(row);
+  await expect(artwork).toBeVisible();
+  const bounds = await artwork.boundingBox();
+  expect(bounds?.width).toBeGreaterThan(0);
+  expect(bounds?.width).toBeLessThanOrEqual(44);
+  expect(bounds?.height).toBeGreaterThan(0);
+  expect(bounds?.height).toBeLessThanOrEqual(44);
+  const label = row.getByText(name, { exact: true });
+  await expect(label).toBeVisible();
+  const labelSize = await label.evaluate((element) => ({
+    available: element.clientWidth,
+    required: element.scrollWidth,
+  }));
+  expect(labelSize.available).toBeGreaterThan(0);
+  expect(labelSize.available).toBeGreaterThanOrEqual(labelSize.required);
+}
+
 test('library artwork opens an animated detail with the original Face Pull guide', async ({
   page,
 }) => {
@@ -30,6 +48,7 @@ test('library artwork opens an animated detail with the original Face Pull guide
     .filter({ has: page.getByText('Face Pull', { exact: true }) });
   await row.scrollIntoViewIfNeeded();
   await expect(motionIn(row)).toBeVisible();
+  await expectThumbnailKeepsLabel(row, 'Face Pull');
   await row.click();
   await expect(page).toHaveURL(/\/library\/face-pull$/);
   const content = page.getByRole('region', { name: 'Page content' });
@@ -52,6 +71,34 @@ test('library artwork opens an animated detail with the original Face Pull guide
   await expect(
     content.getByText('Reviewed form guide', { exact: true }),
   ).toHaveCount(0);
+});
+
+test('exercise picker names remain visible and clickable after their thumbnails load', async ({
+  page,
+}) => {
+  await page.goto('/train');
+  await page
+    .getByRole('button', { name: 'Empty workout', exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/session$/);
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  const picker = page.getByRole('dialog', {
+    name: 'Add exercise',
+    exact: true,
+  });
+  await picker
+    .getByRole('textbox', { name: 'Search exercises', exact: true })
+    .fill('Push-up');
+  const row = picker.getByRole('button').filter({
+    has: page.getByText('Push-up', { exact: true }),
+  });
+  await row.scrollIntoViewIfNeeded();
+  await expectThumbnailKeepsLabel(row, 'Push-up');
+  await row.getByText('Push-up', { exact: true }).click();
+  await expect(picker).toHaveCount(0);
+  await expect(
+    page.getByLabel('Set 1 repetitions', { exact: true }),
+  ).toBeVisible();
 });
 
 test('the workout form guide retains Push-up artwork and instructions with reduced motion', async ({

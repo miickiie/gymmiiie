@@ -213,25 +213,24 @@ export function ArtThumb({
     return () => io.disconnect();
   }, [visible, hasArt]);
 
-  if (!visible || !hasArt) {
-    return (
-      <div
-        ref={ref}
-        className={className}
-        style={{ width: size, height: size }}
-      >
-        {fallback}
-      </div>
-    );
-  }
   return (
-    <ExerciseArt
-      slug={slug!}
-      live={false}
-      height={size}
-      radius={12}
-      className={clsx('w-full text-dim', className)}
-      fallback={fallback}
-    />
+    <div
+      ref={ref}
+      className={className}
+      style={{ width: size, height: size, flexShrink: 0 }}
+    >
+      {!visible || !hasArt ? (
+        fallback
+      ) : (
+        <ExerciseArt
+          slug={slug!}
+          live={false}
+          height={size}
+          radius={12}
+          className="w-full text-dim"
+          fallback={fallback}
+        />
+      )}
+    </div>
   );
 }
