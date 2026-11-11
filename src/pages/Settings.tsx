@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../lib/store';
 import { manualSyncStorageKey } from '../lib/accounts';
+import { setLanguage, useI18n, type Language } from '../lib/i18n';
 import {
   DARK_THEMES,
   LIGHT_THEMES,
@@ -72,6 +73,153 @@ const WEEKDAYS = [
   'Saturday',
 ] as const;
 
+const SEX_LABEL = {
+  male: 'Male',
+  female: 'Female',
+  other: 'Other',
+} as const;
+
+const TH: Record<string, string> = {
+  'Make it yours': 'ปรับให้เป็นของคุณ',
+  'Your account log saves on this device and syncs when connected. Manual encrypted backups are optional.':
+    'ข้อมูลบัญชีบันทึกในเครื่องนี้และซิงก์เมื่อออนไลน์ สำรองแบบเข้ารหัสเป็นตัวเลือกเสริม',
+  'Used for calorie and strength estimates':
+    'ใช้สำหรับประมาณแคลอรีและความแข็งแรง',
+  'Training display name': 'ชื่อที่แสดง',
+  'Display name': 'ชื่อที่แสดง',
+  'Member since {year} · {n} workouts':
+    'สมาชิกตั้งแต่ {year} · {n} การฝึก',
+  Sex: 'เพศ',
+  Male: 'ชาย',
+  Female: 'หญิง',
+  Age: 'อายุ',
+  yrs: 'ปี',
+  Height: 'ส่วนสูง',
+  Activity: 'ระดับกิจกรรม',
+  Sedentary: 'นั่งทำงาน',
+  'Light (1–2 sessions)': 'เบา (1–2 ครั้ง/สัปดาห์)',
+  'Moderate (3–4)': 'ปานกลาง (3–4)',
+  'Active (5–6)': 'สูง (5–6)',
+  'Very active': 'สูงมาก',
+  Measurements: 'ขนาดร่างกาย',
+  'Macro goals': 'เป้าหมายสารอาหาร',
+  'Dark tones': 'โทนมืด',
+  'Light tones': 'โทนสว่าง',
+  Kilograms: 'กิโลกรัม',
+  Pounds: 'ปอนด์',
+  Off: 'ปิด',
+  'Beep test': 'ทดสอบเสียง',
+  'Vibration test': 'ทดสอบการสั่น',
+  'Plate inventory ({unit})': 'แผ่นน้ำหนักที่มี ({unit})',
+  'Enter a positive finite plate weight': 'ใส่น้ำหนักแผ่นให้ถูกต้อง',
+  'Importing…': 'กำลังนำเข้า…',
+  '{n} workouts · {n2} notes · {n3} routines · {n4} custom exercises':
+    '{n} การฝึก · {n2} โน้ต · {n3} ตารางฝึก · {n4} ท่าที่สร้างเอง',
+  'Storage protected': 'ปกป้องพื้นที่เก็บข้อมูลแล้ว',
+  'Browser declined': 'เบราว์เซอร์ไม่อนุญาต',
+  'Not supported': 'ไม่รองรับ',
+  'Backup downloaded': 'ดาวน์โหลดไฟล์สำรองแล้ว',
+  'Workout CSV downloaded': 'ดาวน์โหลด CSV แล้ว',
+  'Could not read that backup': 'อ่านไฟล์สำรองไม่ได้',
+  'Use your browser menu → Add to Home Screen':
+    'ใช้เมนูเบราว์เซอร์ → เพิ่มลงหน้าจอหลัก',
+  '{theme} theme': 'ธีม {theme}',
+  '{n}s rest': 'พัก {n} วิ',
+  '{n}× / week': '{n}× / สัปดาห์',
+  'Replace local log?': 'แทนที่ข้อมูลในเครื่อง?',
+  'Replace local log': 'แทนที่ข้อมูลในเครื่อง',
+  'Backup imported': 'นำเข้าไฟล์สำรองแล้ว',
+  'Import failed': 'นำเข้าไม่สำเร็จ',
+  'Import {name}': 'นำเข้า {name}',
+  'Replaces this account’s tracking data, including an active workout. Export the current log first to keep both copies.':
+    'ข้อมูลการฝึกของบัญชีนี้จะถูกแทนที่ รวมถึงการฝึกที่ยังไม่จบ ส่งออกข้อมูลเดิมก่อนถ้าต้องการเก็บไว้',
+  'All data reset': 'รีเซ็ตข้อมูลทั้งหมดแล้ว',
+  'Reset failed': 'รีเซ็ตไม่สำเร็จ',
+  'Reset everything?': 'รีเซ็ตทุกอย่าง?',
+  'This clears {name}’s workouts, routines, notes, nutrition logs and training settings. The cleared log will sync to this account. Export a backup first to keep a copy. Your account identity remains available.':
+    'ลบการฝึก ตารางฝึก โน้ต ข้อมูลอาหาร และการตั้งค่าของ {name} ข้อมูลที่ลบจะซิงก์ไปยังบัญชีนี้ ส่งออกไฟล์สำรองก่อนถ้าต้องการเก็บไว้ บัญชีของคุณยังใช้งานได้',
+  'Delete everything': 'ลบทั้งหมด',
+  '{n} workouts · {n2} routines · {n3} notes · {n4} meals':
+    '{n} การฝึก · {n2} ตารางฝึก · {n3} โน้ต · {n4} มื้อ',
+  ' · active workout': ' · กำลังฝึก',
+  'Encrypted snapshot': 'ไฟล์สำรองเข้ารหัส',
+  'Optional code-protected backup': 'สำรองด้วยรหัส (ไม่บังคับ)',
+  'Secret sync code': 'รหัสซิงก์ลับ',
+  'Your secret sync code': 'รหัสซิงก์ลับของคุณ',
+  HIDE: 'ซ่อน',
+  SHOW: 'แสดง',
+  'Enter a sync code': 'ใส่รหัสซิงก์',
+  'Sync code saved': 'บันทึกรหัสซิงก์แล้ว',
+  'Browser could not remember the code. Keep a separate copy.':
+    'เบราว์เซอร์จำรหัสไม่ได้ เก็บสำเนาไว้อีกที่',
+  'Codes are case-sensitive. Use the exact same code on another device. There is no reset link.':
+    'รหัสต้องตรงทุกตัวอักษร ใช้รหัสเดิมบนอีกเครื่อง ไม่มีลิงก์รีเซ็ต',
+  'Uploading…': 'กำลังอัปโหลด…',
+  'Downloading…': 'กำลังดาวน์โหลด…',
+  'Generate code': 'สร้างรหัส',
+  'New code generated — keep a copy, then upload':
+    'สร้างรหัสใหม่แล้ว เก็บสำเนาไว้แล้วอัปโหลด',
+  'Cloud copy to delete': 'สำเนาบนคลาวด์ที่จะลบ',
+  Current: 'ปัจจุบัน',
+  Legacy: 'เวอร์ชันเก่า',
+  'Delete cloud copy': 'ลบสำเนาบนคลาวด์',
+  'Privacy by design': 'ออกแบบมาเพื่อความเป็นส่วนตัว',
+  'Your browser encrypts the backup with your code. Only ciphertext is uploaded. Download previews a snapshot before replacing your local log.':
+    'เบราว์เซอร์เข้ารหัสไฟล์ด้วยรหัสของคุณ อัปโหลดเฉพาะข้อมูลที่เข้ารหัสแล้ว กดดาวน์โหลดเพื่อดูตัวอย่างก่อนแทนที่ข้อมูลในเครื่อง',
+  'Older snapshots remain available with the original code. Upload creates a current copy and keeps the legacy copy until it is explicitly deleted.':
+    'ไฟล์เก่ายังใช้รหัสเดิมได้ การอัปโหลดจะสร้างสำเนาปัจจุบันและเก็บเวอร์ชันเก่าไว้จนกว่าจะลบ',
+  '{n} workouts in this snapshot': 'มี {n} การฝึกในไฟล์นี้',
+  'Upload after adding new workouts': 'อัปโหลดหลังเพิ่มการฝึกใหม่',
+  'Delete cloud copy?': 'ลบสำเนาบนคลาวด์?',
+  'Overwrite cloud copy?': 'เขียนทับสำเนาบนคลาวด์?',
+  '{copy} cloud copy · {date}': 'สำเนาบนคลาวด์ ({copy}) · {date}',
+  'This replaces this account’s tracking data, including an active workout. Export the current account log first to keep both copies.':
+    'ข้อมูลการฝึกของบัญชีนี้จะถูกแทนที่ รวมถึงการฝึกที่ยังไม่จบ ส่งออกข้อมูลเดิมก่อนถ้าต้องการเก็บทั้งสองชุด',
+  'Only this selected cloud copy is deleted. Your local log and other cloud copies are kept.':
+    'ลบเฉพาะสำเนาบนคลาวด์ที่เลือก ข้อมูลในเครื่องและสำเนาอื่นยังอยู่',
+  'This replaces the selected manual encrypted snapshot with the current account log shown above. The prior snapshot cannot be recovered afterward.':
+    'เขียนทับไฟล์สำรองที่เลือกด้วยข้อมูลปัจจุบันด้านบน ไฟล์เดิมจะกู้คืนไม่ได้',
+  'Uploaded current copy · {date}': 'อัปโหลดสำเนาปัจจุบันแล้ว · {date}',
+  'Encrypted snapshot uploaded': 'อัปโหลดไฟล์สำรองแล้ว',
+  'Restored {copy} copy · {date}': 'กู้คืนสำเนา{copy}แล้ว · {date}',
+  current: 'ปัจจุบัน',
+  legacy: 'เวอร์ชันเก่า',
+  'Snapshot restored': 'กู้คืนไฟล์สำรองแล้ว',
+  '{copy} cloud copy deleted': 'ลบสำเนาบนคลาวด์ ({copy}) แล้ว',
+  'Cloud snapshot deleted': 'ลบไฟล์สำรองบนคลาวด์แล้ว',
+  'Cloud operation failed': 'ดำเนินการบนคลาวด์ไม่สำเร็จ',
+  'Enter a sync code first': 'ใส่รหัสซิงก์ก่อน',
+  'No snapshot found for that code': 'ไม่พบไฟล์สำรองสำหรับรหัสนี้',
+  'No {copy} cloud copy found': 'ไม่พบสำเนาบนคลาวด์ ({copy})',
+  'Could not read the cloud copy': 'อ่านสำเนาบนคลาวด์ไม่ได้',
+  'Switched to {theme} theme! ✨': 'เปลี่ยนธีมเป็น {theme} แล้ว! ✨',
+  'Units set to {unit}! ⚖️': 'ตั้งหน่วยเป็น{unit}แล้ว! ⚖️',
+  'kilogram': 'กิโลกรัม',
+  'pound': 'ปอนด์',
+  'Week starts on {day}! 📅': 'เริ่มสัปดาห์วัน{day}! 📅',
+  'Effort tracking turned off! 🎯': 'ปิดการวัดความเหนื่อยแล้ว! 🎯',
+  'Effort tracking set to {mode}! 🎯': 'ตั้งการวัดความเหนื่อยเป็น {mode}! 🎯',
+  'Weekly goal set to {n}×! 🎯': 'ตั้งเป้าหมายรายสัปดาห์ {n}×! 🎯',
+  'Auto rest timer on! ⏱️': 'เปิดจับเวลาพักอัตโนมัติ! ⏱️',
+  'Auto rest timer off! ⏱️': 'ปิดจับเวลาพักอัตโนมัติ! ⏱️',
+  'Auto advance on! ⏭️': 'เปิดไปท่าถัดไปอัตโนมัติ! ⏭️',
+  'Auto advance off! ⏭️': 'ปิดไปท่าถัดไปอัตโนมัติ! ⏭️',
+  'Default rest set to {n}s! ⏱️': 'ตั้งเวลาพักเริ่มต้น {n} วินาที! ⏱️',
+  'Sound on! 🔊': 'เปิดเสียง! 🔊',
+  'Sound off! 🔊': 'ปิดเสียง! 🔊',
+  'Vibration on! 📳': 'เปิดการสั่น! 📳',
+  'Vibration off! 📳': 'ปิดการสั่น! 📳',
+  'Bar weight updated! 🏋️': 'อัปเดตน้ำหนักบาร์แล้ว! 🏋️',
+  'Plate inventory updated! 🏋️': 'อัปเดตแผ่นน้ำหนักแล้ว! 🏋️',
+  'Name saved as {name}! 🐾': 'บันทึกชื่อ {name} แล้ว! 🐾',
+  'Name cleared! 🐾': 'ล้างชื่อแล้ว! 🐾',
+  'Bodyweight updated! ⚖️': 'อัปเดตน้ำหนักตัวแล้ว! ⚖️',
+  'Sex set to {sex}. 🐾': 'ตั้งเพศเป็น {sex} 🐾',
+  'Age set to {n}. 🐾': 'ตั้งอายุ {n} ปี 🐾',
+  'Height set to {n} cm. 📏': 'ตั้งส่วนสูง {n} ซม. 📏',
+  'Activity level updated! 🏃': 'อัปเดตระดับกิจกรรมแล้ว! 🏃',
+};
+
 interface SettingsSnapshot {
   settings: AppData['settings'];
   profile: AppData['profile'];
@@ -86,6 +234,7 @@ interface SettingReaction {
 function settingMessages(
   prev: SettingsSnapshot,
   next: SettingsSnapshot,
+  t: (text: string, vars?: Record<string, string | number>) => string,
 ): SettingReaction[] {
   const reactions: SettingReaction[] = [];
   const add = (key: string, message: string) =>
@@ -93,58 +242,87 @@ function settingMessages(
   const was = prev.settings;
   const now = next.settings;
   if (was.theme !== now.theme)
-    add('theme', `Switched to ${themeMeta(now.theme).label} theme! ✨`);
+    add(
+      'theme',
+      t('Switched to {theme} theme! ✨', {
+        theme: themeMeta(now.theme).label,
+      }),
+    );
   if (was.unit !== now.unit)
-    add('unit', `Units set to ${now.unit === 'kg' ? 'kilograms' : 'pounds'}! ⚖️`);
+    add(
+      'unit',
+      t('Units set to {unit}! ⚖️', {
+        unit: now.unit === 'kg' ? t('Kilograms') : t('Pounds'),
+      }),
+    );
   if (was.weekStart !== now.weekStart)
-    add('weekStart', `Week starts on ${WEEKDAYS[now.weekStart]}! 📅`);
+    add('weekStart', t('Week starts on {day}! 📅', { day: t(WEEKDAYS[now.weekStart]) }));
   if (was.effort !== now.effort)
     add(
       'effort',
       now.effort === 'off'
-        ? 'Effort tracking turned off! 🎯'
-        : `Effort tracking set to ${now.effort.toUpperCase()}! 🎯`,
+        ? t('Effort tracking turned off! 🎯')
+        : t('Effort tracking set to {mode}! 🎯', {
+            mode: now.effort.toUpperCase(),
+          }),
     );
   if (was.weeklyGoal !== now.weeklyGoal)
-    add('weeklyGoal', `Weekly goal set to ${now.weeklyGoal}×! 🎯`);
+    add('weeklyGoal', t('Weekly goal set to {n}×! 🎯', { n: now.weeklyGoal }));
   if (was.autoRest !== now.autoRest)
-    add('autoRest', `Auto rest timer ${now.autoRest ? 'on' : 'off'}! ⏱️`);
+    add(
+      'autoRest',
+      now.autoRest
+        ? t('Auto rest timer on! ⏱️')
+        : t('Auto rest timer off! ⏱️'),
+    );
   if (was.autoAdvance !== now.autoAdvance)
-    add('autoAdvance', `Auto advance ${now.autoAdvance ? 'on' : 'off'}! ⏭️`);
+    add(
+      'autoAdvance',
+      now.autoAdvance ? t('Auto advance on! ⏭️') : t('Auto advance off! ⏭️'),
+    );
   if (was.restSec !== now.restSec)
-    add('restSec', `Default rest set to ${now.restSec}s! ⏱️`);
+    add('restSec', t('Default rest set to {n}s! ⏱️', { n: now.restSec }));
   if (was.sound !== now.sound)
-    add('sound', `Sound ${now.sound ? 'on' : 'off'}! 🔊`);
+    add('sound', now.sound ? t('Sound on! 🔊') : t('Sound off! 🔊'));
   if (was.vibrate !== now.vibrate)
-    add('vibrate', `Vibration ${now.vibrate ? 'on' : 'off'}! 📳`);
+    add(
+      'vibrate',
+      now.vibrate ? t('Vibration on! 📳') : t('Vibration off! 📳'),
+    );
   if (was.barWeight !== now.barWeight)
-    add('barWeight', 'Bar weight updated! 🏋️');
+    add('barWeight', t('Bar weight updated! 🏋️'));
   if (
     was.plates.length !== now.plates.length ||
     was.plates.some((plate, i) => plate !== now.plates[i])
   )
-    add('plates', 'Plate inventory updated! 🏋️');
+    add('plates', t('Plate inventory updated! 🏋️'));
 
   const before = prev.profile;
   const after = next.profile;
   if (before.name !== after.name) {
     const name = after.name.trim();
-    add('name', name ? `Name saved as ${name}! 🐾` : 'Name cleared! 🐾');
+    add(
+      'name',
+      name ? t('Name saved as {name}! 🐾', { name }) : t('Name cleared! 🐾'),
+    );
   }
   if (before.weightKg !== after.weightKg)
-    add('weightKg', 'Bodyweight updated! ⚖️');
-  if (before.sex !== after.sex) add('sex', `Sex set to ${after.sex}. 🐾`);
-  if (before.age !== after.age) add('age', `Age set to ${after.age}. 🐾`);
+    add('weightKg', t('Bodyweight updated! ⚖️'));
+  if (before.sex !== after.sex)
+    add('sex', t('Sex set to {sex}. 🐾', { sex: t(SEX_LABEL[after.sex]) }));
+  if (before.age !== after.age)
+    add('age', t('Age set to {n}. 🐾', { n: after.age }));
   if (before.heightCm !== after.heightCm)
-    add('heightCm', `Height set to ${after.heightCm} cm. 📏`);
+    add('heightCm', t('Height set to {n} cm. 📏', { n: after.heightCm }));
   if (before.activity !== after.activity)
-    add('activity', 'Activity level updated! 🏃');
+    add('activity', t('Activity level updated! 🏃'));
   return reactions;
 }
 
 /** Debounced so typing in a number/name field produces one spoken update. */
 function useCatSettingReactions(data: AppData) {
   const { push, clear } = useToast();
+  const { t } = useI18n(TH);
   const previous = useRef<SettingsSnapshot>();
   const pending = useRef(new Map<string, string>());
   useEffect(() => {
@@ -155,7 +333,7 @@ function useCatSettingReactions(data: AppData) {
     const before = previous.current;
     previous.current = snapshot;
     if (before) {
-      for (const reaction of settingMessages(before, snapshot))
+      for (const reaction of settingMessages(before, snapshot, t))
         pending.current.set(reaction.key, reaction.message);
     }
     if (!pending.current.size) return;
@@ -166,12 +344,13 @@ function useCatSettingReactions(data: AppData) {
       push(messages.join(' '), 'good');
     }, 450);
     return () => window.clearTimeout(timeout);
-  }, [data.settings, data.profile, push, clear]);
+  }, [data.settings, data.profile, push, clear, t]);
 }
 
 export default function SettingsPage() {
   const { account } = useAccount();
   const toast = useToast();
+  const { t } = useI18n(TH);
   const data = useStore((s) => s.data);
   useCatSettingReactions(data);
   const setProfile = useStore((s) => s.setProfile);
@@ -215,7 +394,7 @@ export default function SettingsPage() {
       `gymmiie-backup-${new Date().toISOString().slice(0, 10)}.json`,
       JSON.stringify(data, null, 2),
     );
-    toast.push('Backup downloaded', 'good');
+    toast.push(t('Backup downloaded'), 'good');
   };
 
   const exportCsv = () => {
@@ -267,7 +446,7 @@ export default function SettingsPage() {
       `gymmiie-workouts-${new Date().toISOString().slice(0, 10)}.csv`,
       rows.map((r) => r.map(cell).join(',')).join('\n'),
     );
-    toast.push('Workout CSV downloaded', 'good');
+    toast.push(t('Workout CSV downloaded'), 'good');
   };
 
   const importData = async (file: File) => {
@@ -278,7 +457,7 @@ export default function SettingsPage() {
       setPendingImport({ data: parsed, name: file.name });
     } catch (error) {
       toast.push(
-        error instanceof Error ? error.message : 'Could not read that backup',
+        error instanceof Error ? error.message : t('Could not read that backup'),
         'bad',
       );
     } finally {
@@ -292,24 +471,26 @@ export default function SettingsPage() {
       await prompt.prompt();
       setInstallReady(false);
     } else {
-      toast.push('Use your browser menu → Add to Home Screen');
+      toast.push(t('Use your browser menu → Add to Home Screen'));
     }
   };
 
   return (
     <div className="page-enter">
       <PageHeader
-        eyebrow="Settings"
-        title="Make it yours"
-        subtitle="Your account log saves on this device and syncs when connected. Manual encrypted backups are optional."
+        eyebrow={t("Settings")}
+        title={t("Make it yours")}
+        subtitle={t(
+          "Your account log saves on this device and syncs when connected. Manual encrypted backups are optional.",
+        )}
       />
 
       <AccountSettingsCard />
       <div className="grid gap-4 lg:grid-cols-2">
         <div>
           <SectionHeader
-            title="Profile"
-            subtitle="Used for calorie and strength estimates"
+            title={t("Profile")}
+            subtitle={t("Used for calorie and strength estimates")}
           />
           <Card className="p-4">
             <div className="flex items-center gap-3">
@@ -326,21 +507,22 @@ export default function SettingsPage() {
                 <input
                   className="input !border-0 !bg-transparent !p-0 text-lg font-black"
                   value={profile.name}
-                  aria-label="Training display name"
-                  placeholder="Display name"
+                  aria-label={t("Training display name")}
+                  placeholder={t("Display name")}
                   onChange={(e) => setProfile({ name: e.target.value })}
                 />
                 <p className="text-[10px] font-bold text-mute">
-                  Member since{' '}
-                  {profile.since
-                    ? new Date(profile.since).getFullYear()
-                    : new Date().getFullYear()}{' '}
-                  · {data.sessions.length} workouts
+                  {t("Member since {year} · {n} workouts", {
+                    year: profile.since
+                      ? new Date(profile.since).getFullYear()
+                      : new Date().getFullYear(),
+                    n: data.sessions.length,
+                  })}
                 </p>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <Field label="Sex">
+              <Field label={t("Sex")}>
                 <select
                   className="input"
                   value={profile.sex}
@@ -348,21 +530,21 @@ export default function SettingsPage() {
                     setProfile({ sex: e.target.value as typeof profile.sex })
                   }
                 >
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
+                  <option value="male">{t("Male")}</option>
+                  <option value="female">{t("Female")}</option>
+                  <option value="other">{t("Other")}</option>
                 </select>
               </Field>
-              <Field label="Age">
+              <Field label={t("Age")}>
                 <NumField
                   value={profile.age}
                   onChange={(v) => setProfile({ age: v })}
-                  unit="yrs"
+                  unit={t("yrs")}
                   min={13}
                   max={100}
                 />
               </Field>
-              <Field label="Height">
+              <Field label={t("Height")}>
                 <NumField
                   value={profile.heightCm}
                   onChange={(v) => setProfile({ heightCm: v })}
@@ -371,7 +553,7 @@ export default function SettingsPage() {
                   max={250}
                 />
               </Field>
-              <Field label="Weight">
+              <Field label={t("Weight")}>
                 <NumField
                   value={weightDisplay}
                   onChange={(v) =>
@@ -382,7 +564,7 @@ export default function SettingsPage() {
                 />
               </Field>
             </div>
-            <Field label="Activity">
+            <Field label={t("Activity")}>
               <select
                 className="input"
                 value={profile.activity}
@@ -390,11 +572,11 @@ export default function SettingsPage() {
                   setProfile({ activity: Number(e.target.value) })
                 }
               >
-                <option value={1.2}>Sedentary</option>
-                <option value={1.375}>Light (1–2 sessions)</option>
-                <option value={1.55}>Moderate (3–4)</option>
-                <option value={1.725}>Active (5–6)</option>
-                <option value={1.9}>Very active</option>
+                <option value={1.2}>{t("Sedentary")}</option>
+                <option value={1.375}>{t("Light (1–2 sessions)")}</option>
+                <option value={1.55}>{t("Moderate (3–4)")}</option>
+                <option value={1.725}>{t("Active (5–6)")}</option>
+                <option value={1.9}>{t("Very active")}</option>
               </select>
             </Field>
             <div className="mt-3 grid grid-cols-2 gap-2">
@@ -402,60 +584,75 @@ export default function SettingsPage() {
                 to="/progress"
                 className="flex items-center gap-2 rounded-xl bg-[var(--surface-2)] px-3 py-2 text-xs font-extrabold"
               >
-                <Ruler size={14} className="text-mute" /> Measurements{' '}
+                <Ruler size={14} className="text-mute" /> {t("Measurements")}{' '}
                 <ChevronRight size={12} className="ml-auto text-mute" />
               </Link>
               <Link
                 to="/nutrition"
                 className="flex items-center gap-2 rounded-xl bg-[var(--surface-2)] px-3 py-2 text-xs font-extrabold"
               >
-                <Target size={14} className="text-mute" /> Macro goals{' '}
+                <Target size={14} className="text-mute" /> {t("Macro goals")}{' '}
                 <ChevronRight size={12} className="ml-auto text-mute" />
               </Link>
             </div>
           </Card>
 
-          <SectionHeader title="Appearance" />
+          <SectionHeader title={t("Appearance")} />
           <Card className="space-y-4 p-4">
             <div>
-              <p className="label mb-2">Theme</p>
+              <p className="label mb-1.5">{t("Language")}</p>
+              <Segmented
+                value={data.settings.language ?? "en"}
+                onChange={(v) => {
+                  const next = v as Language;
+                  setSettings({ language: next });
+                  setLanguage(next);
+                }}
+                options={[
+                  { value: "en", label: t("English") },
+                  { value: "th", label: t("Thai") },
+                ]}
+              />
+            </div>
+            <div>
+              <p className="label mb-2">{t("Theme")}</p>
               <ThemePicker
                 value={data.settings.theme}
                 onChange={(v) => setSettings({ theme: v })}
               />
             </div>
             <div>
-              <p className="label mb-1.5">Units</p>
+              <p className="label mb-1.5">{t("Units")}</p>
               <Segmented
                 value={unit}
                 onChange={(v) => setSettings({ unit: v })}
                 options={[
-                  { value: 'kg', label: 'Kilograms' },
-                  { value: 'lb', label: 'Pounds' },
+                  { value: 'kg', label: t('Kilograms') },
+                  { value: 'lb', label: t('Pounds') },
                 ]}
               />
             </div>
             <div>
-              <p className="label mb-1.5">Week starts on</p>
+              <p className="label mb-1.5">{t("Week starts on")}</p>
               <Segmented
                 value={String(data.settings.weekStart)}
                 onChange={(v) =>
                   setSettings({ weekStart: Number(v) as 0 | 1 | 6 })
                 }
                 options={[
-                  { value: '1', label: 'Monday' },
-                  { value: '0', label: 'Sunday' },
-                  { value: '6', label: 'Saturday' },
+                  { value: '1', label: t('Monday') },
+                  { value: '0', label: t('Sunday') },
+                  { value: '6', label: t('Saturday') },
                 ]}
               />
             </div>
             <div>
-              <p className="label mb-1.5">Effort tracking</p>
+              <p className="label mb-1.5">{t("Effort tracking")}</p>
               <Segmented
                 value={data.settings.effort}
                 onChange={(v) => setSettings({ effort: v })}
                 options={[
-                  { value: 'off', label: 'Off' },
+                  { value: 'off', label: t('Off') },
                   { value: 'rpe', label: 'RPE' },
                   { value: 'rir', label: 'RIR' },
                 ]}
@@ -465,13 +662,13 @@ export default function SettingsPage() {
         </div>
 
         <div>
-          <SectionHeader title="Training" />
+          <SectionHeader title={t("Training")} />
           <Card className="space-y-4 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-extrabold">Weekly goal</p>
+                <p className="text-sm font-extrabold">{t("Weekly goal")}</p>
                 <p className="text-[10px] font-semibold text-mute">
-                  Workouts per week
+                  {t("Workouts per week")}
                 </p>
               </div>
               <Stepper
@@ -486,20 +683,20 @@ export default function SettingsPage() {
             <Toggle
               on={data.settings.autoRest}
               onChange={(v) => setSettings({ autoRest: v })}
-              label="Auto rest timer"
-              hint="Start countdown when a set is completed"
+              label={t("Auto rest timer")}
+              hint={t("Start countdown when a set is completed")}
             />
             <Toggle
               on={data.settings.autoAdvance}
               onChange={(v) => setSettings({ autoAdvance: v })}
-              label="Auto advance"
-              hint="Move to the next exercise after the last set"
+              label={t("Auto advance")}
+              hint={t("Move to the next exercise after the last set")}
             />
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-sm font-extrabold">Default rest</p>
+                <p className="text-sm font-extrabold">{t("Default rest")}</p>
                 <p className="text-[10px] font-semibold text-mute">
-                  Seconds after a working set
+                  {t("Seconds after a working set")}
                 </p>
               </div>
               <Stepper
@@ -513,47 +710,47 @@ export default function SettingsPage() {
             </div>
           </Card>
 
-          <SectionHeader title="Feedback" />
+          <SectionHeader title={t("Feedback")} />
           <Card className="space-y-3 p-4">
             <Toggle
               on={data.settings.sound}
               onChange={(v) => setSettings({ sound: v })}
-              label="Sound"
-              hint="Rest timer beeps"
+              label={t("Sound")}
+              hint={t("Rest timer beeps")}
             />
             <Toggle
               on={data.settings.vibrate}
               onChange={(v) => setSettings({ vibrate: v })}
-              label="Vibration"
-              hint="Where supported by your device"
+              label={t("Vibration")}
+              hint={t("Where supported by your device")}
             />
             <div className="flex gap-2 pt-1">
               <Btn
                 size="sm"
                 onClick={() => {
                   beep(2);
-                  toast.push('Beep test');
+                  toast.push(t('Beep test'));
                 }}
                 icon={<Volume2 size={14} />}
               >
-                Test beep
+                {t("Test beep")}
               </Btn>
               <Btn
                 size="sm"
                 onClick={() => {
                   vibrate();
-                  toast.push('Vibration test');
+                  toast.push(t('Vibration test'));
                 }}
                 icon={<Vibrate size={14} />}
               >
-                Test buzz
+                {t("Test buzz")}
               </Btn>
             </div>
           </Card>
 
-          <SectionHeader title="Barbell & plates" />
+          <SectionHeader title={t("Barbell & plates")} />
           <Card className="p-4">
-            <Field label="Bar weight">
+            <Field label={t("Bar weight")}>
               <NumField
                 value={
                   Math.round(
@@ -567,7 +764,7 @@ export default function SettingsPage() {
                 step={0.5}
               />
             </Field>
-            <p className="label mb-1.5 mt-3">Plate inventory ({unit})</p>
+            <p className="label mb-1.5 mt-3">{t("Plate inventory ({unit})", { unit })}</p>
             <div className="flex flex-wrap gap-1.5">
               {data.settings.plates.map((p) => (
                 <button
@@ -578,7 +775,7 @@ export default function SettingsPage() {
                     })
                   }
                   className="chip"
-                  title="Remove plate"
+                  title={t("Remove plate")}
                 >
                   {p} <Trash2 size={10} />
                 </button>
@@ -587,7 +784,7 @@ export default function SettingsPage() {
             <div className="mt-2 flex gap-2">
               <NumericInput
                 className="input !py-1.5 text-sm"
-                placeholder="Add plate"
+                placeholder={t("Add plate")}
                 value={newPlate}
                 onValueChange={setNewPlate}
               />
@@ -596,7 +793,7 @@ export default function SettingsPage() {
                 onClick={() => {
                   const v = Number(newPlate);
                   if (!Number.isFinite(v) || v <= 0) {
-                    toast.push('Enter a positive finite plate weight', 'bad');
+                    toast.push(t('Enter a positive finite plate weight'), 'bad');
                     return;
                   }
                   if (!data.settings.plates.includes(v)) {
@@ -609,39 +806,39 @@ export default function SettingsPage() {
                   }
                 }}
               >
-                Add
+                {t("Add")}
               </Btn>
             </div>
             <p className="mt-2 text-[10px] font-semibold text-mute">
-              Used by the plate calculator. Values are per side.
+              {t("Used by the plate calculator. Values are per side.")}
             </p>
           </Card>
         </div>
       </div>
 
       <SectionHeader
-        title="Manual encrypted backup"
-        subtitle="Optional code-protected backup, separate from account sync"
+        title={t("Manual encrypted backup")}
+        subtitle={t("Optional code-protected backup, separate from account sync")}
       />
       <CloudSyncCard />
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <div>
-          <SectionHeader title="Data" />
+          <SectionHeader title={t("Data")} />
           <Card className="space-y-3 p-4">
             <div className="flex flex-wrap gap-2">
               <Btn onClick={exportData} icon={<Download size={15} />}>
-                Export backup
+                {t("Export backup")}
               </Btn>
               <Btn onClick={exportCsv} icon={<Download size={15} />}>
-                Export CSV
+                {t("Export CSV")}
               </Btn>
               <Btn
                 disabled={importing || isCommitting}
                 onClick={() => fileRef.current?.click()}
                 icon={<Upload size={15} />}
               >
-                {importing ? 'Importing…' : 'Import backup'}
+                {importing ? t('Importing…') : t('Import backup')}
               </Btn>
               <input
                 ref={fileRef}
@@ -655,17 +852,23 @@ export default function SettingsPage() {
               />
             </div>
             <div className="rounded-xl bg-[var(--surface-2)] px-3 py-2 text-[11px] font-semibold text-mute">
-              {data.sessions.length} workouts · {data.notes.length} notes ·{' '}
-              {data.routines.length} routines · {data.customExercises.length}{' '}
-              custom exercises
+              {t(
+                "{n} workouts · {n2} notes · {n3} routines · {n4} custom exercises",
+                {
+                  n: data.sessions.length,
+                  n2: data.notes.length,
+                  n3: data.routines.length,
+                  n4: data.customExercises.length,
+                },
+              )}
             </div>
             <div className="flex items-center justify-between rounded-xl border border-[var(--bad)]/25 bg-[var(--bad-soft)] px-3 py-2">
               <div>
                 <p className="text-xs font-black text-[var(--bad)]">
-                  Reset all data
+                  {t("Reset all data")}
                 </p>
                 <p className="text-[10px] font-semibold text-[var(--bad)]/80">
-                  Clears this account’s tracking data
+                  {t("Clears this account’s tracking data")}
                 </p>
               </div>
               <Btn
@@ -674,14 +877,14 @@ export default function SettingsPage() {
                 onClick={() => setResetOpen(true)}
                 icon={<Trash2 size={13} />}
               >
-                Reset
+                {t("Reset")}
               </Btn>
             </div>
             <div className="flex items-center justify-between rounded-xl bg-[var(--surface-2)] px-3 py-2">
               <div>
-                <p className="text-xs font-black">Persistent storage</p>
+                <p className="text-xs font-black">{t("Persistent storage")}</p>
                 <p className="text-[10px] font-semibold text-mute">
-                  Ask the browser to keep your log
+                  {t("Ask the browser to keep your log")}
                 </p>
               </div>
               <Btn
@@ -690,20 +893,20 @@ export default function SettingsPage() {
                   if (navigator.storage?.persist) {
                     const ok = await navigator.storage.persist();
                     toast.push(
-                      ok ? 'Storage protected' : 'Browser declined',
+                      ok ? t('Storage protected') : t('Browser declined'),
                       ok ? 'good' : 'bad',
                     );
-                  } else toast.push('Not supported');
+                  } else toast.push(t('Not supported'));
                 }}
               >
-                Request
+                {t("Request")}
               </Btn>
             </div>
           </Card>
         </div>
 
         <div>
-          <SectionHeader title="App" />
+          <SectionHeader title={t("App")} />
           <Card className="space-y-2 p-4">
             {installReady && (
               <button
@@ -713,10 +916,10 @@ export default function SettingsPage() {
                 <Smartphone size={17} className="text-[var(--accent)]" />
                 <span className="flex-1">
                   <span className="block text-sm font-extrabold">
-                    Install Gymmiie
+                    {t("Install Gymmiie")}
                   </span>
                   <span className="block text-[10px] font-semibold text-mute">
-                    Add to home screen, works offline
+                    {t("Add to home screen, works offline")}
                   </span>
                 </span>
                 <ChevronRight size={15} className="text-mute" />
@@ -728,7 +931,7 @@ export default function SettingsPage() {
             >
               <Info size={17} className="text-mute" />
               <span className="flex-1 text-sm font-extrabold">
-                About & credits
+                {t("About & credits")}
               </span>
               <ChevronRight size={15} className="text-mute" />
             </Link>
@@ -737,11 +940,11 @@ export default function SettingsPage() {
               className="flex items-center gap-3 rounded-xl bg-[var(--surface-2)] px-3 py-2.5"
             >
               <Sparkles size={17} className="text-mute" />
-              <span className="flex-1 text-sm font-extrabold">Calculators</span>
+              <span className="flex-1 text-sm font-extrabold">{t("Calculators")}</span>
               <ChevronRight size={15} className="text-mute" />
             </Link>
             <div className="flex items-center gap-2 px-1 pt-1 text-[10px] font-bold text-mute">
-              <Shield size={12} /> Offline logging · account sync when connected
+              <Shield size={12} /> {t("Offline logging · account sync when connected")}
             </div>
           </Card>
         </div>
@@ -749,16 +952,16 @@ export default function SettingsPage() {
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-[10px] font-bold text-mute">
         <span className="flex items-center gap-1">
-          <Palette size={12} /> {themeMeta(data.settings.theme).label} theme
+          <Palette size={12} /> {t("{theme} theme", { theme: themeMeta(data.settings.theme).label })}
         </span>
         <span className="flex items-center gap-1">
           <Weight size={12} /> {unit}
         </span>
         <span className="flex items-center gap-1">
-          <Timer size={12} /> {data.settings.restSec}s rest
+          <Timer size={12} /> {t("{n}s rest", { n: data.settings.restSec })}
         </span>
         <span className="flex items-center gap-1">
-          <Activity size={12} /> {data.settings.weeklyGoal}× / week
+          <Activity size={12} /> {t("{n}× / week", { n: data.settings.weeklyGoal })}
         </span>
       </div>
 
@@ -767,7 +970,7 @@ export default function SettingsPage() {
         onClose={() => {
           if (!isCommitting) setPendingImport(null);
         }}
-        title="Replace local log?"
+        title={t("Replace local log?")}
         footer={
           <div className="flex gap-2">
             <Btn
@@ -775,7 +978,7 @@ export default function SettingsPage() {
               disabled={isCommitting}
               onClick={() => setPendingImport(null)}
             >
-              Cancel
+              {t("Cancel")}
             </Btn>
             <Btn
               className="flex-1"
@@ -786,16 +989,16 @@ export default function SettingsPage() {
                 try {
                   await replaceData(pendingImport.data);
                   setPendingImport(null);
-                  toast.push('Backup imported', 'good');
+                  toast.push(t('Backup imported'), 'good');
                 } catch (error) {
                   toast.push(
-                    error instanceof Error ? error.message : 'Import failed',
+                    error instanceof Error ? error.message : t('Import failed'),
                     'bad',
                   );
                 }
               }}
             >
-              {isCommitting ? 'Saving…' : 'Replace local log'}
+              {isCommitting ? t('Saving…') : t('Replace local log')}
             </Btn>
           </div>
         }
@@ -803,12 +1006,11 @@ export default function SettingsPage() {
         {pendingImport && (
           <>
             <p className="mb-3 text-sm font-semibold">
-              Import {pendingImport.name}
+              {t("Import {name}", { name: pendingImport.name })}
             </p>
             <BackupSummary data={pendingImport.data} />
             <p className="mt-3 text-sm text-mute">
-              Replaces this account’s tracking data, including an active
-              workout. Export the current log first to keep both copies.
+              {t("Replaces this account’s tracking data, including an active workout. Export the current log first to keep both copies.")}
             </p>
           </>
         )}
@@ -828,29 +1030,37 @@ export default function SettingsPage() {
             } catch {
               /* Optional local preferences may be blocked. */
             }
-            toast.push('All data reset', 'good');
+            toast.push(t('All data reset'), 'good');
           } catch (error) {
             toast.push(
-              error instanceof Error ? error.message : 'Reset failed',
+              error instanceof Error ? error.message : t('Reset failed'),
               'bad',
             );
             throw error;
           }
         }}
-        title="Reset everything?"
-        body={`This clears ${account.name}’s workouts, routines, notes, nutrition logs and training settings. The cleared log will sync to this account. Export a backup first to keep a copy. Your account identity remains available.`}
-        confirmLabel="Delete everything"
+        title={t("Reset everything?")}
+        body={t(
+          "This clears {name}’s workouts, routines, notes, nutrition logs and training settings. The cleared log will sync to this account. Export a backup first to keep a copy. Your account identity remains available.",
+          { name: account.name },
+        )}
+        confirmLabel={t("Delete everything")}
       />
     </div>
   );
 }
 
 function BackupSummary({ data }: { data: AppData }) {
+  const { t } = useI18n(TH);
   return (
     <div className="rounded-xl bg-[var(--surface-2)] p-3 text-sm font-semibold">
-      {data.sessions.length} workouts · {data.routines.length} routines ·{' '}
-      {data.notes.length} notes · {data.nutrition.entries.length} meals
-      {data.active ? ' · active workout' : ''}
+      {t("{n} workouts · {n2} routines · {n3} notes · {n4} meals", {
+        n: data.sessions.length,
+        n2: data.routines.length,
+        n3: data.notes.length,
+        n4: data.nutrition.entries.length,
+      })}
+      {data.active ? t(" · active workout") : ""}
     </div>
   );
 }
@@ -862,6 +1072,7 @@ function ThemePicker({
   value: ThemePref;
   onChange: (value: ThemePref) => void;
 }) {
+  const { t } = useI18n(TH);
   const groups: { label: string; options: readonly ThemeOption[] }[] = [
     { label: 'Dark tones', options: DARK_THEMES },
     { label: 'Light tones', options: LIGHT_THEMES },
@@ -871,7 +1082,7 @@ function ThemePicker({
       {groups.map((group) => (
         <div key={group.label}>
           <p className="mb-1.5 text-[10px] font-extrabold uppercase tracking-[0.08em] text-mute">
-            {group.label}
+            {t(group.label)}
           </p>
           <div className="grid grid-cols-3 gap-2">
             {group.options.map((theme) => {
@@ -946,6 +1157,7 @@ type CloudAction =
 
 function CloudSyncCard() {
   const { account } = useAccount();
+  const { t } = useI18n(TH);
   const toast = useToast();
   const data = useStore((s) => s.data);
   const replaceData = useStore((s) => s.replaceData);
@@ -973,29 +1185,36 @@ function CloudSyncCard() {
       if (action.kind === 'upload') {
         const info = await uploadSync(action.code, action.data);
         savedStatus(
-          `Uploaded current copy · ${new Date(info.updatedAt).toLocaleString()}`,
+          t('Uploaded current copy · {date}', {
+            date: new Date(info.updatedAt).toLocaleString(),
+          }),
           action.code,
         );
-        toast.push('Encrypted snapshot uploaded', 'good');
+        toast.push(t('Encrypted snapshot uploaded'), 'good');
       } else if (action.kind === 'restore') {
         await replaceData(action.data);
         savedStatus(
-          `Restored ${action.info.namespace === 'legacy' ? 'legacy' : 'current'} copy · ${new Date(action.info.updatedAt).toLocaleString()}`,
+          t('Restored {copy} copy · {date}', {
+            copy: t(action.info.namespace === 'legacy' ? 'legacy' : 'current'),
+            date: new Date(action.info.updatedAt).toLocaleString(),
+          }),
           action.code,
         );
-        toast.push('Snapshot restored', 'good');
+        toast.push(t('Snapshot restored'), 'good');
       } else {
         await deleteSync(action.code, action.info.namespace);
         savedStatus(
-          `${action.info.namespace === 'legacy' ? 'Legacy' : 'Current'} cloud copy deleted`,
+          t('{copy} cloud copy deleted', {
+            copy: t(action.info.namespace === 'legacy' ? 'Legacy' : 'Current'),
+          }),
           action.code,
         );
-        toast.push('Cloud snapshot deleted', 'good');
+        toast.push(t('Cloud snapshot deleted'), 'good');
       }
       setPending(null);
     } catch (error) {
       toast.push(
-        error instanceof Error ? error.message : 'Cloud operation failed',
+        error instanceof Error ? error.message : t('Cloud operation failed'),
         'bad',
       );
     } finally {
@@ -1006,7 +1225,7 @@ function CloudSyncCard() {
   const prepare = async (kind: 'upload' | 'download' | 'delete') => {
     const exactCode = code.trim();
     if (!exactCode) {
-      toast.push('Enter a sync code first', 'bad');
+      toast.push(t('Enter a sync code first'), 'bad');
       return;
     }
     setBusy(kind);
@@ -1014,7 +1233,7 @@ function CloudSyncCard() {
       if (kind === 'download') {
         const result = await downloadSync(exactCode);
         if (!result) {
-          toast.push('No snapshot found for that code', 'bad');
+          toast.push(t('No snapshot found for that code'), 'bad');
           return;
         }
         setPending({
@@ -1031,7 +1250,9 @@ function CloudSyncCard() {
         if (kind === 'delete') {
           if (!info) {
             toast.push(
-              `No ${deleteTarget === 'legacy' ? 'legacy' : 'current'} cloud copy found`,
+              t('No {copy} cloud copy found', {
+                copy: t(deleteTarget === 'legacy' ? 'legacy' : 'current'),
+              }),
               'bad',
             );
             return;
@@ -1042,17 +1263,19 @@ function CloudSyncCard() {
         else {
           const uploaded = await uploadSync(exactCode, data);
           savedStatus(
-            `Uploaded current copy · ${new Date(uploaded.updatedAt).toLocaleString()}`,
+            t('Uploaded current copy · {date}', {
+              date: new Date(uploaded.updatedAt).toLocaleString(),
+            }),
             exactCode,
           );
-          toast.push('Encrypted snapshot uploaded', 'good');
+          toast.push(t('Encrypted snapshot uploaded'), 'good');
         }
       }
     } catch (error) {
       toast.push(
         error instanceof Error
           ? error.message
-          : 'Could not read the cloud copy',
+          : t('Could not read the cloud copy'),
         'bad',
       );
     } finally {
@@ -1070,20 +1293,20 @@ function CloudSyncCard() {
                 <Cloud size={18} />
               </div>
               <div>
-                <p className="text-sm font-black">Encrypted snapshot</p>
+                <p className="text-sm font-black">{t('Encrypted snapshot')}</p>
                 <p className="text-[10px] font-semibold text-mute">
-                  Optional code-protected backup
+                  {t('Optional code-protected backup')}
                 </p>
               </div>
             </div>
             <div className="mt-3 flex gap-2">
               <div className="relative flex-1">
                 <input
-                  aria-label="Secret sync code"
+                  aria-label={t('Secret sync code')}
                   disabled={blocked}
                   className="input pr-16 font-mono"
                   type={show ? 'text' : 'password'}
-                  placeholder="Your secret sync code"
+                  placeholder={t('Your secret sync code')}
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                 />
@@ -1092,7 +1315,7 @@ function CloudSyncCard() {
                   onClick={() => setShow(!show)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-black text-mute"
                 >
-                  {show ? 'HIDE' : 'SHOW'}
+                  {show ? t('HIDE') : t('SHOW')}
                 </button>
               </div>
               <Btn
@@ -1101,7 +1324,7 @@ function CloudSyncCard() {
                 disabled={blocked}
                 onClick={() => {
                   if (!code.trim()) {
-                    toast.push('Enter a sync code', 'bad');
+                    toast.push(t('Enter a sync code'), 'bad');
                     return;
                   }
                   try {
@@ -1109,21 +1332,20 @@ function CloudSyncCard() {
                       manualSyncStorageKey(account.id, 'code'),
                       code.trim(),
                     );
-                    toast.push('Sync code saved', 'good');
+                    toast.push(t('Sync code saved'), 'good');
                   } catch {
                     toast.push(
-                      'Browser could not remember the code. Keep a separate copy.',
+                      t('Browser could not remember the code. Keep a separate copy.'),
                       'bad',
                     );
                   }
                 }}
               >
-                Save
+                {t('Save')}
               </Btn>
             </div>
             <p className="mt-1.5 text-[10px] font-semibold text-mute">
-              Codes are case-sensitive. Use the exact same code on another
-              device. There is no reset link.
+              {t('Codes are case-sensitive. Use the exact same code on another device. There is no reset link.')}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Btn
@@ -1133,7 +1355,7 @@ function CloudSyncCard() {
                 disabled={blocked}
                 icon={<Upload size={13} />}
               >
-                {busy === 'upload' ? 'Uploading…' : 'Upload'}
+                {busy === 'upload' ? t('Uploading…') : t('Upload')}
               </Btn>
               <Btn
                 size="sm"
@@ -1141,7 +1363,7 @@ function CloudSyncCard() {
                 disabled={blocked}
                 icon={<Download size={13} />}
               >
-                {busy === 'download' ? 'Downloading…' : 'Download'}
+                {busy === 'download' ? t('Downloading…') : t('Download')}
               </Btn>
               <Btn
                 size="sm"
@@ -1153,11 +1375,11 @@ function CloudSyncCard() {
                     `rep-${Array.from(random, (n) => n.toString(36).padStart(7, '0')).join('-')}`,
                   );
                   setShow(true);
-                  toast.push('New code generated — keep a copy, then upload');
+                  toast.push(t('New code generated — keep a copy, then upload'));
                 }}
                 icon={<Sparkles size={13} />}
               >
-                Generate code
+                {t('Generate code')}
               </Btn>
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -1165,7 +1387,7 @@ function CloudSyncCard() {
                 className="text-[11px] font-bold"
                 htmlFor="cloud-delete-target"
               >
-                Cloud copy to delete
+                {t('Cloud copy to delete')}
               </label>
               <select
                 id="cloud-delete-target"
@@ -1176,8 +1398,8 @@ function CloudSyncCard() {
                   setDeleteTarget(e.target.value as SyncNamespace)
                 }
               >
-                <option value="v2">Current</option>
-                <option value="legacy">Legacy</option>
+                <option value="v2">{t('Current')}</option>
+                <option value="legacy">{t('Legacy')}</option>
               </select>
               <Btn
                 size="sm"
@@ -1186,7 +1408,7 @@ function CloudSyncCard() {
                 disabled={blocked}
                 icon={<Trash2 size={13} />}
               >
-                Delete cloud copy
+                {t('Delete cloud copy')}
               </Btn>
             </div>
             {status && (
@@ -1197,24 +1419,20 @@ function CloudSyncCard() {
           </div>
           <div className="rounded-2xl border border-line bg-[var(--surface-2)] p-3 text-[11px] font-semibold leading-relaxed text-mute">
             <p className="mb-1 flex items-center gap-1 font-black text-dim">
-              <Shield size={12} /> Privacy by design
+              <Shield size={12} /> {t('Privacy by design')}
             </p>
             <p>
-              Your browser encrypts the backup with your code. Only ciphertext
-              is uploaded. Download previews a snapshot before replacing your
-              local log.
+              {t('Your browser encrypts the backup with your code. Only ciphertext is uploaded. Download previews a snapshot before replacing your local log.')}
             </p>
             <p className="mt-2">
-              Older snapshots remain available with the original code. Upload
-              creates a current copy and keeps the legacy copy until it is
-              explicitly deleted.
+              {t('Older snapshots remain available with the original code. Upload creates a current copy and keeps the legacy copy until it is explicitly deleted.')}
             </p>
             <p className="mt-2 flex items-center gap-1">
-              <User size={11} /> {data.sessions.length} workouts in this
-              snapshot
+              <User size={11} />{' '}
+              {t('{n} workouts in this snapshot', { n: data.sessions.length })}
             </p>
             <p className="flex items-center gap-1">
-              <Zap size={11} /> Upload after adding new workouts
+              <Zap size={11} /> {t('Upload after adding new workouts')}
             </p>
           </div>
         </div>
@@ -1226,10 +1444,10 @@ function CloudSyncCard() {
         }}
         title={
           pending?.kind === 'restore'
-            ? 'Replace local log?'
+            ? t('Replace local log?')
             : pending?.kind === 'delete'
-              ? 'Delete cloud copy?'
-              : 'Overwrite cloud copy?'
+              ? t('Delete cloud copy?')
+              : t('Overwrite cloud copy?')
         }
         footer={
           <div className="flex gap-2">
@@ -1238,7 +1456,7 @@ function CloudSyncCard() {
               disabled={blocked}
               onClick={() => setPending(null)}
             >
-              Cancel
+              {t("Cancel")}
             </Btn>
             <Btn
               className="flex-1"
@@ -1249,12 +1467,12 @@ function CloudSyncCard() {
               }}
             >
               {blocked
-                ? 'Working…'
+                ? t('Working…')
                 : pending?.kind === 'restore'
-                  ? 'Replace local log'
+                  ? t('Replace local log')
                   : pending?.kind === 'delete'
-                    ? 'Delete cloud copy'
-                    : 'Overwrite cloud copy'}
+                    ? t('Delete cloud copy')
+                    : t('Overwrite cloud copy')}
             </Btn>
           </div>
         }
@@ -1262,16 +1480,18 @@ function CloudSyncCard() {
         {pending && (
           <div className="space-y-3 text-sm font-semibold">
             <p>
-              {pending.info.namespace === 'legacy' ? 'Legacy' : 'Current'} cloud
-              copy · {new Date(pending.info.updatedAt).toLocaleString()}
+              {t('{copy} cloud copy · {date}', {
+                copy: t(pending.info.namespace === 'legacy' ? 'Legacy' : 'Current'),
+                date: new Date(pending.info.updatedAt).toLocaleString(),
+              })}
             </p>
             {pending.kind !== 'delete' && <BackupSummary data={pending.data} />}
             <p className="text-mute">
               {pending.kind === 'restore'
-                ? 'This replaces this account’s tracking data, including an active workout. Export the current account log first to keep both copies.'
+                ? t('This replaces this account’s tracking data, including an active workout. Export the current account log first to keep both copies.')
                 : pending.kind === 'delete'
-                  ? 'Only this selected cloud copy is deleted. Your local log and other cloud copies are kept.'
-                  : 'This replaces the selected manual encrypted snapshot with the current account log shown above. The prior snapshot cannot be recovered afterward.'}
+                  ? t('Only this selected cloud copy is deleted. Your local log and other cloud copies are kept.')
+                  : t('This replaces the selected manual encrypted snapshot with the current account log shown above. The prior snapshot cannot be recovered afterward.')}
             </p>
           </div>
         )}

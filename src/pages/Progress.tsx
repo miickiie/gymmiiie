@@ -34,6 +34,7 @@ import {
   useToast,
 } from '../components/ui';
 import { addDays, dateKey, fmtDate, fmtDuration } from '../lib/date';
+import { useI18n } from '../lib/i18n';
 import {
   awardsFor,
   bodyMeasureSeries,
@@ -56,7 +57,140 @@ import type { PR } from '../types';
 
 type Tab = 'overview' | 'records' | 'body' | 'awards';
 
+const TH: Record<string, string> = {
+  Progress: 'ความก้าวหน้า',
+  'Your progress': 'ความก้าวหน้าของคุณ',
+  '{n} workouts · {volume} lifted · {time} trained':
+    '{n} การฝึก · ยก {volume} · ฝึก {time}',
+  Overview: 'ภาพรวม',
+  Records: 'สถิติ',
+  Body: 'ร่างกาย',
+  Awards: 'รางวัล',
+  Streak: 'สตรีค',
+  Sets: 'เซ็ต',
+  Hours: 'ชั่วโมง',
+  'Training load': 'ภาระการฝึก',
+  'Last 12 weeks': '12 สัปดาห์ล่าสุด',
+  volume: 'ปริมาณ',
+  sets: 'เซ็ต',
+  '{n} sets': '{n} เซ็ต',
+  '{volume} across 12 weeks': '{volume} ใน 12 สัปดาห์',
+  '{n} working sets across 12 weeks': '{n} เซ็ตทำงานใน 12 สัปดาห์',
+  'trending up': 'กำลังขึ้น',
+  'keep going': 'สู้ต่อ',
+  'Last 30 days': '30 วันล่าสุด',
+  'Daily volume ({unit})': 'ปริมาณต่อวัน ({unit})',
+  'Recent records': 'สถิติล่าสุด',
+  'All records': 'สถิติทั้งหมด',
+  'Log a workout to set your first record.':
+    'บันทึกการฝึกเพื่อสร้างสถิติแรก',
+  level: 'เลเวล',
+  'Level {n}': 'เลเวล {n}',
+  '{n} XP earned': 'ได้ {n} XP',
+  '{n} XP to next level': 'อีก {n} XP ถึงเลเวลถัดไป',
+  'Muscle balance': 'สมดุลกล้ามเนื้อ',
+  'Working sets · last 4 weeks': 'เซ็ตทำงาน · 4 สัปดาห์ล่าสุด',
+  'No sessions in the last four weeks.': 'ไม่มีเซสชันใน 4 สัปดาห์ที่ผ่านมา',
+  Milestones: 'หมุดหมาย',
+  '{earned} of {total} earned': 'ได้ {earned} จาก {total}',
+  'Trophy cabinet': 'ตู้ถ้วยรางวัล',
+  'Earn badges by showing up, lifting heavy, and staying consistent.':
+    'เก็บเหรียญด้วยการมาฝึก ยกหนัก และทำต่อเนื่อง',
+  'Search your records…': 'ค้นหาสถิติ…',
+  'No matching records': 'ไม่พบสถิติที่ตรงกัน',
+  'No records yet': 'ยังไม่มีสถิติ',
+  'Try a different search.': 'ลองค้นหาคำอื่น',
+  'Every exercise you train gets a best set and estimated 1RM here.':
+    'ทุกท่าที่ฝึกจะได้เซ็ตที่ดีที่สุดและ 1RM โดยประมาณที่นี่',
+  'Start training': 'เริ่มฝึก',
+  'Top e1RM': 'e1RM สูงสุด',
+  'Heaviest set': 'เซ็ตหนักสุด',
+  'Exercises tracked': 'ท่าที่ติดตาม',
+  'Top weight': 'น้ำหนักสูงสุด',
+  'Longest time': 'เวลานานสุด',
+  'Farthest distance': 'ระยะไกลสุด',
+  'Most repetitions': 'ครั้งมากสุด',
+
+  // Awards
+  'First rep': 'เรปแรก',
+  'Finish your first workout': 'ฝึกให้จบครั้งแรก',
+  Planner: 'นักวางแผน',
+  'Create a routine': 'สร้างตารางฝึก',
+  'On a roll': 'กำลังมา',
+  '3 day streak': 'สตรีค 3 วัน',
+  'Week strong': 'ครบสัปดาห์',
+  '7 day streak': 'สตรีค 7 วัน',
+  'Ten deep': 'สิบครั้ง',
+  '10 workouts': '10 การฝึก',
+  Century: 'ร้อยเซ็ต',
+  '100 working sets': '100 เซ็ตทำงาน',
+  'One tonne': 'หนึ่งตัน',
+  'Lift 1,000 kg total': 'ยกน้ำหนักรวม 1,000 kg',
+  'Ten hours': 'สิบชั่วโมง',
+  'Train for 10 hours': 'ฝึก 10 ชั่วโมง',
+  Regular: 'สม่ำเสมอ',
+  '50 workouts': '50 การฝึก',
+  'Ten tonnes': 'สิบตัน',
+  'Lift 10,000 kg total': 'ยกน้ำหนักรวม 10,000 kg',
+  Unbroken: 'ไม่ขาดตอน',
+  '30 day streak': 'สตรีค 30 วัน',
+  'Thousand club': 'คลับพันเซ็ต',
+  '1,000 working sets': '1,000 เซ็ตทำงาน',
+  Centurion: 'ร้อยครั้ง',
+  '100 workouts': '100 การฝึก',
+  'Hundred hours': 'ร้อยชั่วโมง',
+  'Train for 100 hours': 'ฝึก 100 ชั่วโมง',
+  Heavyweight: 'รุ่นหนัก',
+  'Lift 100,000 kg total': 'ยกน้ำหนักรวม 100,000 kg',
+
+  // Body tab
+  'Enter a valid weight': 'ใส่น้ำหนักให้ถูกต้อง',
+  'Weight logged': 'บันทึกน้ำหนักแล้ว',
+  'Enter a positive, finite goal or clear the field':
+    'ใส่เป้าหมายเป็นจำนวนบวก หรือล้างช่องนี้',
+  'Goal saved': 'บันทึกเป้าหมายแล้ว',
+  'Goal cleared': 'ล้างเป้าหมายแล้ว',
+  'Enter a positive, finite measurement': 'ใส่ค่าที่เป็นจำนวนบวก',
+  'Measurement saved': 'บันทึกขนาดแล้ว',
+  Bodyweight: 'น้ำหนักตัว',
+  '{n} entries · {delta} {unit} since first':
+    '{n} รายการ · {delta} {unit} จากค่าแรก',
+  'Log your first weigh-in': 'ชั่งน้ำหนักครั้งแรก',
+  Weight: 'น้ำหนัก',
+  Goal: 'เป้าหมาย',
+  optional: 'ไม่บังคับ',
+  Log: 'บันทึก',
+  'Save goal': 'บันทึกเป้าหมาย',
+  '{n} {unit} to goal · {goal}': 'เหลือ {n} {unit} ถึงเป้าหมาย · {goal}',
+  Measurements: 'ขนาดร่างกาย',
+  'Track the tape, not just the scale': 'วัดสายวัด ไม่ใช่แค่ตาชั่ง',
+  Site: 'ตำแหน่ง',
+  Value: 'ค่า',
+  Date: 'วันที่',
+  Add: 'เพิ่ม',
+  'remove latest': 'ลบล่าสุด',
+  'Body snapshot': 'ภาพรวมร่างกาย',
+  Height: 'ส่วนสูง',
+  Entries: 'รายการ',
+  'Why measure?': 'ทำไมต้องวัด?',
+  'The scale only tells part of the story. Waist, arm and thigh measurements show recomposition even when bodyweight is flat.':
+    'ตาชั่งเล่าได้แค่บางส่วน เอว แขน และต้นขาแสดงการเปลี่ยนแปลงของสัดส่วนได้ แม้น้ำหนักตัวจะเท่าเดิม',
+  'Measure at the same time of day, relaxed, with the tape snug but not compressing the skin.':
+    'วัดเวลาเดิมของทุกวัน ทำตัวสบาย สายวัดแนบแต่ไม่รัดจนกดผิว',
+  Neck: 'คอ',
+  Shoulders: 'ไหล่',
+  Chest: 'อก',
+  Arm: 'แขน',
+  Forearm: 'แขนท่อนล่าง',
+  Waist: 'เอว',
+  Hips: 'สะโพก',
+  Thigh: 'ต้นขา',
+  Calf: 'น่อง',
+  'Body fat %': 'เปอร์เซ็นต์ไขมัน',
+};
+
 export default function Progress() {
+  const { t, tm } = useI18n(TH);
   const data = useStore((s) => s.data);
   const [tab, setTab] = useState<Tab>('overview');
   const [metric, setMetric] = useState<'volume' | 'sets'>('volume');
@@ -89,9 +223,13 @@ export default function Progress() {
   return (
     <div className="page-enter">
       <PageHeader
-        eyebrow="Progress"
-        title="Your progress"
-        subtitle={`${data.sessions.length} workouts · ${volumeLabel(totalVolume(data.sessions), unit)} lifted · ${fmtDuration(totalTime)} trained`}
+        eyebrow={t('Progress')}
+        title={t('Your progress')}
+        subtitle={t('{n} workouts · {volume} lifted · {time} trained', {
+          n: data.sessions.length,
+          volume: volumeLabel(totalVolume(data.sessions), unit),
+          time: fmtDuration(totalTime),
+        })}
       />
 
       <div className="scroll-x mb-4 pb-1">
@@ -108,7 +246,7 @@ export default function Progress() {
             onClick={() => setTab(id)}
             className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-black transition ${tab === id ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]' : 'border-line bg-[var(--surface)] text-dim hover:border-strong'}`}
           >
-            {icon} {label}
+            {icon} {t(label)}
           </button>
         ))}
       </div>
@@ -140,14 +278,14 @@ export default function Progress() {
                 },
               ].map((s) => (
                 <Card key={s.label} className="p-4">
-                  <Stat label={s.label} value={s.value} icon={s.icon} />
+                  <Stat label={t(s.label)} value={s.value} icon={s.icon} />
                 </Card>
               ))}
             </div>
 
             <SectionHeader
-              title="Training load"
-              subtitle="Last 12 weeks"
+              title={t('Training load')}
+              subtitle={t('Last 12 weeks')}
               action={
                 <div className="flex rounded-full border border-line bg-[var(--surface-2)] p-0.5">
                   {(['volume', 'sets'] as const).map((m) => (
@@ -156,7 +294,7 @@ export default function Progress() {
                       onClick={() => setMetric(m)}
                       className={`rounded-full px-2.5 py-1 text-[10px] font-black capitalize ${metric === m ? 'bg-[var(--surface-3)] text-[var(--text)]' : 'text-mute'}`}
                     >
-                      {m}
+                      {t(m)}
                     </button>
                   ))}
                 </div>
@@ -175,31 +313,35 @@ export default function Progress() {
                 format={(v) =>
                   metric === 'volume'
                     ? `${v.toLocaleString()} ${unit}`
-                    : `${v} sets`
+                    : t('{n} sets', { n: v })
                 }
               />
               <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-mute">
                 <span>
                   {metric === 'volume'
-                    ? `${volumeLabel(
-                        weeks.reduce((n, w) => n + w.value, 0),
-                        unit,
-                      )} across 12 weeks`
-                    : `${weeks.reduce((n, w) => n + w.sets, 0)} working sets across 12 weeks`}
+                    ? t('{volume} across 12 weeks', {
+                        volume: volumeLabel(
+                          weeks.reduce((n, w) => n + w.value, 0),
+                          unit,
+                        ),
+                      })
+                    : t('{n} working sets across 12 weeks', {
+                        n: weeks.reduce((n, w) => n + w.sets, 0),
+                      })}
                 </span>
                 <span className="flex items-center gap-1 text-[var(--good)]">
                   <TrendingUp size={11} />{' '}
                   {weeks[weeks.length - 1]?.value >
                   weeks[weeks.length - 2]?.value
-                    ? 'trending up'
-                    : 'keep going'}
+                    ? t('trending up')
+                    : t('keep going')}
                 </span>
               </div>
             </Card>
 
             <SectionHeader
-              title="Last 30 days"
-              subtitle={`Daily volume (${unit})`}
+              title={t('Last 30 days')}
+              subtitle={t('Daily volume ({unit})', { unit })}
             />
             <Card className="p-4">
               <LineChart
@@ -213,13 +355,13 @@ export default function Progress() {
             </Card>
 
             <SectionHeader
-              title="Recent records"
+              title={t('Recent records')}
               action={
                 <button
                   onClick={() => setTab('records')}
                   className="text-[11px] font-black text-[var(--accent)]"
                 >
-                  All records
+                  {t('All records')}
                 </button>
               }
             />
@@ -245,7 +387,7 @@ export default function Progress() {
               ))}
               {!prs.length && (
                 <p className="px-4 py-6 text-center text-xs font-semibold text-mute">
-                  Log a workout to set your first record.
+                  {t('Log a workout to set your first record.')}
                 </p>
               )}
             </Card>
@@ -260,14 +402,16 @@ export default function Progress() {
                       {level.level}
                     </p>
                     <p className="text-[8px] font-black uppercase text-mute">
-                      level
+                      {t('level')}
                     </p>
                   </div>
                 </Ring>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-black">Level {level.level}</p>
+                  <p className="text-sm font-black">
+                    {t('Level {n}', { n: level.level })}
+                  </p>
                   <p className="mt-0.5 text-[11px] font-semibold text-mute">
-                    {level.xp.toLocaleString()} XP earned
+                    {t('{n} XP earned', { n: level.xp.toLocaleString() })}
                   </p>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
                     <div
@@ -276,15 +420,15 @@ export default function Progress() {
                     />
                   </div>
                   <p className="mt-1 text-[10px] font-bold text-mute">
-                    {level.next} XP to next level
+                    {t('{n} XP to next level', { n: level.next })}
                   </p>
                 </div>
               </div>
             </Card>
 
             <SectionHeader
-              title="Muscle balance"
-              subtitle="Working sets · last 4 weeks"
+              title={t('Muscle balance')}
+              subtitle={t('Working sets · last 4 weeks')}
             />
             <Card className="p-4">
               <BodyMap heat={heat} />
@@ -293,9 +437,11 @@ export default function Progress() {
                   muscleOrder.map(([m, v]) => (
                     <div key={m}>
                       <div className="flex items-center justify-between text-[10px] font-black">
-                        <span className="text-dim">{MUSCLE_LABEL[m] ?? m}</span>
+                        <span className="text-dim">
+                          {tm(m, MUSCLE_LABEL[m] ?? m)}
+                        </span>
                         <span className="text-mute">
-                          {Math.round(v * 10) / 10} sets
+                          {t('{n} sets', { n: Math.round(v * 10) / 10 })}
                         </span>
                       </div>
                       <div className="mt-0.5 h-1.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
@@ -308,27 +454,30 @@ export default function Progress() {
                   ))
                 ) : (
                   <p className="py-4 text-center text-xs font-semibold text-mute">
-                    No sessions in the last four weeks.
+                    {t('No sessions in the last four weeks.')}
                   </p>
                 )}
               </div>
             </Card>
 
             <SectionHeader
-              title="Milestones"
+              title={t('Milestones')}
               action={
                 <button
                   onClick={() => setTab('awards')}
                   className="text-[11px] font-black text-[var(--accent)]"
                 >
-                  Awards
+                  {t('Awards')}
                 </button>
               }
             />
             <Card className="p-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-black">
-                  {earned} of {awards.length} earned
+                  {t('{earned} of {total} earned', {
+                    earned,
+                    total: awards.length,
+                  })}
                 </p>
                 <Award size={17} className="text-[var(--warn)]" />
               </div>
@@ -342,7 +491,7 @@ export default function Progress() {
                 {awards.slice(0, 8).map((a) => (
                   <div
                     key={a.id}
-                    title={`${a.name}: ${a.detail}`}
+                    title={`${t(a.name)}: ${t(a.detail)}`}
                     className={`grid aspect-square place-items-center rounded-xl ${a.earned ? 'bg-[var(--warn)]/15 text-[var(--warn)]' : 'bg-[var(--surface-2)] text-[var(--surface-3)]'}`}
                   >
                     <Star size={17} fill={a.earned ? 'currentColor' : 'none'} />
@@ -363,7 +512,7 @@ export default function Progress() {
             />
             <input
               className="input pl-9"
-              placeholder="Search your records…"
+              placeholder={t('Search your records…')}
               value={recordQuery}
               onChange={(e) => setRecordQuery(e.target.value)}
             />
@@ -377,16 +526,20 @@ export default function Progress() {
           ) : (
             <EmptyState
               icon={<Trophy size={24} />}
-              title={prs.length ? 'No matching records' : 'No records yet'}
+              title={
+                prs.length ? t('No matching records') : t('No records yet')
+              }
               body={
                 prs.length
-                  ? 'Try a different search.'
-                  : 'Every exercise you train gets a best set and estimated 1RM here.'
+                  ? t('Try a different search.')
+                  : t(
+                      'Every exercise you train gets a best set and estimated 1RM here.',
+                    )
               }
               action={
                 !prs.length ? (
                   <Link to="/train">
-                    <Btn variant="primary">Start training</Btn>
+                    <Btn variant="primary">{t('Start training')}</Btn>
                   </Link>
                 ) : undefined
               }
@@ -415,7 +568,7 @@ export default function Progress() {
               },
             ].map((s) => (
               <Card key={s.label} className="p-4">
-                <Stat label={s.label} value={s.value} icon={s.icon} />
+                <Stat label={t(s.label)} value={s.value} icon={s.icon} />
               </Card>
             ))}
           </div>
@@ -433,10 +586,11 @@ export default function Progress() {
               </span>
             </Ring>
             <div>
-              <p className="text-sm font-black">Trophy cabinet</p>
+              <p className="text-sm font-black">{t('Trophy cabinet')}</p>
               <p className="mt-0.5 text-xs font-semibold text-mute">
-                Earn badges by showing up, lifting heavy, and staying
-                consistent.
+                {t(
+                  'Earn badges by showing up, lifting heavy, and staying consistent.',
+                )}
               </p>
             </div>
           </Card>
@@ -453,9 +607,9 @@ export default function Progress() {
                     {a.earned ? <Medal size={20} /> : <Star size={19} />}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-black">{a.name}</p>
+                    <p className="text-sm font-black">{t(a.name)}</p>
                     <p className="text-[11px] font-semibold text-mute">
-                      {a.detail}
+                      {t(a.detail)}
                     </p>
                   </div>
                   {a.earned && (
@@ -481,6 +635,7 @@ export default function Progress() {
 }
 
 function RecordRow({ pr, unit }: { pr: PR; unit: 'kg' | 'lb' }) {
+  const { t } = useI18n(TH);
   const isWeight = pr.kind === 'weight';
   return (
     <Link
@@ -500,7 +655,7 @@ function RecordRow({ pr, unit }: { pr: PR; unit: 'kg' | 'lb' }) {
         </p>
       </div>
       <span className="rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-[9px] font-black uppercase text-mute">
-        {recordLabel(pr.kind)}
+        {t(recordLabel(pr.kind))}
       </span>
       <ChevronRight size={14} className="text-mute" />
     </Link>
@@ -508,6 +663,7 @@ function RecordRow({ pr, unit }: { pr: PR; unit: 'kg' | 'lb' }) {
 }
 
 function BodyTab() {
+  const { t } = useI18n(TH);
   const data = useStore((s) => s.data);
   const update = useStore((s) => s.update);
   const addBodyweight = useStore((s) => s.addBodyweight);
@@ -541,32 +697,32 @@ function BodyTab() {
   const saveWeight = () => {
     const v = Number(weight);
     if (!Number.isFinite(v) || v <= 0) {
-      toast.push('Enter a valid weight', 'bad');
+      toast.push(t('Enter a valid weight'), 'bad');
       return;
     }
     addBodyweight(fromDisplay(v));
-    toast.push('Weight logged', 'good');
+    toast.push(t('Weight logged'), 'good');
   };
   const saveGoal = () => {
     const v = Number(goal);
     if (goal.trim() && (!Number.isFinite(v) || v <= 0)) {
-      toast.push('Enter a positive, finite goal or clear the field', 'bad');
+      toast.push(t('Enter a positive, finite goal or clear the field'), 'bad');
       return;
     }
     update((d) => {
       d.bodyGoalKg = v > 0 ? fromDisplay(v) : undefined;
     });
-    toast.push(v > 0 ? 'Goal saved' : 'Goal cleared');
+    toast.push(v > 0 ? t('Goal saved') : t('Goal cleared'));
   };
   const saveMeasure = () => {
     const v = Number(value);
     if (!Number.isFinite(v) || v <= 0) {
-      toast.push('Enter a positive, finite measurement', 'bad');
+      toast.push(t('Enter a positive, finite measurement'), 'bad');
       return;
     }
     addMeasure(key, v, day);
     setValue('');
-    toast.push('Measurement saved', 'good');
+    toast.push(t('Measurement saved'), 'good');
   };
   const fromDisplay = (v: number) => (unit === 'lb' ? v * 0.45359237 : v);
 
@@ -574,17 +730,21 @@ function BodyTab() {
     <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
       <div>
         <SectionHeader
-          title="Bodyweight"
+          title={t('Bodyweight')}
           subtitle={
             weights.length
-              ? `${weights.length} entries · ${delta >= 0 ? '+' : ''}${delta.toFixed(1)} ${unit} since first`
-              : 'Log your first weigh-in'
+              ? t('{n} entries · {delta} {unit} since first', {
+                  n: weights.length,
+                  delta: `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}`,
+                  unit,
+                })
+              : t('Log your first weigh-in')
           }
         />
         <Card className="p-4">
           <div className="flex flex-wrap items-end gap-2">
             <label className="min-w-[120px] flex-1">
-              <span className="label mb-1 block">Weight</span>
+              <span className="label mb-1 block">{t('Weight')}</span>
               <div className="relative">
                 <NumericInput
                   className="input pr-10 text-right num"
@@ -600,14 +760,14 @@ function BodyTab() {
               </div>
             </label>
             <label className="min-w-[120px] flex-1">
-              <span className="label mb-1 block">Goal</span>
+              <span className="label mb-1 block">{t('Goal')}</span>
               <div className="relative">
                 <NumericInput
                   className="input pr-10 text-right num"
                   unit={unit}
                   inputMode="decimal"
                   step="0.1"
-                  placeholder="optional"
+                  placeholder={t('optional')}
                   value={goal}
                   onValueChange={setGoal}
                 />
@@ -621,10 +781,10 @@ function BodyTab() {
               onClick={saveWeight}
               icon={<Plus size={15} />}
             >
-              Log
+              {t('Log')}
             </Btn>
             <Btn variant="soft" onClick={saveGoal}>
-              Save goal
+              {t('Save goal')}
             </Btn>
           </div>
           {series.length > 1 && (
@@ -638,13 +798,15 @@ function BodyTab() {
           )}
           {data.bodyGoalKg != null && latest != null && (
             <div className="mt-3 rounded-xl bg-[var(--surface-2)] px-3 py-2 text-[11px] font-bold text-dim">
-              {Math.abs(
-                latest - toDisplayWeight(data.bodyGoalKg, unit),
-              ).toFixed(1)}{' '}
-              {unit} to goal ·{' '}
-              {data.bodyGoalKg
-                ? `${toDisplayWeight(data.bodyGoalKg, unit).toFixed(1)} ${unit}`
-                : ''}
+              {t('{n} {unit} to goal · {goal}', {
+                n: Math.abs(
+                  latest - toDisplayWeight(data.bodyGoalKg, unit),
+                ).toFixed(1),
+                unit,
+                goal: data.bodyGoalKg
+                  ? `${toDisplayWeight(data.bodyGoalKg, unit).toFixed(1)} ${unit}`
+                  : '',
+              })}
             </div>
           )}
           {weights.length > 0 && (
@@ -681,13 +843,13 @@ function BodyTab() {
         </Card>
 
         <SectionHeader
-          title="Measurements"
-          subtitle="Track the tape, not just the scale"
+          title={t('Measurements')}
+          subtitle={t('Track the tape, not just the scale')}
         />
         <Card className="p-4">
           <div className="grid gap-2 sm:grid-cols-[1.2fr_1fr_1fr_auto]">
             <label>
-              <span className="label mb-1 block">Site</span>
+              <span className="label mb-1 block">{t('Site')}</span>
               <select
                 className="input"
                 value={key}
@@ -695,13 +857,13 @@ function BodyTab() {
               >
                 {MEASURE_KEYS.map((m) => (
                   <option key={m.key} value={m.key}>
-                    {m.label}
+                    {t(m.label)}
                   </option>
                 ))}
               </select>
             </label>
             <label>
-              <span className="label mb-1 block">Value</span>
+              <span className="label mb-1 block">{t('Value')}</span>
               <NumericInput
                 className="input num"
                 unit="cm"
@@ -713,7 +875,7 @@ function BodyTab() {
               />
             </label>
             <label>
-              <span className="label mb-1 block">Date</span>
+              <span className="label mb-1 block">{t('Date')}</span>
               <input
                 className="input"
                 type="date"
@@ -727,7 +889,7 @@ function BodyTab() {
                 onClick={saveMeasure}
                 icon={<Plus size={15} />}
               >
-                Add
+                {t('Add')}
               </Btn>
             </div>
           </div>
@@ -750,7 +912,7 @@ function BodyTab() {
                   className="rounded-xl bg-[var(--surface-2)] px-2.5 py-2"
                 >
                   <p className="text-[9px] font-black uppercase text-mute">
-                    {m.label}
+                    {t(m.label)}
                   </p>
                   <p className="num text-sm font-black">
                     {latestM
@@ -762,7 +924,7 @@ function BodyTab() {
                       onClick={() => deleteMeasure(latestM!.id)}
                       className="text-[9px] font-bold text-mute hover:text-[var(--bad)]"
                     >
-                      remove latest
+                      {t('remove latest')}
                     </button>
                   )}
                 </div>
@@ -773,28 +935,28 @@ function BodyTab() {
       </div>
 
       <div>
-        <SectionHeader title="Body snapshot" />
+        <SectionHeader title={t('Body snapshot')} />
         <Card className="p-4">
           <BodyMap />
           <div className="mt-3 grid grid-cols-2 gap-2">
             <div className="rounded-xl bg-[var(--surface-2)] p-2.5">
-              <p className="label">Weight</p>
+              <p className="label">{t('Weight')}</p>
               <p className="num text-lg font-black">
                 {toDisplayWeight(data.profile.weightKg, unit).toFixed(1)} {unit}
               </p>
             </div>
             <div className="rounded-xl bg-[var(--surface-2)] p-2.5">
-              <p className="label">Height</p>
+              <p className="label">{t('Height')}</p>
               <p className="num text-lg font-black">
                 {data.profile.heightCm} cm
               </p>
             </div>
             <div className="rounded-xl bg-[var(--surface-2)] p-2.5">
-              <p className="label">Entries</p>
+              <p className="label">{t('Entries')}</p>
               <p className="num text-lg font-black">{data.measures.length}</p>
             </div>
             <div className="rounded-xl bg-[var(--surface-2)] p-2.5">
-              <p className="label">Goal</p>
+              <p className="label">{t('Goal')}</p>
               <p className="num text-lg font-black">
                 {data.bodyGoalKg
                   ? `${toDisplayWeight(data.bodyGoalKg, unit).toFixed(1)} ${unit}`
@@ -803,15 +965,17 @@ function BodyTab() {
             </div>
           </div>
         </Card>
-        <SectionHeader title="Why measure?" />
+        <SectionHeader title={t('Why measure?')} />
         <Card className="p-4 text-xs font-semibold leading-relaxed text-dim">
           <p>
-            The scale only tells part of the story. Waist, arm and thigh
-            measurements show recomposition even when bodyweight is flat.
+            {t(
+              'The scale only tells part of the story. Waist, arm and thigh measurements show recomposition even when bodyweight is flat.',
+            )}
           </p>
           <p className="mt-2 text-mute">
-            Measure at the same time of day, relaxed, with the tape snug but not
-            compressing the skin.
+            {t(
+              'Measure at the same time of day, relaxed, with the tape snug but not compressing the skin.',
+            )}
           </p>
         </Card>
       </div>

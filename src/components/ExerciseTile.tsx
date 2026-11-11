@@ -13,8 +13,11 @@ import {
 } from 'lucide-react';
 import { modeFor } from '../lib/exercises';
 import { MUSCLE_LABEL } from '../lib/stats';
+import { useI18n } from '../lib/i18n';
 import type { Exercise } from '../types';
 import { ArtThumb } from './ExerciseArt';
+
+const TH: Record<string, string> = {};
 
 export function ExerciseIcon({
   ex,
@@ -100,6 +103,7 @@ export function ExerciseRow({
   right?: React.ReactNode;
   compact?: boolean;
 }) {
+  const { t, tm } = useI18n(TH);
   const size = compact ? 36 : 44;
   return (
     <button
@@ -115,8 +119,9 @@ export function ExerciseRow({
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-extrabold">{ex.name}</p>
         <p className="flex items-center gap-1.5 truncate text-[11px] font-bold text-mute">
-          <MuscleDot id={ex.primary} /> {MUSCLE_LABEL[ex.primary] ?? ex.primary}
-          <span className="opacity-40">·</span> {ex.equipment}
+          <MuscleDot id={ex.primary} />{' '}
+          {tm(ex.primary, MUSCLE_LABEL[ex.primary] ?? ex.primary)}
+          <span className="opacity-40">·</span> {t(ex.equipment)}
         </p>
       </div>
       {right}

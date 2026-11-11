@@ -47,6 +47,7 @@ import {
   type Food,
   type Macro,
 } from '../lib/foods';
+import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import type { CustomFood, MealEntry } from '../types';
 
@@ -58,7 +59,108 @@ const MEALS: { id: Meal; label: string; icon: React.ReactNode }[] = [
   { id: 'snacks', label: 'Snacks', icon: <Cookie size={16} /> },
 ];
 
+const TH: Record<string, string> = {
+  Nutrition: 'อาหาร',
+  'Fuel the work': 'เติมพลังให้การฝึก',
+  '{foods} foods · {dishes} dishes · macros stay on your device':
+    '{foods} อาหาร · {dishes} เมนู · ข้อมูลสารอาหารอยู่ในเครื่องคุณ',
+  Goals: 'เป้าหมาย',
+  Today: 'วันนี้',
+  'of {n}': 'จาก {n}',
+  '{n} kcal left': 'เหลือ {n} kcal',
+  '{n} kcal over': 'เกิน {n} kcal',
+  '{n} items logged · {p}g protein': 'บันทึก {n} รายการ · โปรตีน {p}g',
+  Protein: 'โปรตีน',
+  Carbs: 'คาร์บ',
+  Fat: 'ไขมัน',
+  Fiber: 'ไฟเบอร์',
+  Sugar: 'น้ำตาล',
+  'of {n}g': 'จาก {n}g',
+  Water: 'น้ำ',
+  '{water} ml · {n} of {total} glasses': '{water} ml · {n} จาก {total} แก้ว',
+  '+{n}ml': '+{n} ml',
+  'Nothing logged': 'ยังไม่บันทึก',
+  Add: 'เพิ่ม',
+  'Macro goals': 'เป้าหมายสารอาหาร',
+  'Daily targets': 'เป้าหมายต่อวัน',
+  Edit: 'แก้ไข',
+  Calories: 'แคลอรี',
+  'These are starter targets. Set your own to make them meaningful.':
+    'นี่คือค่าเริ่มต้น ตั้งเป้าหมายของคุณเองเพื่อให้มีความหมาย',
+  'Today’s plate': 'จานวันนี้',
+  'Macro split': 'สัดส่วนสารอาหาร',
+  'Quick add': 'เพิ่มเร็ว',
+  'Food library': 'คลังอาหาร',
+  'Add {name}': 'เพิ่ม {name}',
+  'Browse all {n} foods': 'ดูอาหารทั้งหมด {n} รายการ',
+  'Nutrition data is approximate and sourced from common food databases. It is a guide, not medical advice.':
+    'ข้อมูลโภชนาการเป็นค่าประมาณจากฐานข้อมูลอาหารทั่วไป ใช้เป็นแนวทางเท่านั้น ไม่ใช่คำแนะนำทางการแพทย์',
+  '{name} added': 'เพิ่ม {name} แล้ว',
+  Breakfast: 'เช้า',
+  Lunch: 'กลางวัน',
+  Dinner: 'เย็น',
+  Snacks: 'ของว่าง',
+  'Add to {meal}': 'เพิ่มในมื้อ{meal}',
+  'Portion in grams': 'ปริมาณเป็นกรัม',
+  'Pick a food, dish or custom entry to continue.':
+    'เลือกอาหาร เมนู หรือรายการที่สร้างเองเพื่อไปต่อ',
+  'Enter a portion greater than zero grams.': 'ใส่ปริมาณมากกว่า 0 กรัม',
+  'Nutrition amounts must be finite and cannot be negative.':
+    'ค่าสารอาหารต้องเป็นจำนวนจริงและไม่ติดลบ',
+  'Name your food.': 'ตั้งชื่ออาหาร',
+  'Enter nonnegative, finite nutrition amounts per 100 g.':
+    'ใส่ค่าสารอาหารต่อ 100 g ที่ไม่ติดลบ',
+  'Custom food saved': 'บันทึกอาหารที่สร้างเองแล้ว',
+  Foods: 'อาหาร',
+  Dishes: 'เมนู',
+  Custom: 'กำหนดเอง',
+  'New food': 'สร้างอาหาร',
+  'Food name': 'ชื่ออาหาร',
+  '{macro} per 100 grams': '{macro} ต่อ 100 g',
+  kcal: 'kcal',
+  protein: 'โปรตีน',
+  carbs: 'คาร์บ',
+  fat: 'ไขมัน',
+  'Values per 100 g.': 'ค่าต่อ 100 g',
+  'Save custom food': 'บันทึกอาหารที่สร้างเอง',
+  'Search foods…': 'ค้นหาอาหาร…',
+  All: 'ทั้งหมด',
+  Fruit: 'ผลไม้',
+  Vegetables: 'ผัก',
+  Legumes: 'ถั่วเมล็ด',
+  Nuts: 'ถั่ว',
+  Meat: 'เนื้อ',
+  Fish: 'ปลา',
+  Eggs: 'ไข่',
+  Dairy: 'นม',
+  Grains: 'ธัญพืช',
+  Bakery: 'เบเกอรี',
+  Oils: 'น้ำมัน',
+  Pantry: 'ของแห้ง',
+  Drinks: 'เครื่องดื่ม',
+  Sauces: 'ซอส',
+  Spices: 'เครื่องเทศ',
+  food: 'อาหาร',
+  'No foods match.': 'ไม่พบอาหารที่ตรงกัน',
+  'No dishes match.': 'ไม่พบเมนูที่ตรงกัน',
+  '{n} ingredients · {g} g': '{n} วัตถุดิบ · {g} g',
+  'P{p} C{c} F{f} per 100g': 'P{p} C{c} F{f} ต่อ 100g',
+  'No custom foods': 'ไม่มีอาหารที่สร้างเอง',
+  'Create one with the New food button above.':
+    'สร้างได้จากปุ่มสร้างอาหารด้านบน',
+  'Selected: {name}': 'เลือก: {name}',
+  'Daily goals': 'เป้าหมายต่อวัน',
+  'Glass size': 'ขนาดแก้ว',
+  'Use finite, nonnegative goals and a glass size greater than zero.':
+    'ใส่เป้าหมายที่ไม่ติดลบ และขนาดแก้วมากกว่า 0',
+  'Save goals': 'บันทึกเป้าหมาย',
+  'Goals saved': 'บันทึกเป้าหมายแล้ว',
+  'Targets are personal. Adjust them with a coach or dietitian if you have specific health goals.':
+    'เป้าหมายขึ้นกับแต่ละคน ปรับกับโค้ชหรือนักโภชนาการถ้ามีเป้าหมายสุขภาพเฉพาะ',
+};
+
 export default function Nutrition() {
+  const { t } = useI18n(TH);
   const toast = useToast();
   const data = useStore((s) => s.data);
   const addMealEntry = useStore((s) => s.addMealEntry);
@@ -100,9 +202,12 @@ export default function Nutrition() {
   return (
     <div className="page-enter">
       <PageHeader
-        eyebrow="Nutrition"
-        title="Fuel the work"
-        subtitle={`${FOODS.length} foods · ${DISHES.length} dishes · macros stay on your device`}
+        eyebrow={t('Nutrition')}
+        title={t('Fuel the work')}
+        subtitle={t(
+          '{foods} foods · {dishes} dishes · macros stay on your device',
+          { foods: FOODS.length, dishes: DISHES.length },
+        )}
         action={
           <Btn
             variant="soft"
@@ -110,7 +215,7 @@ export default function Nutrition() {
             onClick={() => setGoalsOpen(true)}
             icon={<Settings2 size={14} />}
           >
-            Goals
+            {t('Goals')}
           </Btn>
         }
       />
@@ -124,7 +229,9 @@ export default function Nutrition() {
         </button>
         <div className="text-center">
           <p className="text-sm font-black">
-            {isToday ? 'Today' : fmtDate(parseKey(day), { weekday: 'long' })}
+            {isToday
+              ? t('Today')
+              : fmtDate(parseKey(day), { weekday: 'long' })}
           </p>
           <p className="text-[10px] font-bold text-mute">
             {fmtDate(parseKey(day), {
@@ -148,7 +255,7 @@ export default function Nutrition() {
         />
         {!isToday && (
           <Btn size="sm" variant="soft" onClick={() => setDay(dateKey())}>
-            Today
+            {t('Today')}
           </Btn>
         )}
       </Card>
@@ -163,35 +270,37 @@ export default function Nutrition() {
                     {Math.round(totals.kcal)}
                   </p>
                   <p className="text-[9px] font-black uppercase text-mute">
-                    of {goals.kcal}
+                    {t('of {n}', { n: goals.kcal })}
                   </p>
                 </div>
               </Ring>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-black">
                   {remaining >= 0
-                    ? `${Math.round(remaining)} kcal left`
-                    : `${Math.round(-remaining)} kcal over`}
+                    ? t('{n} kcal left', { n: Math.round(remaining) })
+                    : t('{n} kcal over', { n: Math.round(-remaining) })}
                 </p>
                 <p className="mt-0.5 text-[11px] font-semibold text-mute">
-                  {entries.length} items logged · {Math.round(totals.protein)}g
-                  protein
+                  {t('{n} items logged · {p}g protein', {
+                    n: entries.length,
+                    p: Math.round(totals.protein),
+                  })}
                 </p>
                 <div className="mt-3 space-y-2">
                   <MacroBar
-                    label="Protein"
+                    label={t('Protein')}
                     value={totals.protein}
                     goal={goals.protein}
                     tone="var(--accent)"
                   />
                   <MacroBar
-                    label="Carbs"
+                    label={t('Carbs')}
                     value={totals.carbs}
                     goal={goals.carbs}
                     tone="var(--good)"
                   />
                   <MacroBar
-                    label="Fat"
+                    label={t('Fat')}
                     value={totals.fat}
                     goal={goals.fat}
                     tone="var(--warn)"
@@ -214,13 +323,15 @@ export default function Nutrition() {
                   key={m.label}
                   className="rounded-xl bg-[var(--surface-2)] p-2.5"
                 >
-                  <p className="label">{m.label}</p>
+                  <p className="label">{t(m.label)}</p>
                   <p className="num mt-0.5 text-base font-black">
                     {Math.round(m.v)}
                     <span className="text-[10px] text-mute">{m.unit}</span>
                   </p>
                   {m.g > 0 && (
-                    <p className="text-[9px] font-bold text-mute">of {m.g}g</p>
+                    <p className="text-[9px] font-bold text-mute">
+                      {t('of {n}g', { n: m.g })}
+                    </p>
                   )}
                 </div>
               ))}
@@ -228,8 +339,12 @@ export default function Nutrition() {
           </Card>
 
           <SectionHeader
-            title="Water"
-            subtitle={`${water} ml · ${glasses} of ${Math.ceil(goals.waterMl / glass)} glasses`}
+            title={t('Water')}
+            subtitle={t('{water} ml · {n} of {total} glasses', {
+              water,
+              n: glasses,
+              total: Math.ceil(goals.waterMl / glass),
+            })}
             action={
               <div className="flex gap-1">
                 <Btn
@@ -245,7 +360,7 @@ export default function Nutrition() {
                   onClick={() => addWater(glass, day)}
                   icon={<Droplets size={13} />}
                 >
-                  +{glass}ml
+                  {t('+{n}ml', { n: glass })}
                 </Btn>
               </div>
             }
@@ -297,9 +412,11 @@ export default function Nutrition() {
                     {m.icon}
                   </span>
                   <div className="flex-1">
-                    <p className="text-sm font-black">{m.label}</p>
+                    <p className="text-sm font-black">{t(m.label)}</p>
                     <p className="text-[10px] font-bold text-mute">
-                      {kcal ? `${Math.round(kcal)} kcal` : 'Nothing logged'}
+                      {kcal
+                        ? `${Math.round(kcal)} kcal`
+                        : t('Nothing logged')}
                     </p>
                   </div>
                   <Btn
@@ -308,7 +425,7 @@ export default function Nutrition() {
                     onClick={() => openAdd(m.id)}
                     icon={<Plus size={13} />}
                   >
-                    Add
+                    {t('Add')}
                   </Btn>
                 </div>
                 {list.length > 0 && (
@@ -348,14 +465,14 @@ export default function Nutrition() {
 
         <div>
           <SectionHeader
-            title="Macro goals"
-            subtitle="Daily targets"
+            title={t('Macro goals')}
+            subtitle={t('Daily targets')}
             action={
               <button
                 onClick={() => setGoalsOpen(true)}
                 className="text-[11px] font-black text-[var(--accent)]"
               >
-                Edit
+                {t('Edit')}
               </button>
             }
           />
@@ -395,7 +512,7 @@ export default function Nutrition() {
                     className="block h-1 w-6 rounded-full"
                     style={{ background: g.tone }}
                   />
-                  <p className="label mt-2">{g.label}</p>
+                  <p className="label mt-2">{t(g.label)}</p>
                   <p className="num text-lg font-black">
                     {g.value}
                     <span className="ml-0.5 text-[10px] text-mute">
@@ -407,12 +524,17 @@ export default function Nutrition() {
             </div>
             {!data.nutrition.goalsSet && (
               <p className="mt-2 text-[10px] font-bold text-[var(--warn)]">
-                These are starter targets. Set your own to make them meaningful.
+                {t(
+                  'These are starter targets. Set your own to make them meaningful.',
+                )}
               </p>
             )}
           </Card>
 
-          <SectionHeader title="Today’s plate" subtitle="Macro split" />
+          <SectionHeader
+            title={t('Today’s plate')}
+            subtitle={t('Macro split')}
+          />
           <Card className="p-4">
             <MacroDonut
               protein={totals.protein}
@@ -437,7 +559,7 @@ export default function Nutrition() {
                       className="h-2 w-2 rounded-full"
                       style={{ background: x.color }}
                     />
-                    <span className="flex-1 text-dim">{x.label}</span>
+                    <span className="flex-1 text-dim">{t(x.label)}</span>
                     <span className="text-mute">
                       {Math.round((x.v / all) * 100)}%
                     </span>
@@ -447,7 +569,7 @@ export default function Nutrition() {
             </div>
           </Card>
 
-          <SectionHeader title="Quick add" />
+          <SectionHeader title={t('Quick add')} />
           <div className="grid grid-cols-2 gap-2">
             {MEALS.map((m) => (
               <button
@@ -456,18 +578,18 @@ export default function Nutrition() {
                 className="card flex items-center gap-2 p-3 text-left transition hover:border-strong"
               >
                 <span className="text-[var(--accent)]">{m.icon}</span>
-                <span className="text-xs font-extrabold">{m.label}</span>
+                <span className="text-xs font-extrabold">{t(m.label)}</span>
                 <Plus size={13} className="ml-auto text-mute" />
               </button>
             ))}
           </div>
 
-          <SectionHeader title="Food library" />
+          <SectionHeader title={t('Food library')} />
           <Card className="divide-y divide-[var(--line)] overflow-hidden">
             {FOODS.slice(0, 5).map((f) => (
               <button
                 key={f.id}
-                aria-label={`Add ${f.name}`}
+                aria-label={t('Add {name}', { name: f.name })}
                 onClick={() => {
                   setInitialFood(f);
                   setMeal('snacks');
@@ -488,14 +610,15 @@ export default function Nutrition() {
               onClick={() => openAdd('snacks')}
               className="w-full px-3 py-2 text-center text-[11px] font-black text-[var(--accent)]"
             >
-              Browse all {FOODS.length} foods
+              {t('Browse all {n} foods', { n: FOODS.length })}
             </button>
           </Card>
 
           <div className="mt-4 rounded-2xl border border-line bg-[var(--surface)] p-4 text-[11px] font-semibold leading-relaxed text-mute">
             <Salad size={14} className="mb-1 text-[var(--good)]" />
-            Nutrition data is approximate and sourced from common food
-            databases. It is a guide, not medical advice.
+            {t(
+              'Nutrition data is approximate and sourced from common food databases. It is a guide, not medical advice.',
+            )}
           </div>
         </div>
       </div>
@@ -509,7 +632,7 @@ export default function Nutrition() {
         onAdd={(entry) => {
           addMealEntry(entry);
           setAddOpen(false);
-          toast.push(`${entry.name} added`, 'good');
+          toast.push(t('{name} added', { name: entry.name }), 'good');
         }}
       />
       <GoalsSheet open={goalsOpen} onClose={() => setGoalsOpen(false)} />
@@ -628,6 +751,8 @@ function AddFoodSheet({
   initialFood: Food | null;
   onAdd: (entry: Omit<MealEntry, 'id' | 'createdAt'>) => void;
 }) {
+  const { t, language } = useI18n(TH);
+  const mealLabel = MEALS.find((m) => m.id === meal)?.label ?? meal;
   const data = useStore((s) => s.data);
   const addCustomFood = useStore((s) => s.addCustomFood);
   const deleteCustomFood = (id: string) =>
@@ -725,7 +850,7 @@ function AddFoodSheet({
     if (!selected || !preview || !grams) return;
     const g = Number(grams);
     if (!Number.isFinite(g) || g <= 0) {
-      setError('Enter a portion greater than zero grams.');
+      setError(t('Enter a portion greater than zero grams.'));
       return;
     }
     if (
@@ -733,7 +858,7 @@ function AddFoodSheet({
         (value) => Number.isFinite(value) && value >= 0,
       )
     ) {
-      setError('Nutrition amounts must be finite and cannot be negative.');
+      setError(t('Nutrition amounts must be finite and cannot be negative.'));
       return;
     }
     setError('');
@@ -770,7 +895,7 @@ function AddFoodSheet({
 
   const createCustom = () => {
     if (!cf.name.trim()) {
-      setError('Name your food.');
+      setError(t('Name your food.'));
       return;
     }
     if (
@@ -778,7 +903,7 @@ function AddFoodSheet({
         (value) => Number.isFinite(Number(value)) && Number(value) >= 0,
       )
     ) {
-      setError('Enter nonnegative, finite nutrition amounts per 100 g.');
+      setError(t('Enter nonnegative, finite nutrition amounts per 100 g.'));
       return;
     }
     setError('');
@@ -794,14 +919,16 @@ function AddFoodSheet({
     setCreating(false);
     setTab('custom');
     selectCustom(created);
-    toast.push('Custom food saved', 'good');
+    toast.push(t('Custom food saved'), 'good');
   };
 
   return (
     <Sheet
       open={open}
       onClose={onClose}
-      title={`Add to ${meal}`}
+      title={t('Add to {meal}', {
+        meal: language === 'th' ? t(mealLabel) : meal,
+      })}
       size="lg"
       footer={
         selected && preview ? (
@@ -824,7 +951,7 @@ function AddFoodSheet({
               <NumericInput
                 className="input py-2 pr-8 text-right text-xs"
                 unit="g"
-                aria-label="Portion in grams"
+                aria-label={t('Portion in grams')}
                 min="0.1"
                 step="any"
                 inputMode="decimal"
@@ -836,12 +963,12 @@ function AddFoodSheet({
               </span>
             </div>
             <Btn variant="primary" onClick={confirm} icon={<Plus size={15} />}>
-              Add
+              {t('Add')}
             </Btn>
           </div>
         ) : (
           <p className="text-center text-[11px] font-semibold text-mute">
-            Pick a food, dish or custom entry to continue.
+            {t('Pick a food, dish or custom entry to continue.')}
           </p>
         )
       }
@@ -859,9 +986,9 @@ function AddFoodSheet({
             setSelected(null);
           }}
           options={[
-            { value: 'foods', label: 'Foods' },
-            { value: 'dishes', label: 'Dishes' },
-            { value: 'custom', label: 'Custom' },
+            { value: 'foods', label: t('Foods') },
+            { value: 'dishes', label: t('Dishes') },
+            { value: 'custom', label: t('Custom') },
           ]}
           className="flex-1"
         />
@@ -871,7 +998,7 @@ function AddFoodSheet({
           onClick={() => setCreating(!creating)}
           icon={<Plus size={13} />}
         >
-          New food
+          {t('New food')}
         </Btn>
       </div>
 
@@ -879,7 +1006,7 @@ function AddFoodSheet({
         <Card className="mb-3 space-y-2 p-3">
           <input
             className="input py-2 text-sm"
-            placeholder="Food name"
+            placeholder={t('Food name')}
             value={cf.name}
             onChange={(e) => setCf({ ...cf, name: e.target.value })}
           />
@@ -889,10 +1016,10 @@ function AddFoodSheet({
                 <NumericInput
                   className="input py-2 pr-7 text-right text-xs"
                   unit={k === 'kcal' ? 'cal' : 'g'}
-                  aria-label={`${k} per 100 grams`}
+                  aria-label={t('{macro} per 100 grams', { macro: t(k) })}
                   min="0"
                   step="any"
-                  placeholder={k}
+                  placeholder={t(k)}
                   value={cf[k]}
                   onValueChange={(raw) => setCf({ ...cf, [k]: raw })}
                 />
@@ -902,14 +1029,16 @@ function AddFoodSheet({
               </label>
             ))}
           </div>
-          <p className="text-[9px] font-bold text-mute">Values per 100 g.</p>
+          <p className="text-[9px] font-bold text-mute">
+            {t('Values per 100 g.')}
+          </p>
           <Btn
             size="sm"
             variant="primary"
             className="w-full"
             onClick={createCustom}
           >
-            Save custom food
+            {t('Save custom food')}
           </Btn>
         </Card>
       )}
@@ -922,7 +1051,7 @@ function AddFoodSheet({
           />
           <input
             className="input pl-9"
-            placeholder="Search foods…"
+            placeholder={t('Search foods…')}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -941,7 +1070,7 @@ function AddFoodSheet({
         <>
           <div className="scroll-x mb-2 pb-1">
             <Chip on={cat == null} onClick={() => setCat(null)}>
-              All
+              {t('All')}
             </Chip>
             {FOOD_CATEGORIES.map((c) => (
               <Chip
@@ -949,7 +1078,7 @@ function AddFoodSheet({
                 on={cat === c}
                 onClick={() => setCat(cat === c ? null : c)}
               >
-                {CATEGORY_LABEL[c] ?? c}
+                {t(CATEGORY_LABEL[c] ?? c)}
               </Chip>
             ))}
           </div>
@@ -966,7 +1095,7 @@ function AddFoodSheet({
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-extrabold">{f.name}</p>
                   <p className="text-[10px] font-bold text-mute">
-                    {f.cat ? (CATEGORY_LABEL[f.cat] ?? f.cat) : 'food'} · P
+                    {f.cat ? t(CATEGORY_LABEL[f.cat] ?? f.cat) : t('food')} · P
                     {roundMacro(f.protein, 1)} C{roundMacro(f.carbs, 1)} F
                     {roundMacro(f.fat, 1)}
                   </p>
@@ -978,7 +1107,7 @@ function AddFoodSheet({
             ))}
             {!foods.length && (
               <p className="py-8 text-center text-xs font-semibold text-mute">
-                No foods match.
+                {t('No foods match.')}
               </p>
             )}
           </div>
@@ -999,7 +1128,10 @@ function AddFoodSheet({
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-extrabold">{d.name}</p>
                 <p className="text-[10px] font-bold text-mute">
-                  {d.items.length} ingredients · {dishWeight(d)} g
+                  {t('{n} ingredients · {g} g', {
+                    n: d.items.length,
+                    g: dishWeight(d),
+                  })}
                 </p>
               </div>
               <span className="num text-[10px] font-black text-mute">
@@ -1009,7 +1141,7 @@ function AddFoodSheet({
           ))}
           {!dishes.length && (
             <p className="py-8 text-center text-xs font-semibold text-mute">
-              No dishes match.
+              {t('No dishes match.')}
             </p>
           )}
         </div>
@@ -1033,8 +1165,11 @@ function AddFoodSheet({
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-extrabold">{f.name}</p>
                     <p className="text-[10px] font-bold text-mute">
-                      P{roundMacro(f.protein, 1)} C{roundMacro(f.carbs, 1)} F
-                      {roundMacro(f.fat, 1)} per 100g
+                      {t('P{p} C{c} F{f} per 100g', {
+                        p: roundMacro(f.protein, 1),
+                        c: roundMacro(f.carbs, 1),
+                        f: roundMacro(f.fat, 1),
+                      })}
                     </p>
                   </div>
                   <span className="num text-[10px] font-black text-mute">
@@ -1052,8 +1187,8 @@ function AddFoodSheet({
           ) : (
             <EmptyState
               icon={<Beef size={22} />}
-              title="No custom foods"
-              body="Create one with the New food button above."
+              title={t('No custom foods')}
+              body={t('Create one with the New food button above.')}
             />
           )}
         </div>
@@ -1061,12 +1196,14 @@ function AddFoodSheet({
 
       {selected && (
         <div className="sticky bottom-0 mt-2 rounded-xl border border-[var(--accent-line)] bg-[var(--accent-soft)] px-3 py-2 text-[10px] font-bold text-[var(--accent)]">
-          Selected:{' '}
-          {selected.kind === 'food'
-            ? selected.food.name
-            : selected.kind === 'dish'
-              ? selected.dish.name
-              : selected.food.name}
+          {t('Selected: {name}', {
+            name:
+              selected.kind === 'food'
+                ? selected.food.name
+                : selected.kind === 'dish'
+                  ? selected.dish.name
+                  : selected.food.name,
+          })}
         </div>
       )}
     </Sheet>
@@ -1074,6 +1211,7 @@ function AddFoodSheet({
 }
 
 function GoalsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useI18n(TH);
   const goals = useStore((s) => s.data.nutrition.goals);
   const setNutritionGoals = useStore((s) => s.setNutritionGoals);
   const toast = useToast();
@@ -1100,7 +1238,7 @@ function GoalsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
     <Sheet
       open={open}
       onClose={onClose}
-      title="Daily goals"
+      title={t('Daily goals')}
       footer={
         <Btn
           variant="primary"
@@ -1113,16 +1251,18 @@ function GoalsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
               g.glassMl <= 0
             ) {
               setError(
-                'Use finite, nonnegative goals and a glass size greater than zero.',
+                t(
+                  'Use finite, nonnegative goals and a glass size greater than zero.',
+                ),
               );
               return;
             }
             setNutritionGoals(g);
             onClose();
-            toast.push('Goals saved', 'good');
+            toast.push(t('Goals saved'), 'good');
           }}
         >
-          Save goals
+          {t('Save goals')}
         </Btn>
       }
     >
@@ -1133,7 +1273,7 @@ function GoalsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
       )}
       <div className="grid grid-cols-2 gap-3">
         {fields.map((f) => (
-          <Field key={f.key} label={f.label}>
+          <Field key={f.key} label={t(f.label)}>
             <div className="relative">
               <NumericInput
                 className="input num pr-10 text-right"
@@ -1151,8 +1291,9 @@ function GoalsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
         ))}
       </div>
       <p className="mt-3 text-[11px] font-semibold text-mute">
-        Targets are personal. Adjust them with a coach or dietitian if you have
-        specific health goals.
+        {t(
+          'Targets are personal. Adjust them with a coach or dietitian if you have specific health goals.',
+        )}
       </p>
     </Sheet>
   );

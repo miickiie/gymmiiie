@@ -1,4 +1,5 @@
 import { modeFor, loadKindFor } from './exerciseBehavior';
+import { translateNow } from './i18n';
 import {
   addDays,
   addDaysKey,
@@ -711,16 +712,16 @@ export function newId(prefix = ''): string {
 export function setKindLabel(kind: string): string {
   switch (kind) {
     case 'warmup':
-      return 'Warm-up';
+      return translateNow('Warm-up');
     case 'drop':
-      return 'Drop';
+      return translateNow('Drop');
     case 'failure':
-      return 'Failure';
+      return translateNow('Failure');
     case 'restPause':
-      return 'Rest-pause';
+      return translateNow('Rest-pause');
     case 'cluster':
-      return 'Cluster';
+      return translateNow('Cluster');
     default:
-      return 'Working';
+      return translateNow('Working');
   }
 }

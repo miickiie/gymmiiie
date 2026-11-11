@@ -25,6 +25,7 @@ export function defaultData(): AppData {
     settings: {
       unit: 'kg',
       theme: 'dark',
+      language: 'en',
       restSec: 90,
       miniRestSec: 20,
       weeklyGoal: 4,

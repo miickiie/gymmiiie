@@ -17,10 +17,57 @@ import {
   Sheet,
   useToast,
 } from '../components/ui';
+import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import type { GymPass } from '../types';
 
+const TH: Record<string, string> = {
+  'Name and code are required.': 'ต้องกรอกชื่อและรหัส',
+  'Pass added': 'เพิ่มบัตรแล้ว',
+  'Code copied': 'คัดลอกรหัสแล้ว',
+  'Could not copy': 'คัดลอกไม่ได้',
+  'Gym pass': 'บัตรยิม',
+  'Never forget your card': 'ไม่ลืมบัตรอีกต่อไป',
+  'Keep membership numbers and entry codes with your account, available offline on this device.':
+    'เก็บเลขสมาชิกและรหัสเข้าอาคารไว้กับบัญชี ใช้ออฟไลน์ได้ในเครื่องนี้',
+  'Add pass': 'เพิ่มบัตร',
+  'Copy code': 'คัดลอกรหัส',
+  Delete: 'ลบ',
+  'No passes yet': 'ยังไม่มีบัตร',
+  'Add your gym membership, pool card or door code so it’s always in your pocket.':
+    'เพิ่มบัตรยิม บัตรสระ หรือรหัสประตู ให้พกติดตัวได้เสมอ',
+  'Add your first pass': 'เพิ่มบัตรใบแรก',
+  'Local by default': 'เก็บในเครื่องเป็นค่าเริ่มต้น',
+  'Passes are stored in the same encrypted-on-upload snapshot as the rest of your log. Treat your sync code like a key to your gym bag.':
+    'บัตรถูกเก็บในสแนปช็อตเดียวกับข้อมูลอื่น และเข้ารหัสตอนอัปโหลด เก็บรหัสซิงก์ให้ดีเหมือนกุญแจกระเป๋ายิม',
+  'Add gym pass': 'เพิ่มบัตรยิม',
+  'Save pass': 'บันทึกบัตร',
+  'Pass name': 'ชื่อบัตร',
+  'e.g. City Gym, Pool, Studio': 'เช่น ฟิตเนสในเมือง สระว่ายน้ำ สตูดิโอ',
+  'Member name (optional)': 'ชื่อสมาชิก (ไม่บังคับ)',
+  'Name on the card': 'ชื่อบนบัตร',
+  'Code / number': 'รหัส / หมายเลข',
+  'Scan code or membership number': 'รหัสสแกนหรือเลขสมาชิก',
+  'Card colour': 'สีบัตร',
+  Pass: 'บัตร',
+  'Show at desk': 'แสดงที่เคาน์เตอร์',
+  'Membership code': 'รหัสสมาชิก',
+  'Show the membership code to gym staff.':
+    'แสดงรหัสสมาชิกให้พนักงานยิมดู',
+  'Pass deleted': 'ลบบัตรแล้ว',
+  'Delete pass?': 'ลบบัตร?',
+  '“{name}” will be removed from this device and your synced snapshot.':
+    '“{name}” จะถูกลบออกจากเครื่องนี้และข้อมูลที่ซิงก์ไว้',
+  'Delete pass': 'ลบบัตร',
+  'Show {name} pass': 'แสดงบัตร {name}',
+  'Member pass': 'บัตรสมาชิก',
+  'Gymmiie member': 'สมาชิก Gymmiie',
+  Code: 'รหัส',
+  'Offline pass': 'บัตรออฟไลน์',
+};
+
 export default function PassPage() {
+  const { t } = useI18n(TH);
   const toast = useToast();
   const passes = useStore((s) => s.data.passes);
   const addPass = useStore((s) => s.addPass);
@@ -37,7 +84,7 @@ export default function PassPage() {
 
   const save = () => {
     if (!name.trim() || !code.trim()) {
-      setError('Name and code are required.');
+      setError(t('Name and code are required.'));
       return;
     }
     setError('');
@@ -51,24 +98,26 @@ export default function PassPage() {
     setName('Gym');
     setMember('');
     setCode('');
-    toast.push('Pass added', 'good');
+    toast.push(t('Pass added'), 'good');
   };
 
   const copy = async (value: string) => {
     try {
       await navigator.clipboard.writeText(value);
-      toast.push('Code copied', 'good');
+      toast.push(t('Code copied'), 'good');
     } catch {
-      toast.push('Could not copy', 'bad');
+      toast.push(t('Could not copy'), 'bad');
     }
   };
 
   return (
     <div className="page-enter">
       <PageHeader
-        eyebrow="Gym pass"
-        title="Never forget your card"
-        subtitle="Keep membership numbers and entry codes with your account, available offline on this device."
+        eyebrow={t('Gym pass')}
+        title={t('Never forget your card')}
+        subtitle={t(
+          'Keep membership numbers and entry codes with your account, available offline on this device.',
+        )}
         action={
           <Btn
             variant="primary"
@@ -76,7 +125,7 @@ export default function PassPage() {
             onClick={() => setOpen(true)}
             icon={<Plus size={15} />}
           >
-            Add pass
+            {t('Add pass')}
           </Btn>
         }
       />
@@ -99,7 +148,7 @@ export default function PassPage() {
                   onClick={() => copy(p.code)}
                   icon={<Copy size={13} />}
                 >
-                  Copy code
+                  {t('Copy code')}
                 </Btn>
                 <Btn
                   size="sm"
@@ -107,7 +156,7 @@ export default function PassPage() {
                   onClick={() => setConfirm(p)}
                   icon={<Trash2 size={13} />}
                 >
-                  Delete
+                  {t('Delete')}
                 </Btn>
               </div>
             </div>
@@ -116,15 +165,17 @@ export default function PassPage() {
       ) : (
         <EmptyState
           icon={<CreditCard size={26} />}
-          title="No passes yet"
-          body="Add your gym membership, pool card or door code so it’s always in your pocket."
+          title={t('No passes yet')}
+          body={t(
+            'Add your gym membership, pool card or door code so it’s always in your pocket.',
+          )}
           action={
             <Btn
               variant="primary"
               onClick={() => setOpen(true)}
               icon={<Plus size={15} />}
             >
-              Add your first pass
+              {t('Add your first pass')}
             </Btn>
           }
         />
@@ -133,10 +184,11 @@ export default function PassPage() {
       <Card className="mt-6 flex items-start gap-3 p-4">
         <Sparkles size={17} className="mt-0.5 shrink-0 text-[var(--accent)]" />
         <div>
-          <p className="text-sm font-black">Local by default</p>
+          <p className="text-sm font-black">{t('Local by default')}</p>
           <p className="mt-0.5 text-[11px] font-semibold leading-relaxed text-mute">
-            Passes are stored in the same encrypted-on-upload snapshot as the
-            rest of your log. Treat your sync code like a key to your gym bag.
+            {t(
+              'Passes are stored in the same encrypted-on-upload snapshot as the rest of your log. Treat your sync code like a key to your gym bag.',
+            )}
           </p>
         </div>
       </Card>
@@ -144,7 +196,7 @@ export default function PassPage() {
       <Sheet
         open={open}
         onClose={() => setOpen(false)}
-        title="Add gym pass"
+        title={t('Add gym pass')}
         footer={
           <Btn
             variant="primary"
@@ -152,7 +204,7 @@ export default function PassPage() {
             onClick={save}
             icon={<CreditCard size={15} />}
           >
-            Save pass
+            {t('Save pass')}
           </Btn>
         }
       >
@@ -162,32 +214,32 @@ export default function PassPage() {
               {error}
             </p>
           )}
-          <Field label="Pass name">
+          <Field label={t('Pass name')}>
             <input
               className="input"
-              placeholder="e.g. City Gym, Pool, Studio"
+              placeholder={t('e.g. City Gym, Pool, Studio')}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </Field>
-          <Field label="Member name (optional)">
+          <Field label={t('Member name (optional)')}>
             <input
               className="input"
-              placeholder="Name on the card"
+              placeholder={t('Name on the card')}
               value={member}
               onChange={(e) => setMember(e.target.value)}
             />
           </Field>
-          <Field label="Code / number">
+          <Field label={t('Code / number')}>
             <input
               className="input font-mono"
-              placeholder="Scan code or membership number"
+              placeholder={t('Scan code or membership number')}
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
           </Field>
           <div>
-            <p className="label mb-1.5">Card colour</p>
+            <p className="label mb-1.5">{t('Card colour')}</p>
             <input
               type="range"
               min={0}
@@ -209,7 +261,7 @@ export default function PassPage() {
       <Sheet
         open={!!detail}
         onClose={() => setDetail(null)}
-        title={detail?.name ?? 'Pass'}
+        title={detail?.name ?? t('Pass')}
       >
         {detail && (
           <div>
@@ -220,7 +272,7 @@ export default function PassPage() {
                 onClick={() => copy(detail.code)}
                 icon={<Copy size={15} />}
               >
-                Copy code
+                {t('Copy code')}
               </Btn>
               <Btn
                 className="flex-1"
@@ -228,7 +280,7 @@ export default function PassPage() {
                 onClick={() => setShowAtDesk(true)}
                 icon={<ScanLine size={15} />}
               >
-                Show at desk
+                {t('Show at desk')}
               </Btn>
             </div>
             {showAtDesk && (
@@ -236,14 +288,14 @@ export default function PassPage() {
                 role="status"
                 className="mt-4 rounded-2xl bg-white p-5 text-center text-black"
               >
-                <p className="text-xs font-bold">Membership code</p>
+                <p className="text-xs font-bold">{t('Membership code')}</p>
                 <p className="mt-2 break-all font-mono text-3xl font-black">
                   {detail.code}
                 </p>
               </div>
             )}
             <p className="mt-3 text-center text-[10px] font-bold text-mute">
-              Show the membership code to gym staff.
+              {t('Show the membership code to gym staff.')}
             </p>
           </div>
         )}
@@ -255,12 +307,14 @@ export default function PassPage() {
         onConfirm={() => {
           if (confirm) {
             deletePass(confirm.id);
-            toast.push('Pass deleted');
+            toast.push(t('Pass deleted'));
           }
         }}
-        title="Delete pass?"
-        body={`“${confirm?.name ?? ''}” will be removed from this device and your synced snapshot.`}
-        confirmLabel="Delete pass"
+        title={t('Delete pass?')}
+        body={t('“{name}” will be removed from this device and your synced snapshot.', {
+          name: confirm?.name ?? '',
+        })}
+        confirmLabel={t('Delete pass')}
       />
     </div>
   );
@@ -275,10 +329,13 @@ function PassCard({
   onClick?: () => void;
   large?: boolean;
 }) {
+  const { t } = useI18n(TH);
   const Surface = onClick ? 'button' : 'div';
   return (
     <Surface
-      aria-label={onClick ? `Show ${pass.name} pass` : undefined}
+      aria-label={
+        onClick ? t('Show {name} pass', { name: pass.name }) : undefined
+      }
       onClick={onClick}
       className={`relative w-full overflow-hidden rounded-3xl border border-white/10 p-5 text-left text-white shadow-card transition ${onClick ? 'hover:brightness-110 active:scale-[.99]' : ''} ${large ? 'p-6' : ''}`}
       style={{
@@ -292,7 +349,7 @@ function PassCard({
           <CreditCard size={19} />
         </div>
         <span className="text-[9px] font-black uppercase tracking-[0.22em] text-white/60">
-          Member pass
+          {t('Member pass')}
         </span>
       </div>
       <p
@@ -301,12 +358,12 @@ function PassCard({
         {pass.name}
       </p>
       <p className="text-[11px] font-bold text-white/65">
-        {pass.member || 'Gymmiie member'}
+        {pass.member || t('Gymmiie member')}
       </p>
       <div className="mt-4 flex items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[8px] font-black uppercase tracking-widest text-white/50">
-            Code
+            {t('Code')}
           </p>
           <p className="break-all font-mono text-sm font-bold tracking-wider text-white/90">
             {pass.code}
@@ -315,7 +372,7 @@ function PassCard({
       </div>
       <div className="mt-3 flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-white/45">
         <span>Gymmiie</span>
-        <span>Offline pass</span>
+        <span>{t('Offline pass')}</span>
       </div>
     </Surface>
   );

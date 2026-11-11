@@ -24,6 +24,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { dateKey, fmtClock } from '../lib/date';
 import { activeElapsed, currentStreak } from '../lib/stats';
 import { useStore } from '../lib/store';
+import { useI18n } from '../lib/i18n';
 import { Avatar, Btn, Sheet, useNow } from './ui';
 import { useAccount } from './AccountGate';
 
@@ -44,7 +45,15 @@ const NAV = [
 
 const MOBILE_NAV = [NAV[0], NAV[1], NAV[5], NAV[4]];
 
+const TH: Record<string, string> = {
+  '{n} day streak': 'ต่อเนื่อง {n} วัน',
+  '{n} workouts logged · keep it going.': 'บันทึกแล้ว {n} การฝึก · สู้ต่อ',
+  'Based on GymMane by InlitX · GPL-3.0':
+    'สร้างจาก GymMane โดย InlitX · GPL-3.0',
+};
+
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const { t } = useI18n(TH);
   const { account, signOut, switchUser } = useAccount();
   const location = useLocation();
   const navigate = useNavigate();
@@ -109,7 +118,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               Gymmiie
             </p>
             <p className="mt-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-mute">
-              Lift · log · grow
+              {t('Lift · log · grow')}
             </p>
           </div>
         </Link>
@@ -128,7 +137,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               )}
             >
               <Icon size={18} strokeWidth={2.4} />
-              {label}
+              {t(label)}
               {to === '/progress' && streak > 0 && (
                 <span className="ml-auto flex items-center gap-1 text-[11px] font-black text-[var(--warn)]">
                   <Flame size={12} />
@@ -151,7 +160,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               )}
             >
               <Icon size={18} strokeWidth={2.4} />
-              {label}
+              {t(label)}
             </Link>
           ))}
         </nav>
@@ -164,22 +173,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             >
               <div className="flex items-center gap-2 text-xs font-black text-[var(--accent)]">
                 <span className="h-2 w-2 animate-pulseSoft rounded-full bg-[var(--accent)]" />{' '}
-                Live workout
+                {t('Live workout')}
               </div>
               <p className="mt-1 num text-lg font-black">
                 {fmtClock(activeElapsed(active))}
               </p>
               <p className="mt-0.5 flex items-center gap-1 text-[11px] font-bold text-dim">
-                Back to session <ArrowRight size={12} />
+                {t('Back to session')} <ArrowRight size={12} />
               </p>
             </button>
           ) : (
             <div className="rounded-2xl border border-line bg-[var(--surface)] p-3">
               <div className="flex items-center gap-2 text-xs font-black text-[var(--warn)]">
-                <Flame size={14} /> {streak} day streak
+                <Flame size={14} /> {t('{n} day streak', { n: streak })}
               </div>
               <p className="mt-1 text-[11px] font-semibold text-mute">
-                {data.sessions.length} workouts logged · keep it going.
+                {t('{n} workouts logged · keep it going.', { n: data.sessions.length })}
               </p>
               <Btn
                 size="sm"
@@ -187,13 +196,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 className="mt-2.5 w-full"
                 onClick={() => navigate('/train')}
               >
-                Start training
+                {t('Start training')}
               </Btn>
             </div>
           )}
           <button
             type="button"
-            aria-label="Account menu"
+            aria-label={t('Account menu')}
             onClick={() => setAccountMenu(true)}
             className="mt-3 flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left hover:bg-[var(--surface-2)]"
           >
@@ -201,7 +210,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="min-w-0">
               <p className="truncate text-xs font-black">{account.name}</p>
               <p className="text-[10px] font-bold text-mute">
-                {data.settings.unit} · {data.settings.weeklyGoal}× / week
+                {data.settings.unit} ·{' '}
+                {t('{n}× / week', { n: data.settings.weeklyGoal })}
               </p>
             </div>
           </button>
@@ -228,7 +238,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {streak}
           </span>
           <button
-            aria-label="Open menu"
+            aria-label={t('Open menu')}
             onClick={() => setMore(true)}
             className="grid h-10 w-10 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
           >
@@ -236,7 +246,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </button>
           <button
             type="button"
-            aria-label="Account menu"
+            aria-label={t('Account menu')}
             onClick={() => setAccountMenu(true)}
           >
             <Avatar name={account.name} size={32} />
@@ -251,7 +261,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             className="flex w-full items-center gap-2 text-xs font-black text-[var(--accent)]"
           >
             <span className="h-2 w-2 animate-pulseSoft rounded-full bg-[var(--accent)]" />
-            Workout in progress ·{' '}
+            {t('Workout in progress')} ·{' '}
             <span className="num">{fmtClock(activeElapsed(active))}</span>
             <ArrowRight size={14} className="ml-auto" />
           </button>
@@ -286,24 +296,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <span className="absolute -top-px h-0.5 w-8 rounded-full bg-[var(--accent)]" />
                 )}
                 <Icon size={20} strokeWidth={on ? 2.7 : 2.1} />
-                {label}
+                {t(label)}
               </Link>
             );
           })}
           <button
             type="button"
-            aria-label="More pages"
+            aria-label={t('More pages')}
             aria-expanded={more}
             onClick={() => setMore(true)}
             className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-extrabold text-mute"
           >
             <Menu size={20} />
-            More
+            {t('More')}
           </button>
         </div>
       </nav>
 
-      <Sheet open={more} onClose={() => setMore(false)} title="Menu">
+      <Sheet open={more} onClose={() => setMore(false)} title={t('Menu')}>
         <div className="grid grid-cols-2 gap-2">
           {NAV.map(({ to, label, icon: Icon }) => (
             <button
@@ -319,7 +329,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   : 'border-line bg-[var(--surface-2)] text-dim',
               )}
             >
-              <Icon size={18} /> {label}
+              <Icon size={18} /> {t(label)}
             </button>
           ))}
         </div>
@@ -329,20 +339,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             icon={<Download size={16} />}
             onClick={install}
           >
-            Install Gymmiie
+            {t('Install Gymmiie')}
           </Btn>
         )}
         <div className="mt-4 flex items-center justify-center gap-2 text-[11px] font-bold text-mute">
-          <Trophy size={13} /> Based on GymMane by InlitX · GPL-3.0
+          <Trophy size={13} /> {t('Based on GymMane by InlitX · GPL-3.0')}
         </div>
         <div className="mt-4 flex items-center justify-center gap-2 text-[11px] font-bold text-mute">
-          <CloudSun size={13} /> Offline logging · account sync when connected
+          <CloudSun size={13} /> {t('Offline logging · account sync when connected')}
         </div>
       </Sheet>
       <Sheet
         open={accountMenu}
         onClose={() => setAccountMenu(false)}
-        title="Your account"
+        title={t('Your account')}
       >
         <p className="text-base font-black">{account.name}</p>
         <p className="mt-1 text-sm font-semibold text-dim">
@@ -355,7 +365,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               navigate('/');
             }}
           >
-            Home
+            {t('Home')}
           </Btn>
           <Btn
             onClick={() => {
@@ -363,7 +373,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               navigate('/settings');
             }}
           >
-            Account settings
+            {t('Account settings')}
           </Btn>
           <Btn
             onClick={() => {
@@ -371,7 +381,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               void switchUser();
             }}
           >
-            Switch user
+            {t('Switch user')}
           </Btn>
           <Btn
             onClick={() => {
@@ -379,7 +389,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               void signOut();
             }}
           >
-            Sign out
+            {t('Sign out')}
           </Btn>
         </div>
       </Sheet>

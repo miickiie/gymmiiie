@@ -33,8 +33,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Nunito', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
-        display: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'Anuphan', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        display: ['Inter', 'Anuphan', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         '4xl': '2rem',

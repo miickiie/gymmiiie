@@ -31,10 +31,77 @@ import {
 } from '../components/ui';
 import { MUSCLE_LABEL } from '../lib/stats';
 import { allExercises, useStore } from '../lib/store';
+import { useI18n } from '../lib/i18n';
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+const TH: Record<string, string> = {
+  'Routine not found': 'ไม่พบตารางนี้',
+  'It may have been deleted.': 'อาจถูกลบไปแล้ว',
+  'Back to routines': 'กลับไปตารางฝึก',
+  'Routine editor': 'แก้ไขตาราง',
+  'Saved locally': 'บันทึกในเครื่องแล้ว',
+  'Saving…': 'กำลังบันทึก…',
+  'Unsaved changes': 'ยังไม่ได้บันทึก',
+  'Routine name': 'ชื่อตาราง',
+  'Push day, Legs, Upper…': 'วันดัน ขา บน…',
+  'Group (optional)': 'กลุ่ม (ไม่บังคับ)',
+  'e.g. PPL, Arnold, Rehab': 'เช่น PPL, Arnold, Rehab',
+  'Split name': 'ชื่อสปลิต',
+  '{n} exercises': '{n} ท่า',
+  '{n} sets': '{n} เซ็ต',
+  Start: 'เริ่ม',
+  Delete: 'ลบ',
+  Exercises: 'ท่าออกกำลัง',
+  'Sets and rest are saved as you edit': 'เซ็ตและเวลาพักบันทึกอัตโนมัติขณะแก้ไข',
+  'Add movements from the library': 'เพิ่มท่าจากคลัง',
+  Add: 'เพิ่ม',
+  Sets: 'เซ็ต',
+  Rest: 'พัก',
+  'No exercises yet': 'ยังไม่มีท่า',
+  'Add the movements you want this routine to include.':
+    'เพิ่มท่าที่ต้องการให้ตารางนี้มี',
+  'Add exercise': 'เพิ่มท่า',
+  Schedule: 'ตารางวัน',
+  'Tap days to plan this routine': 'แตะวันที่ต้องการวางตารางนี้',
+  'Scheduled days show on Today and Train. Only one routine per weekday.':
+    'วันที่ตั้งไว้จะแสดงในหน้าวันนี้และฝึก โดยหนึ่งวันมีได้หนึ่งตาราง',
+  'Routine tips': 'เคล็ดลับตารางฝึก',
+  'Order matters: big compound lifts first, isolation and finishers later.':
+    'ลำดับสำคัญ: ท่าหลักยกหนักก่อน แล้วค่อยท่าแยกและท่าปิดท้าย',
+  'Everything autosaves to this device. Use export in Settings for a backup.':
+    'ทุกอย่างบันทึกอัตโนมัติในเครื่องนี้ ส่งออกในหน้าตั้งค่าเพื่อสำรองข้อมูล',
+  'Starting the routine pre-fills sets from your last workout and adds warm-ups.':
+    'เริ่มตารางจะเติมเซ็ตจากการฝึกครั้งล่าสุดและเพิ่มวอร์มอัปให้',
+  'Session preview': 'ตัวอย่างการฝึก',
+  'Add to routine': 'เพิ่มในตาราง',
+  'Delete routine?': 'ลบตาราง?',
+  '“{name}” will be deleted and removed from the weekly plan. History is untouched.':
+    'จะลบ “{name}” และนำออกจากแผนรายสัปดาห์ ประวัติยังอยู่',
+  'Delete routine': 'ลบตาราง',
+  'Routine deleted': 'ลบตารางแล้ว',
+  'Add at least one exercise': 'เพิ่มท่าอย่างน้อยหนึ่งท่า',
+  Barbell: 'บาร์เบล',
+  Dumbbell: 'ดัมเบล',
+  Cable: 'เคเบิล',
+  Machine: 'เครื่อง',
+  Bodyweight: 'น้ำหนักตัว',
+  Weighted: 'เพิ่มน้ำหนัก',
+  Band: 'ยางยืด',
+  Kettlebell: 'เคตเทิลเบล',
+  Rings: 'ห่วง',
+  Other: 'อื่น ๆ',
+  Sun: 'อา.',
+  Mon: 'จ.',
+  Tue: 'อ.',
+  Wed: 'พ.',
+  Thu: 'พฤ.',
+  Fri: 'ศ.',
+  Sat: 'ส.',
+};
+
 export default function RoutineEditor() {
+  const { t, tm } = useI18n(TH);
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -55,11 +122,11 @@ export default function RoutineEditor() {
     return (
       <EmptyState
         icon={<Dumbbell size={24} />}
-        title="Routine not found"
-        body="It may have been deleted."
+        title={t('Routine not found')}
+        body={t('It may have been deleted.')}
         action={
           <Btn variant="primary" onClick={() => navigate('/routines')}>
-            Back to routines
+            {t('Back to routines')}
           </Btn>
         }
       />
@@ -108,7 +175,7 @@ export default function RoutineEditor() {
 
   const start = () => {
     if (!routine.exerciseIds.length) {
-      toast.push('Add at least one exercise', 'bad');
+      toast.push(t('Add at least one exercise'), 'bad');
       return;
     }
     requestStart(() => startFromRoutine(routine.id));
@@ -123,45 +190,48 @@ export default function RoutineEditor() {
         >
           <ArrowLeft size={18} />
         </button>
-        <p className="label">Routine editor</p>
+        <p className="label">{t('Routine editor')}</p>
         <span
           role="status"
           className={`ml-auto flex items-center gap-1 text-[10px] font-black ${persistenceStatus === 'idle' ? 'text-[var(--good)]' : 'text-[var(--warn)]'}`}
         >
           <Check size={12} />{' '}
           {persistenceStatus === 'idle'
-            ? 'Saved locally'
+            ? t('Saved locally')
             : persistenceStatus === 'saving'
-              ? 'Saving…'
-              : 'Unsaved changes'}
+              ? t('Saving…')
+              : t('Unsaved changes')}
         </span>
       </div>
 
       <Card className="p-4">
         <div className="grid gap-3 sm:grid-cols-[1.5fr_1fr]">
-          <Field label="Routine name">
+          <Field label={t('Routine name')}>
             <input
               className="input"
               value={routine.name}
               onChange={(e) => patch({ name: e.target.value })}
-              placeholder="Push day, Legs, Upper…"
+              placeholder={t('Push day, Legs, Upper…')}
             />
           </Field>
-          <Field label="Group (optional)" hint="e.g. PPL, Arnold, Rehab">
+          <Field
+            label={t('Group (optional)')}
+            hint={t('e.g. PPL, Arnold, Rehab')}
+          >
             <input
               className="input"
               value={routine.group ?? ''}
               onChange={(e) => patch({ group: e.target.value })}
-              placeholder="Split name"
+              placeholder={t('Split name')}
             />
           </Field>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-[var(--surface-2)] px-2.5 py-1 text-[10px] font-black text-mute">
-            {routine.exerciseIds.length} exercises
+            {t('{n} exercises', { n: routine.exerciseIds.length })}
           </span>
           <span className="rounded-full bg-[var(--surface-2)] px-2.5 py-1 text-[10px] font-black text-mute">
-            {totalSets} sets
+            {t('{n} sets', { n: totalSets })}
           </span>
           <span className="rounded-full bg-[var(--surface-2)] px-2.5 py-1 text-[10px] font-black text-mute">
             ~{Math.round(totalSets * 3.2)} min
@@ -174,7 +244,7 @@ export default function RoutineEditor() {
               disabled={!routine.exerciseIds.length}
               icon={<Play size={14} />}
             >
-              Start
+              {t('Start')}
             </Btn>
             <Btn
               variant="ghost"
@@ -182,7 +252,7 @@ export default function RoutineEditor() {
               onClick={() => setConfirmDelete(true)}
               icon={<Trash2 size={14} />}
             >
-              Delete
+              {t('Delete')}
             </Btn>
           </div>
         </div>
@@ -191,11 +261,11 @@ export default function RoutineEditor() {
       <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <div>
           <SectionHeader
-            title="Exercises"
+            title={t('Exercises')}
             subtitle={
               routine.exerciseIds.length
-                ? 'Sets and rest are saved as you edit'
-                : 'Add movements from the library'
+                ? t('Sets and rest are saved as you edit')
+                : t('Add movements from the library')
             }
             action={
               <Btn
@@ -203,7 +273,7 @@ export default function RoutineEditor() {
                 onClick={() => setPicker(true)}
                 icon={<Plus size={14} />}
               >
-                Add
+                {t('Add')}
               </Btn>
             }
           />
@@ -229,8 +299,11 @@ export default function RoutineEditor() {
                         </p>
                         <p className="flex items-center gap-1 text-[10px] font-bold text-mute">
                           <MuscleDot id={ex.primary} size={5} />{' '}
-                          {MUSCLE_LABEL[ex.primary] ?? ex.primary} ·{' '}
-                          {ex.equipment}
+                          {tm(
+                            ex.primary,
+                            MUSCLE_LABEL[ex.primary] ?? ex.primary,
+                          )}{' '}
+                          · {t(ex.equipment)}
                         </p>
                       </div>
                       <div className="flex shrink-0 gap-0.5">
@@ -258,7 +331,7 @@ export default function RoutineEditor() {
                     </div>
                     <div className="mt-2.5 flex flex-wrap items-center gap-2 border-t border-line pt-2.5">
                       <span className="text-[10px] font-black uppercase text-mute">
-                        Sets
+                        {t('Sets')}
                       </span>
                       <Stepper
                         value={routine.sets[exId] ?? 3}
@@ -271,7 +344,7 @@ export default function RoutineEditor() {
                         max={12}
                       />
                       <span className="ml-2 flex items-center gap-1 text-[10px] font-black uppercase text-mute">
-                        <Clock size={11} /> Rest
+                        <Clock size={11} /> {t('Rest')}
                       </span>
                       <Stepper
                         value={routine.rest[exId] ?? data.settings.restSec}
@@ -293,21 +366,21 @@ export default function RoutineEditor() {
                 onClick={() => setPicker(true)}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-line py-3 text-xs font-black text-mute hover:border-strong hover:text-dim"
               >
-                <Plus size={15} /> Add exercise
+                <Plus size={15} /> {t('Add exercise')}
               </button>
             </div>
           ) : (
             <EmptyState
               icon={<Dumbbell size={24} />}
-              title="No exercises yet"
-              body="Add the movements you want this routine to include."
+              title={t('No exercises yet')}
+              body={t('Add the movements you want this routine to include.')}
               action={
                 <Btn
                   variant="primary"
                   onClick={() => setPicker(true)}
                   icon={<Plus size={15} />}
                 >
-                  Add exercise
+                  {t('Add exercise')}
                 </Btn>
               }
             />
@@ -316,8 +389,8 @@ export default function RoutineEditor() {
 
         <div>
           <SectionHeader
-            title="Schedule"
-            subtitle="Tap days to plan this routine"
+            title={t('Schedule')}
+            subtitle={t('Tap days to plan this routine')}
           />
           <Card className="p-4">
             <div className="grid grid-cols-7 gap-1.5">
@@ -330,45 +403,49 @@ export default function RoutineEditor() {
                     className={`flex flex-col items-center gap-1 rounded-xl border px-1 py-2 text-[10px] font-black uppercase transition ${on ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]' : 'border-line bg-[var(--surface-2)] text-mute hover:border-strong'}`}
                   >
                     {on ? <Check size={13} /> : <Moon size={13} />}
-                    {d}
+                    {t(d)}
                   </button>
                 );
               })}
             </div>
             <p className="mt-3 text-[11px] font-semibold text-mute">
-              Scheduled days show on Today and Train. Only one routine per
-              weekday.
+              {t(
+                'Scheduled days show on Today and Train. Only one routine per weekday.',
+              )}
             </p>
           </Card>
 
-          <SectionHeader title="Routine tips" />
+          <SectionHeader title={t('Routine tips')} />
           <Card className="space-y-3 p-4 text-xs font-semibold text-dim">
             <div className="flex gap-2">
               <GripVertical size={15} className="mt-0.5 shrink-0 text-mute" />
               <p>
-                Order matters: big compound lifts first, isolation and finishers
-                later.
+                {t(
+                  'Order matters: big compound lifts first, isolation and finishers later.',
+                )}
               </p>
             </div>
             <div className="flex gap-2">
               <Save size={15} className="mt-0.5 shrink-0 text-mute" />
               <p>
-                Everything autosaves to this device. Use export in Settings for
-                a backup.
+                {t(
+                  'Everything autosaves to this device. Use export in Settings for a backup.',
+                )}
               </p>
             </div>
             <div className="flex gap-2">
               <Play size={15} className="mt-0.5 shrink-0 text-mute" />
               <p>
-                Starting the routine pre-fills sets from your last workout and
-                adds warm-ups.
+                {t(
+                  'Starting the routine pre-fills sets from your last workout and adds warm-ups.',
+                )}
               </p>
             </div>
           </Card>
 
           {routine.exerciseIds.length > 0 && (
             <Card className="mt-3 p-4">
-              <p className="label mb-2">Session preview</p>
+              <p className="label mb-2">{t('Session preview')}</p>
               <div className="space-y-1">
                 {routine.exerciseIds.map((eid, i) => {
                   const ex = all.find((e) => e.id === eid);
@@ -399,7 +476,7 @@ export default function RoutineEditor() {
         onClose={() => setPicker(false)}
         onPick={(ex) => addExercise(ex.id)}
         exclude={routine.exerciseIds}
-        title="Add to routine"
+        title={t('Add to routine')}
       />
 
       {dialogs}
@@ -408,12 +485,15 @@ export default function RoutineEditor() {
         onClose={() => setConfirmDelete(false)}
         onConfirm={() => {
           deleteRoutine(routine.id);
-          toast.push('Routine deleted');
+          toast.push(t('Routine deleted'));
           navigate('/routines');
         }}
-        title="Delete routine?"
-        body={`“${routine.name}” will be deleted and removed from the weekly plan. History is untouched.`}
-        confirmLabel="Delete routine"
+        title={t('Delete routine?')}
+        body={t(
+          '“{name}” will be deleted and removed from the weekly plan. History is untouched.',
+          { name: routine.name },
+        )}
+        confirmLabel={t('Delete routine')}
       />
     </div>
   );

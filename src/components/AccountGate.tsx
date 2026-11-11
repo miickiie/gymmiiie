@@ -19,8 +19,100 @@ import {
   type Account,
 } from '../lib/accounts';
 import { identityFieldErrors } from '../lib/identity';
+import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import { Btn, Card, Confirm, Field, Sheet, useToast } from './ui';
+
+const TH: Record<string, string> = {
+  'The older device log could not be opened. It has been kept.':
+    'เปิดบันทึกเดิมในเครื่องไม่ได้ แต่ยังเก็บไว้อยู่',
+  'The account log could not be loaded.': 'โหลดบันทึกของบัญชีไม่ได้',
+  'Connect to check the account session.':
+    'เชื่อมต่อเพื่อตรวจสอบเซสชันบัญชี',
+  'The log could not be saved on this device. Export a recovery copy or retry before signing out.':
+    'บันทึกข้อมูลลงเครื่องนี้ไม่ได้ ส่งออกสำเนาสำรองหรือลองใหม่ก่อนออกจากระบบ',
+  'Reconnect to finish signing out of the server.':
+    'เชื่อมต่อใหม่เพื่อออกจากระบบเซิร์ฟเวอร์ให้เสร็จ',
+  'Your session has ended. Enter your name and telephone to continue. Unsynced changes are kept with this account on this device.':
+    'เซสชันสิ้นสุดแล้ว กรอกชื่อและเบอร์โทรเพื่อไปต่อ การเปลี่ยนแปลงที่ยังไม่ซิงก์ยังเก็บไว้กับบัญชีนี้ในเครื่อง',
+  'Signed out on this device. Unsynced changes for {name} are kept here. Sign in on this device and sync before opening the latest log on another device.':
+    'ออกจากระบบในเครื่องนี้แล้ว การเปลี่ยนแปลงของ {name} ที่ยังไม่ซิงก์ยังอยู่ที่นี่ เข้าสู่ระบบในเครื่องนี้และซิงก์ก่อนเปิดข้อมูลล่าสุดบนเครื่องอื่น',
+  'Your tracking changes were synced. Signed out on this device.':
+    'ซิงก์ข้อมูลการฝึกแล้ว ออกจากระบบในเครื่องนี้เรียบร้อย',
+  'Your changes were synced. Enter the other user’s name and telephone.':
+    'ซิงก์ข้อมูลแล้ว กรอกชื่อและเบอร์โทรของผู้ใช้คนอื่น',
+  'Signed out. Your changes were synced to your account.':
+    'ออกจากระบบแล้ว ข้อมูลของคุณซิงก์กับบัญชีเรียบร้อย',
+  'The latest changes could not be synced. They remain on this device.':
+    'ซิงก์การเปลี่ยนแปลงล่าสุดไม่ได้ ข้อมูลยังอยู่ในเครื่องนี้',
+  'Your session has ended. Returning to sign in…':
+    'เซสชันสิ้นสุดแล้ว กำลังกลับไปหน้าเข้าสู่ระบบ…',
+  'The account log stays closed while you choose what to do.':
+    'บันทึกของบัญชีจะปิดอยู่จนกว่าคุณจะเลือกว่าจะทำอะไร',
+  'Changes are not synced yet': 'ยังไม่ได้ซิงก์การเปลี่ยนแปลง',
+  'Keep open': 'เปิดค้างไว้',
+  'Continue sign out': 'ออกจากระบบต่อ',
+  'The latest tracking data is kept on this device for {name}. It may not be available on another device until you return here and sync.':
+    'ข้อมูลการฝึกล่าสุดของ {name} เก็บไว้ในเครื่องนี้ อาจยังไม่แสดงบนเครื่องอื่นจนกว่าจะกลับมาที่นี่และซิงก์',
+  'Could not export the device copy.': 'ส่งออกสำเนาในเครื่องไม่ได้',
+  'Export device copy': 'ส่งออกสำเนาในเครื่อง',
+  'Checking your session…': 'กำลังตรวจสอบเซสชัน…',
+  'Saving this user’s log and signing out…':
+    'กำลังบันทึกข้อมูลผู้ใช้และออกจากระบบ…',
+  'Opening your account log…': 'กำลังเปิดบันทึกของบัญชี…',
+  'Keep this log before signing out': 'เก็บข้อมูลนี้ก่อนออกจากระบบ',
+  'Could not export this log.': 'ส่งออกข้อมูลนี้ไม่ได้',
+  'Export recovery copy': 'ส่งออกสำเนาสำรอง',
+  'Retry sign out': 'ลองออกจากระบบอีกครั้ง',
+  'Your account log is not open yet': 'ยังเปิดบันทึกของบัญชีไม่ได้',
+  'Retry online': 'ลองออนไลน์อีกครั้ง',
+  'Continue offline': 'ใช้แบบออฟไลน์ต่อ',
+  'Use another user': 'ใช้ผู้ใช้อื่น',
+  'No saved account log could be exported.':
+    'ไม่มีบันทึกบัญชีที่บันทึกไว้ให้ส่งออก',
+  'Enter the registration passphrase.': 'กรอกรหัสสำหรับสมัครสมาชิก',
+  'The request could not be completed. Retry when connected.':
+    'ทำรายการไม่สำเร็จ ลองใหม่เมื่อเชื่อมต่อ',
+  'Create your user': 'สร้างผู้ใช้ของคุณ',
+  'Welcome to Gymmiie': 'ยินดีต้อนรับสู่ Gymmiie',
+  'No user was found with these details. A registration passphrase is required to create one.':
+    'ไม่พบผู้ใช้ที่ตรงกับข้อมูลนี้ ต้องใช้รหัสสมัครสมาชิกเพื่อสร้างใหม่',
+  'Enter the same name and telephone to open your training log.':
+    'กรอกชื่อและเบอร์โทรเดิมเพื่อเปิดบันทึกการฝึกของคุณ',
+  Name: 'ชื่อ',
+  Telephone: 'เบอร์โทร',
+  'Include + and the international country calling code.':
+    'ใส่ + และรหัสประเทศด้วย',
+  'Registration passphrase': 'รหัสสมัครสมาชิก',
+  'Creating user…': 'กำลังสร้างผู้ใช้…',
+  'Opening your log…': 'กำลังเปิดบันทึกของคุณ…',
+  'Create user': 'สร้างผู้ใช้',
+  'Back to sign in': 'กลับไปหน้าเข้าสู่ระบบ',
+  'Retry connection': 'ลองเชื่อมต่ออีกครั้ง',
+  'An older device log is kept separately':
+    'มีบันทึกเดิมในเครื่องแยกเก็บไว้',
+  'Review it before choosing whether to import it into {name}’s account. Nothing has been assigned automatically.':
+    'ตรวจดูก่อนเลือกว่าจะนำเข้ายังบัญชีของ {name} หรือไม่ ยังไม่มีอะไรถูกกำหนดอัตโนมัติ',
+  'Review device log': 'ตรวจดูบันทึกในเครื่อง',
+  'Keep separate': 'แยกเก็บไว้',
+  'Review older device log': 'ตรวจดูบันทึกเดิมในเครื่อง',
+  'Import into this account…': 'นำเข้าบัญชีนี้…',
+  'Account: {name} · {telephone}': 'บัญชี: {name} · {telephone}',
+  'Current account log': 'บันทึกบัญชีปัจจุบัน',
+  'Older device log': 'บันทึกเดิมในเครื่อง',
+  'No older device log is available.': 'ไม่มีบันทึกเดิมในเครื่อง',
+  'Import replaces this account’s tracking data with a copy of the older device log. The original device log stays separate and unchanged.':
+    'การนำเข้าจะแทนที่ข้อมูลการฝึกของบัญชีนี้ด้วยสำเนาบันทึกเดิม โดยบันทึกเดิมยังแยกเก็บไว้และไม่ถูกเปลี่ยน',
+  'Replace {name}’s account log?': 'แทนที่บันทึกบัญชีของ {name}?',
+  'This imports the older device history into the named account and replaces its current tracking data. Export the current account log first to keep both copies.':
+    'การนำเข้าจะย้ายประวัติจากเครื่องเดิมเข้าบัญชีนี้และแทนที่ข้อมูลปัจจุบัน ส่งออกบันทึกบัญชีปัจจุบันก่อนถ้าต้องการเก็บทั้งสองชุด',
+  'Import device log': 'นำเข้าบันทึกในเครื่อง',
+  '{n} workouts': '{n} การฝึก',
+  '{n} routines': '{n} ตารางฝึก',
+  '{n} notes': '{n} โน้ต',
+  '{n} meals': '{n} มื้อ',
+  'active workout': 'กำลังฝึกอยู่',
+};
 
 type Phase =
   | 'checking'
@@ -93,6 +185,7 @@ function messageOf(error: unknown, fallback: string) {
 
 export default function AccountGate({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const { t } = useI18n(TH);
   const { clear: clearToasts } = useToast();
   const cloudStatus = useStore((state) => state.cloudStatus);
   const [phase, setPhase] = useState<Phase>('checking');
@@ -139,13 +232,15 @@ export default function AccountGate({ children }: { children: ReactNode }) {
             setLegacyError(
               messageOf(
                 failure,
-                'The older device log could not be opened. It has been kept.',
+                t('The older device log could not be opened. It has been kept.'),
               ),
             );
         });
     } catch (failure) {
       if (token !== generation.current) return;
-      setError(messageOf(failure, 'The account log could not be loaded.'));
+      setError(
+        messageOf(failure, t('The account log could not be loaded.')),
+      );
       setPhase(
         useStore.getState().cloudStatus === 'session-expired'
           ? 'signed-out'
@@ -176,7 +271,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
       if (token !== generation.current) return;
       const remembered = getRememberedAccount();
       setAccount(remembered);
-      setError(messageOf(failure, 'Connect to check the account session.'));
+      setError(messageOf(failure, t('Connect to check the account session.')));
       setPhase(remembered && !isLocallySignedOut() ? 'offline' : 'signed-out');
     }
   };
@@ -192,7 +287,9 @@ export default function AccountGate({ children }: { children: ReactNode }) {
       setError(
         messageOf(
           failure,
-          'The log could not be saved on this device. Export a recovery copy or retry before signing out.',
+          t(
+            'The log could not be saved on this device. Export a recovery copy or retry before signing out.',
+          ),
         ),
       );
       setPhase('leave-error');
@@ -205,21 +302,30 @@ export default function AccountGate({ children }: { children: ReactNode }) {
       } catch (failure) {
         remoteError = messageOf(
           failure,
-          'Reconnect to finish signing out of the server.',
+          t('Reconnect to finish signing out of the server.'),
         );
       }
     }
     setAccount(null);
     setNotice(
       reason === 'expired'
-        ? 'Your session has ended. Enter your name and telephone to continue. Unsynced changes are kept with this account on this device.'
+        ? t(
+            'Your session has ended. Enter your name and telephone to continue. Unsynced changes are kept with this account on this device.',
+          )
         : unsynced
-          ? `Signed out on this device. Unsynced changes for ${candidate.name} are kept here. Sign in on this device and sync before opening the latest log on another device.${remoteError ? ` ${remoteError}` : ''}`
+          ? `${t(
+              'Signed out on this device. Unsynced changes for {name} are kept here. Sign in on this device and sync before opening the latest log on another device.',
+              { name: candidate.name },
+            )}${remoteError ? ` ${remoteError}` : ''}`
           : remoteError
-            ? `Your tracking changes were synced. Signed out on this device. ${remoteError}`
+            ? `${t(
+                'Your tracking changes were synced. Signed out on this device.',
+              )} ${remoteError}`
             : reason === 'switch'
-              ? 'Your changes were synced. Enter the other user’s name and telephone.'
-              : 'Signed out. Your changes were synced to your account.',
+              ? t(
+                  'Your changes were synced. Enter the other user’s name and telephone.',
+                )
+              : t('Signed out. Your changes were synced to your account.'),
     );
     setPhase('signed-out');
     navigate('/', { replace: true });
@@ -251,7 +357,9 @@ export default function AccountGate({ children }: { children: ReactNode }) {
         setError(
           messageOf(
             failure,
-            'The latest changes could not be synced. They remain on this device.',
+            t(
+              'The latest changes could not be synced. They remain on this device.',
+            ),
           ),
         );
         setPhase('leave-pending');
@@ -290,7 +398,9 @@ export default function AccountGate({ children }: { children: ReactNode }) {
   if (phase === 'ready' && cloudStatus === 'session-expired')
     return (
       <PublicShell>
-        <p role="status">Your session has ended. Returning to sign in…</p>
+        <p role="status">
+          {t('Your session has ended. Returning to sign in…')}
+        </p>
       </PublicShell>
     );
   if (phase === 'ready' && account)
@@ -333,16 +443,16 @@ export default function AccountGate({ children }: { children: ReactNode }) {
     return (
       <PublicShell>
         <p className="text-sm text-dim">
-          The account log stays closed while you choose what to do.
+          {t('The account log stays closed while you choose what to do.')}
         </p>
         <Sheet
           open
           onClose={keepOpen}
-          title="Changes are not synced yet"
+          title={t('Changes are not synced yet')}
           footer={
             <div className="flex flex-wrap gap-2">
               <Btn className="flex-1" onClick={keepOpen}>
-                Keep open
+                {t('Keep open')}
               </Btn>
               <Btn
                 variant="primary"
@@ -353,15 +463,16 @@ export default function AccountGate({ children }: { children: ReactNode }) {
                     void finishLeave(candidate, leaveReason.current, true);
                 }}
               >
-                Continue sign out
+                {t('Continue sign out')}
               </Btn>
             </div>
           }
         >
           <p className="text-sm font-semibold">
-            The latest tracking data is kept on this device for{' '}
-            {leaveAccount.current?.name}. It may not be available on another
-            device until you return here and sync.
+            {t(
+              'The latest tracking data is kept on this device for {name}. It may not be available on another device until you return here and sync.',
+              { name: leaveAccount.current?.name ?? '' },
+            )}
           </p>
           <p role="alert" className="mt-3 text-sm text-[var(--bad)]">
             {error}
@@ -374,12 +485,12 @@ export default function AccountGate({ children }: { children: ReactNode }) {
                 .recoveryExport()
                 .catch((failure) =>
                   setError(
-                    messageOf(failure, 'Could not export the device copy.'),
+                    messageOf(failure, t('Could not export the device copy.')),
                   ),
                 )
             }
           >
-            Export device copy
+            {t('Export device copy')}
           </Btn>
         </Sheet>
       </PublicShell>
@@ -392,10 +503,10 @@ export default function AccountGate({ children }: { children: ReactNode }) {
           className="py-12 text-center text-sm font-bold text-dim"
         >
           {phase === 'checking'
-            ? 'Checking your session…'
+            ? t('Checking your session…')
             : phase === 'leaving'
-              ? 'Saving this user’s log and signing out…'
-              : 'Opening your account log…'}
+              ? t('Saving this user’s log and signing out…')
+              : t('Opening your account log…')}
         </p>
       </PublicShell>
     );
@@ -403,30 +514,32 @@ export default function AccountGate({ children }: { children: ReactNode }) {
     return (
       <PublicShell>
         <h1 className="text-2xl font-black">
-          Keep this log before signing out
+          {t('Keep this log before signing out')}
         </h1>
         <p role="alert" className="mt-3 text-sm text-[var(--bad)]">
           {error}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
-          <Btn onClick={keepOpen}>Keep open</Btn>
+          <Btn onClick={keepOpen}>{t('Keep open')}</Btn>
           <Btn
             onClick={() =>
               void useStore
                 .getState()
                 .recoveryExport()
                 .catch((failure) =>
-                  setError(messageOf(failure, 'Could not export this log.')),
+                  setError(
+                    messageOf(failure, t('Could not export this log.')),
+                  ),
                 )
             }
           >
-            Export recovery copy
+            {t('Export recovery copy')}
           </Btn>
           <Btn
             variant="primary"
             onClick={() => void leave(leaveReason.current)}
           >
-            Retry sign out
+            {t('Retry sign out')}
           </Btn>
         </div>
       </PublicShell>
@@ -435,7 +548,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
     return (
       <PublicShell>
         <h1 className="text-2xl font-black">
-          Your account log is not open yet
+          {t('Your account log is not open yet')}
         </h1>
         <p role="alert" className="mt-3 text-sm text-dim">
           {error}
@@ -448,15 +561,17 @@ export default function AccountGate({ children }: { children: ReactNode }) {
             variant="primary"
             onClick={() => void activate(account, false, true)}
           >
-            Retry online
+            {t('Retry online')}
           </Btn>
           {!isLocallySignedOut() &&
             getRememberedAccount()?.id === account.id && (
               <Btn onClick={() => void activate(account, true, true)}>
-                Continue offline
+                {t('Continue offline')}
               </Btn>
             )}
-          <Btn onClick={() => void leave('switch')}>Use another user</Btn>
+          <Btn onClick={() => void leave('switch')}>
+            {t('Use another user')}
+          </Btn>
           <Btn
             onClick={() =>
               void useStore
@@ -466,13 +581,13 @@ export default function AccountGate({ children }: { children: ReactNode }) {
                   setError(
                     messageOf(
                       failure,
-                      'No saved account log could be exported.',
+                      t('No saved account log could be exported.'),
                     ),
                   ),
                 )
             }
           >
-            Export recovery copy
+            {t('Export recovery copy')}
           </Btn>
         </div>
       </PublicShell>
@@ -490,6 +605,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
 }
 
 function PublicShell({ children }: { children: ReactNode }) {
+  const { t } = useI18n(TH);
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center px-5 py-10">
       <div className="mb-7 flex items-center gap-3">
@@ -498,7 +614,9 @@ function PublicShell({ children }: { children: ReactNode }) {
         </div>
         <div>
           <p className="text-xl font-black">Gymmiie</p>
-          <p className="text-xs font-bold text-mute">Lift · log · grow</p>
+          <p className="text-xs font-bold text-mute">
+            {t('Lift · log · grow')}
+          </p>
         </div>
       </div>
       <Card className="p-5 sm:p-6">{children}</Card>
@@ -516,6 +634,7 @@ function AccountForm({
   onAccount: (account: Account) => Promise<void>;
   onRetry: () => void;
 }) {
+  const { t } = useI18n(TH);
   const [name, setName] = useState('');
   const [telephone, setTelephone] = useState('');
   const [passphrase, setPassphrase] = useState('');
@@ -538,7 +657,7 @@ function AccountForm({
     setFields(invalid);
     if (Object.keys(invalid).length) return;
     if (register && !passphrase) {
-      setError('Enter the registration passphrase.');
+      setError(t('Enter the registration passphrase.'));
       return;
     }
     setBusy(true);
@@ -562,7 +681,7 @@ function AccountForm({
         setError(
           messageOf(
             failure,
-            'The request could not be completed. Retry when connected.',
+            t('The request could not be completed. Retry when connected.'),
           ),
         );
     } finally {
@@ -572,12 +691,16 @@ function AccountForm({
   return (
     <form onSubmit={(event) => void submit(event)}>
       <h1 className="text-2xl font-black">
-        {register ? 'Create your user' : 'Welcome to Gymmiie'}
+        {register ? t('Create your user') : t('Welcome to Gymmiie')}
       </h1>
       <p className="mt-2 text-sm font-semibold text-dim">
         {register
-          ? 'No user was found with these details. A registration passphrase is required to create one.'
-          : 'Enter the same name and telephone to open your training log.'}
+          ? t(
+              'No user was found with these details. A registration passphrase is required to create one.',
+            )
+          : t(
+              'Enter the same name and telephone to open your training log.',
+            )}
       </p>
       {notice && (
         <p
@@ -588,7 +711,7 @@ function AccountForm({
         </p>
       )}
       <div className="mt-5 space-y-4">
-        <Field label="Name">
+        <Field label={t('Name')}>
           <input
             name="name"
             autoComplete="name"
@@ -613,11 +736,11 @@ function AccountForm({
           </p>
         )}
         <Field
-          label="Telephone"
-          hint="Include + and the international country calling code."
+          label={t('Telephone')}
+          hint={t('Include + and the international country calling code.')}
         >
           <input
-            aria-label="Telephone"
+            aria-label={t('Telephone')}
             name="telephone"
             type="tel"
             inputMode="tel"
@@ -645,7 +768,7 @@ function AccountForm({
           </p>
         )}
         {register && (
-          <Field label="Registration passphrase">
+          <Field label={t('Registration passphrase')}>
             <input
               name="registration-passphrase"
               type="password"
@@ -671,20 +794,20 @@ function AccountForm({
       >
         {busy
           ? register
-            ? 'Creating user…'
-            : 'Opening your log…'
+            ? t('Creating user…')
+            : t('Opening your log…')
           : register
-            ? 'Create user'
-            : 'Continue'}
+            ? t('Create user')
+            : t('Continue')}
       </Btn>
       {register && (
         <Btn className="mt-2 w-full" disabled={busy} onClick={resetIdentity}>
-          Back to sign in
+          {t('Back to sign in')}
         </Btn>
       )}
       {initialError && !register && (
         <Btn className="mt-2 w-full" disabled={busy} onClick={onRetry}>
-          Retry connection
+          {t('Retry connection')}
         </Btn>
       )}
     </form>
@@ -692,6 +815,7 @@ function AccountForm({
 }
 
 export function LegacyDeviceNotice() {
+  const { t } = useI18n(TH);
   const {
     account,
     legacy,
@@ -704,19 +828,22 @@ export function LegacyDeviceNotice() {
   return (
     <section className="mb-4 rounded-2xl border border-line bg-[var(--surface)] p-4">
       <h2 className="text-sm font-black">
-        An older device log is kept separately
+        {t('An older device log is kept separately')}
       </h2>
       <p className="mt-2 text-xs font-semibold text-dim">
         {legacyError ||
-          `Review it before choosing whether to import it into ${account.name}’s account. Nothing has been assigned automatically.`}
+          t(
+            'Review it before choosing whether to import it into {name}’s account. Nothing has been assigned automatically.',
+            { name: account.name },
+          )}
       </p>
       {legacy && (
         <div className="mt-3 flex flex-wrap gap-2">
           <Btn size="sm" onClick={reviewLegacy}>
-            Review device log
+            {t('Review device log')}
           </Btn>
           <Btn size="sm" onClick={keepLegacySeparate}>
-            Keep separate
+            {t('Keep separate')}
           </Btn>
         </div>
       )}
@@ -738,23 +865,24 @@ function LegacyImportDialog({
   account: Account;
   onImported: () => void;
 }) {
+  const { t } = useI18n(TH);
   const data = useStore((state) => state.data);
   const [confirm, setConfirm] = useState(false);
   useEffect(() => {
     if (!open) setConfirm(false);
   }, [open]);
   const counts = (snapshot: AppData) =>
-    `${snapshot.sessions.length} workouts · ${snapshot.routines.length} routines · ${snapshot.notes.length} notes · ${snapshot.nutrition.entries.length} meals${snapshot.active ? ' · active workout' : ''}`;
+    `${t('{n} workouts', { n: snapshot.sessions.length })} · ${t('{n} routines', { n: snapshot.routines.length })} · ${t('{n} notes', { n: snapshot.notes.length })} · ${t('{n} meals', { n: snapshot.nutrition.entries.length })}${snapshot.active ? ` · ${t('active workout')}` : ''}`;
   return (
     <>
       <Sheet
         open={open}
         onClose={onClose}
-        title="Review older device log"
+        title={t('Review older device log')}
         footer={
           <div className="flex gap-2">
             <Btn className="flex-1" onClick={onSeparate}>
-              Keep separate
+              {t('Keep separate')}
             </Btn>
             <Btn
               variant="primary"
@@ -762,31 +890,37 @@ function LegacyImportDialog({
               disabled={!legacy}
               onClick={() => setConfirm(true)}
             >
-              Import into this account…
+              {t('Import into this account…')}
             </Btn>
           </div>
         }
       >
         <p className="text-sm font-semibold">
-          Account: {account.name} · {account.telephone}
+          {t('Account: {name} · {telephone}', {
+            name: account.name,
+            telephone: account.telephone,
+          })}
         </p>
-        <h3 className="label mt-4">Current account log</h3>
+        <h3 className="label mt-4">{t('Current account log')}</h3>
         <p className="mt-2 text-sm">{counts(data)}</p>
-        <h3 className="label mt-4">Older device log</h3>
+        <h3 className="label mt-4">{t('Older device log')}</h3>
         <p className="mt-2 text-sm">
-          {legacy ? counts(legacy) : 'No older device log is available.'}
+          {legacy ? counts(legacy) : t('No older device log is available.')}
         </p>
         <p className="mt-4 text-sm text-dim">
-          Import replaces this account’s tracking data with a copy of the older
-          device log. The original device log stays separate and unchanged.
+          {t(
+            'Import replaces this account’s tracking data with a copy of the older device log. The original device log stays separate and unchanged.',
+          )}
         </p>
       </Sheet>
       <Confirm
         open={confirm}
         onClose={() => setConfirm(false)}
-        title={`Replace ${account.name}’s account log?`}
-        body="This imports the older device history into the named account and replaces its current tracking data. Export the current account log first to keep both copies."
-        confirmLabel="Import device log"
+        title={t('Replace {name}’s account log?', { name: account.name })}
+        body={t(
+          'This imports the older device history into the named account and replaces its current tracking data. Export the current account log first to keep both copies.',
+        )}
+        confirmLabel={t('Import device log')}
         onConfirm={async () => {
           await useStore.getState().importLegacyDeviceData();
           onImported();

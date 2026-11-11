@@ -45,8 +45,105 @@ import {
   toDisplayWeight,
 } from '../lib/stats';
 import { allExercises, useStore } from '../lib/store';
+import { useI18n } from '../lib/i18n';
+
+const TH: Record<string, string> = {
+  'Exercise not found': 'ไม่พบท่านี้',
+  'It may have been deleted or the link is incomplete.':
+    'อาจถูกลบไปแล้วหรือลิงก์ไม่ครบ',
+  'Back to library': 'กลับไปคลังท่า',
+  'Resolve the storage issue before changing this workout':
+    'แก้ปัญหาที่เก็บข้อมูลก่อนแก้ไขการฝึกนี้',
+  'Resume the workout before adding an exercise': 'ฝึกต่อก่อนเพิ่มท่า',
+  '{name} is already in this workout': '{name} อยู่ในตารางนี้แล้ว',
+  '{name} added to current workout': 'เพิ่ม {name} ในการฝึกนี้แล้ว',
+  'Note saved': 'บันทึกโน้ตแล้ว',
+  Back: 'ย้อนกลับ',
+  Exercise: 'ท่าออกกำลัง',
+  Favourite: 'รายการโปรด',
+  Unarchived: 'ยกเลิกการเก็บถาวรแล้ว',
+  Archived: 'เก็บถาวร',
+  Archive: 'เก็บถาวร',
+  Delete: 'ลบ',
+  custom: 'กำหนดเอง',
+  ' · primary': ' · หลัก',
+  'Add to workout': 'เพิ่มในการฝึก',
+  'Start with this': 'เริ่มด้วยท่านี้',
+  'Add note': 'เพิ่มโน้ต',
+  'Last session': 'ครั้งล่าสุด',
+  'How to perform it': 'วิธีทำ',
+  '{n} steps · {source}': '{n} ขั้นตอน · {source}',
+  'Your instructions': 'คำแนะนำของคุณ',
+  'Form guide': 'คู่มือท่าทาง',
+  'Guide unavailable': 'ยังไม่มีคู่มือ',
+  Tips: 'เคล็ดลับ',
+  'Your exercise instructions': 'คำแนะนำท่านี้ของคุณ',
+  Reference: 'อ้างอิง',
+  'No form notes yet': 'ยังไม่มีโน้ตท่าทาง',
+  'Form guidance is not available for this movement.':
+    'ยังไม่มีคำแนะนำท่าทางสำหรับท่านี้',
+  'Your history': 'ประวัติของคุณ',
+  '{n} recent sessions': '{n} ครั้งล่าสุด',
+  'Nothing logged yet': 'ยังไม่มีการบันทึก',
+  'Open session': 'เปิดการฝึก',
+  '{n} working sets': '{n} เซ็ตทำงาน',
+  ' · intensity techniques': ' · เทคนิคเพิ่มความหนัก',
+  'No history yet': 'ยังไม่มีประวัติ',
+  'Log this exercise in a workout to start tracking e1RM and PRs.':
+    'บันทึกท่านี้ในการฝึกเพื่อเริ่มติดตาม e1RM และ PR',
+  'Train it now': 'ฝึกเลย',
+  'Exercise notes': 'โน้ตของท่า',
+  Journal: 'บันทึก',
+  note: 'โน้ต',
+  plan: 'แผน',
+  done: 'เสร็จ',
+  pain: 'เจ็บ',
+  'Personal record': 'สถิติส่วนตัว',
+  'Top weight': 'น้ำหนักสูงสุด',
+  'Longest time': 'เวลานานสุด',
+  'Farthest distance': 'ระยะไกลสุด',
+  'Most repetitions': 'จำนวนครั้งมากสุด',
+  'Best set {load}': 'เซ็ตดีที่สุด {load}',
+  'No records yet. Log a working set to start tracking.':
+    'ยังไม่มีสถิติ บันทึกเซ็ตทำงานเพื่อเริ่มติดตาม',
+  'Estimated 1RM': '1RM โดยประมาณ',
+  '{n} points': '{n} จุด',
+  Muscles: 'กล้ามเนื้อ',
+  primary: 'หลัก',
+  secondary: 'รอง',
+  'Similar movements': 'ท่าที่คล้ายกัน',
+  'Note on {name}': 'โน้ตของ {name}',
+  Cancel: 'ยกเลิก',
+  'Save note': 'บันทึกโน้ต',
+  'Cues that worked, pain to watch, setup notes…':
+    'คิวที่ได้ผล จุดที่เจ็บ โน้ตการตั้งท่า…',
+  'Attached to {name} and visible in your journal.':
+    'แนบกับ {name} และแสดงในบันทึกของคุณ',
+  'Exercise deleted': 'ลบท่าแล้ว',
+  'Delete custom exercise?': 'ลบท่าที่สร้างเอง?',
+  'It will be removed from your library and any routines using it. Logged history stays intact.':
+    'ท่าจะถูกนำออกจากคลังและตารางฝึกที่ใช้ท่านี้ ประวัติที่บันทึกไว้ยังอยู่',
+  'Delete exercise': 'ลบท่า',
+  'Also known as {names}': 'หรือเรียกอีกชื่อว่า {names}',
+  time: 'เวลา',
+  cardio: 'คาร์ดิโอ',
+  Beginner: 'เริ่มต้น',
+  Intermediate: 'ปานกลาง',
+  Advanced: 'ขั้นสูง',
+  Barbell: 'บาร์เบล',
+  Dumbbell: 'ดัมเบล',
+  Cable: 'เคเบิล',
+  Machine: 'เครื่อง',
+  Bodyweight: 'น้ำหนักตัว',
+  Weighted: 'เพิ่มน้ำหนัก',
+  Band: 'ยางยืด',
+  Kettlebell: 'เคตเทิลเบล',
+  Rings: 'ห่วง',
+  Other: 'อื่น ๆ',
+};
 
 export default function ExerciseDetail() {
+  const { t, tm } = useI18n(TH);
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -68,11 +165,11 @@ export default function ExerciseDetail() {
     return (
       <EmptyState
         icon={<BookOpen size={24} />}
-        title="Exercise not found"
-        body="It may have been deleted or the link is incomplete."
+        title={t('Exercise not found')}
+        body={t('It may have been deleted or the link is incomplete.')}
         action={
           <Btn variant="primary" onClick={() => navigate('/library')}>
-            Back to library
+            {t('Back to library')}
           </Btn>
         }
       />
@@ -111,14 +208,14 @@ export default function ExerciseDetail() {
       state.persistenceStatus === 'conflict'
     ) {
       toast.push(
-        'Resolve the storage issue before changing this workout',
+        t('Resolve the storage issue before changing this workout'),
         'bad',
       );
       return;
     }
     if (data.active) {
       if (data.active.pausedAt) {
-        toast.push('Resume the workout before adding an exercise', 'bad');
+        toast.push(t('Resume the workout before adding an exercise'), 'bad');
         navigate('/session');
         return;
       }
@@ -128,8 +225,8 @@ export default function ExerciseDetail() {
       addExerciseToSession(ex.id);
       toast.push(
         alreadyAdded
-          ? `${ex.name} is already in this workout`
-          : `${ex.name} added to current workout`,
+          ? t('{name} is already in this workout', { name: ex.name })
+          : t('{name} added to current workout', { name: ex.name }),
       );
       navigate('/session');
       return;
@@ -147,7 +244,7 @@ export default function ExerciseDetail() {
     });
     setNote('');
     setNoteOpen(false);
-    toast.push('Note saved', 'good');
+    toast.push(t('Note saved'), 'good');
   };
 
   return (
@@ -155,27 +252,27 @@ export default function ExerciseDetail() {
       <div className="mb-3 flex items-center gap-2">
         <button
           onClick={() => navigate(-1)}
-          aria-label="Back"
+          aria-label={t('Back')}
           className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
         >
           <ArrowLeft size={18} />
         </button>
-        <p className="label">Exercise</p>
+        <p className="label">{t('Exercise')}</p>
         <div className="ml-auto flex gap-1">
           <button
             onClick={() => toggleFavorite(ex.id)}
             className={`grid h-9 w-9 place-items-center rounded-full ${isFav ? 'bg-[var(--warn)]/10 text-[var(--warn)]' : 'bg-[var(--surface-2)] text-mute'}`}
-            title="Favourite"
+            title={t('Favourite')}
           >
             <Star size={17} fill={isFav ? 'currentColor' : 'none'} />
           </button>
           <button
             onClick={() => {
               toggleArchived(ex.id);
-              toast.push(isArchived ? 'Unarchived' : 'Archived');
+              toast.push(isArchived ? t('Unarchived') : t('Archived'));
             }}
             className={`grid h-9 w-9 place-items-center rounded-full ${isArchived ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'bg-[var(--surface-2)] text-mute'}`}
-            title="Archive"
+            title={t('Archive')}
           >
             <Archive size={16} />
           </button>
@@ -183,7 +280,7 @@ export default function ExerciseDetail() {
             <button
               onClick={() => setConfirmDelete(true)}
               className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-mute hover:text-[var(--bad)]"
-              title="Delete"
+              title={t('Delete')}
             >
               <Trash2 size={16} />
             </button>
@@ -207,7 +304,7 @@ export default function ExerciseDetail() {
               </h1>
               {isCustom && (
                 <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--accent)]">
-                  custom
+                  {t('custom')}
                 </span>
               )}
               {isFav && (
@@ -224,21 +321,21 @@ export default function ExerciseDetail() {
                   key={m.id}
                   className="flex items-center gap-1 rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-[10px] font-black text-dim"
                 >
-                  <MuscleDot id={m.id} size={5} /> {m.label}
-                  {m.id === ex.primary ? ' · primary' : ''}
+                  <MuscleDot id={m.id} size={5} /> {tm(m.id, m.label)}
+                  {m.id === ex.primary ? t(' · primary') : ''}
                 </span>
               ))}
             </div>
             <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] font-black uppercase tracking-wide text-mute">
               <span className="rounded-full border border-line px-2 py-0.5">
-                {ex.equipment}
+                {t(ex.equipment)}
               </span>
               <span className="rounded-full border border-line px-2 py-0.5">
-                {ex.difficulty}
+                {t(ex.difficulty)}
               </span>
               {modeFor(ex) && (
                 <span className="rounded-full border border-line px-2 py-0.5 text-[var(--accent)]">
-                  {modeFor(ex)}
+                  {t(modeFor(ex))}
                 </span>
               )}
             </div>
@@ -250,14 +347,14 @@ export default function ExerciseDetail() {
             onClick={start}
             icon={data.active ? <Plus size={16} /> : <Zap size={16} />}
           >
-            {data.active ? 'Add to workout' : 'Start with this'}
+            {data.active ? t('Add to workout') : t('Start with this')}
           </Btn>
           <Btn
             variant="soft"
             onClick={() => setNoteOpen(true)}
             icon={<NotebookPen size={15} />}
           >
-            Add note
+            {t('Add note')}
           </Btn>
           {last && (
             <Btn
@@ -265,7 +362,7 @@ export default function ExerciseDetail() {
               onClick={() => navigate(`/history/${last.session.id}`)}
               icon={<History size={15} />}
             >
-              Last session
+              {t('Last session')}
             </Btn>
           )}
         </div>
@@ -274,11 +371,16 @@ export default function ExerciseDetail() {
       <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
         <div>
           <SectionHeader
-            title="How to perform it"
+            title={t('How to perform it')}
             subtitle={
               steps.length
-                ? `${steps.length} steps · ${isCustom ? 'Your instructions' : 'Form guide'}`
-                : 'Guide unavailable'
+                ? t('{n} steps · {source}', {
+                    n: steps.length,
+                    source: isCustom
+                      ? t('Your instructions')
+                      : t('Form guide'),
+                  })
+                : t('Guide unavailable')
             }
           />
           {steps.length ? (
@@ -298,22 +400,24 @@ export default function ExerciseDetail() {
               {tips.length > 0 && (
                 <div className="mt-4 rounded-2xl bg-[var(--surface-2)] p-3">
                   <p className="text-[10px] font-black uppercase tracking-wider text-mute">
-                    Tips
+                    {t('Tips')}
                   </p>
                   <ul className="mt-1.5 space-y-1.5">
-                    {tips.map((t, i) => (
+                    {tips.map((tip, i) => (
                       <li
                         key={i}
                         className="flex gap-2 text-xs font-semibold leading-relaxed text-dim"
                       >
-                        <span className="text-[var(--accent)]">•</span> {t}
+                        <span className="text-[var(--accent)]">•</span> {tip}
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
               <p className="mt-3 text-[10px] font-bold text-mute">
-                {isCustom ? 'Your exercise instructions' : 'Form guide'}
+                {isCustom
+                  ? t('Your exercise instructions')
+                  : t('Form guide')}
                 {instr?.url && (
                   <>
                     {' '}
@@ -324,7 +428,7 @@ export default function ExerciseDetail() {
                       rel="noreferrer"
                       className="text-[var(--accent)] underline"
                     >
-                      Reference
+                      {t('Reference')}
                     </a>
                   </>
                 )}
@@ -333,17 +437,17 @@ export default function ExerciseDetail() {
           ) : (
             <EmptyState
               icon={<BookOpen size={22} />}
-              title="No form notes yet"
-              body="Form guidance is not available for this movement."
+              title={t('No form notes yet')}
+              body={t('Form guidance is not available for this movement.')}
             />
           )}
 
           <SectionHeader
-            title="Your history"
+            title={t('Your history')}
             subtitle={
               history.length
-                ? `${history.length} recent sessions`
-                : 'Nothing logged yet'
+                ? t('{n} recent sessions', { n: history.length })
+                : t('Nothing logged yet')
             }
             action={
               last ? (
@@ -351,7 +455,7 @@ export default function ExerciseDetail() {
                   to={`/history/${last.session.id}`}
                   className="text-[11px] font-black text-[var(--accent)]"
                 >
-                  Open session
+                  {t('Open session')}
                 </Link>
               ) : undefined
             }
@@ -378,9 +482,9 @@ export default function ExerciseDetail() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-extrabold">
-                        {sets.length} working sets
+                        {t('{n} working sets', { n: sets.length })}
                         {sets.some((s) => s.kind !== 'normal')
-                          ? ' · intensity techniques'
+                          ? t(' · intensity techniques')
                           : ''}
                       </p>
                       <p className="truncate text-[11px] font-bold text-mute">
@@ -399,11 +503,13 @@ export default function ExerciseDetail() {
           ) : (
             <EmptyState
               icon={<Dumbbell size={22} />}
-              title="No history yet"
-              body="Log this exercise in a workout to start tracking e1RM and PRs."
+              title={t('No history yet')}
+              body={t(
+                'Log this exercise in a workout to start tracking e1RM and PRs.',
+              )}
               action={
                 <Btn variant="primary" size="sm" onClick={start}>
-                  Train it now
+                  {t('Train it now')}
                 </Btn>
               }
             />
@@ -412,13 +518,13 @@ export default function ExerciseDetail() {
           {notes.length > 0 && (
             <>
               <SectionHeader
-                title="Exercise notes"
+                title={t('Exercise notes')}
                 action={
                   <Link
                     to="/notes"
                     className="text-[11px] font-black text-[var(--accent)]"
                   >
-                    Journal
+                    {t('Journal')}
                   </Link>
                 }
               />
@@ -426,7 +532,8 @@ export default function ExerciseDetail() {
                 {notes.map((n) => (
                   <div key={n.id} className="px-4 py-3">
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase text-mute">
-                      <NotebookPen size={11} /> {relativeDay(n.date)} · {n.kind}
+                      <NotebookPen size={11} /> {relativeDay(n.date)} ·{' '}
+                      {t(n.kind)}
                     </div>
                     <p className="mt-1 text-sm font-semibold text-dim">
                       {n.text}
@@ -442,7 +549,7 @@ export default function ExerciseDetail() {
           <Card className="p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="label">Personal record</p>
+                <p className="label">{t('Personal record')}</p>
                 <p className="num mt-1 text-3xl font-black text-accent">
                   {record ? recordValue(record, unit) : '—'}
                 </p>
@@ -453,7 +560,7 @@ export default function ExerciseDetail() {
             </div>
             {record && (
               <p className="mt-2 text-xs font-bold text-mute">
-                {recordLabel(record.kind)}
+                {t(recordLabel(record.kind))}
                 {record.kind === 'weight' && record.oneRm > 0
                   ? ` · e1RM ${toDisplayWeight(record.oneRm, unit).toFixed(1)} ${unit}`
                   : ''}
@@ -462,8 +569,9 @@ export default function ExerciseDetail() {
             {best && record?.kind === 'weight' ? (
               <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-bold text-mute">
                 <span className="rounded-full bg-[var(--surface-2)] px-2 py-1">
-                  Best set {toDisplayWeight(best.set.weight, unit).toFixed(1)}{' '}
-                  {unit} × {best.set.reps}
+                  {t('Best set {load}', {
+                    load: `${toDisplayWeight(best.set.weight, unit).toFixed(1)} ${unit} × ${best.set.reps}`,
+                  })}
                 </span>
                 <span className="rounded-full bg-[var(--surface-2)] px-2 py-1">
                   {relativeDay(dateKey(best.date))}
@@ -476,7 +584,7 @@ export default function ExerciseDetail() {
               </div>
             ) : !record ? (
               <p className="mt-3 text-xs font-semibold text-mute">
-                No records yet. Log a working set to start tracking.
+                {t('No records yet. Log a working set to start tracking.')}
               </p>
             ) : null}
           </Card>
@@ -486,9 +594,10 @@ export default function ExerciseDetail() {
             series.length > 1 && (
               <Card className="mt-3 p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-black">Estimated 1RM</p>
+                  <p className="text-sm font-black">{t('Estimated 1RM')}</p>
                   <span className="flex items-center gap-1 text-[10px] font-black text-[var(--good)]">
-                    <TrendingUp size={12} /> {series.length} points
+                    <TrendingUp size={12} />{' '}
+                    {t('{n} points', { n: series.length })}
                   </span>
                 </div>
                 <LineChart
@@ -501,17 +610,17 @@ export default function ExerciseDetail() {
               </Card>
             )}
 
-          <SectionHeader title="Muscles" />
+          <SectionHeader title={t('Muscles')} />
           <Card className="p-4">
             <div className="space-y-2">
               {muscleOptions.map((m) => (
                 <div key={m.id} className="flex items-center gap-2">
                   <MuscleDot id={m.id} size={8} />
                   <span className="flex-1 text-xs font-extrabold">
-                    {m.label}
+                    {tm(m.id, m.label)}
                   </span>
                   <span className="text-[10px] font-black uppercase text-mute">
-                    {m.id === ex.primary ? 'primary' : 'secondary'}
+                    {m.id === ex.primary ? t('primary') : t('secondary')}
                   </span>
                 </div>
               ))}
@@ -520,7 +629,7 @@ export default function ExerciseDetail() {
 
           {related.length > 0 && (
             <>
-              <SectionHeader title="Similar movements" />
+              <SectionHeader title={t('Similar movements')} />
               <Card className="divide-y divide-[var(--line)] overflow-hidden">
                 {related.map((r) => (
                   <Link
@@ -544,11 +653,11 @@ export default function ExerciseDetail() {
       <Sheet
         open={noteOpen}
         onClose={() => setNoteOpen(false)}
-        title={`Note on ${ex.name}`}
+        title={t('Note on {name}', { name: ex.name })}
         footer={
           <div className="flex gap-2">
             <Btn className="flex-1" onClick={() => setNoteOpen(false)}>
-              Cancel
+              {t('Cancel')}
             </Btn>
             <Btn
               className="flex-1"
@@ -556,7 +665,7 @@ export default function ExerciseDetail() {
               onClick={addNote}
               icon={<Plus size={15} />}
             >
-              Save note
+              {t('Save note')}
             </Btn>
           </div>
         }
@@ -564,12 +673,14 @@ export default function ExerciseDetail() {
         <textarea
           autoFocus
           className="input min-h-[120px]"
-          placeholder="Cues that worked, pain to watch, setup notes…"
+          placeholder={t('Cues that worked, pain to watch, setup notes…')}
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
         <p className="mt-2 text-[11px] font-semibold text-mute">
-          Attached to {ex.name} and visible in your journal.
+          {t('Attached to {name} and visible in your journal.', {
+            name: ex.name,
+          })}
         </p>
       </Sheet>
 
@@ -579,17 +690,19 @@ export default function ExerciseDetail() {
         onClose={() => setConfirmDelete(false)}
         onConfirm={() => {
           deleteCustomExercise(ex.id);
-          toast.push('Exercise deleted');
+          toast.push(t('Exercise deleted'));
           navigate('/library');
         }}
-        title="Delete custom exercise?"
-        body="It will be removed from your library and any routines using it. Logged history stays intact."
-        confirmLabel="Delete exercise"
+        title={t('Delete custom exercise?')}
+        body={t(
+          'It will be removed from your library and any routines using it. Logged history stays intact.',
+        )}
+        confirmLabel={t('Delete exercise')}
       />
 
       {ex.aliases.length > 0 && (
         <p className="mt-6 text-center text-[10px] font-bold text-mute">
-          Also known as {ex.aliases.join(', ')}
+          {t('Also known as {names}', { names: ex.aliases.join(', ') })}
         </p>
       )}
     </div>

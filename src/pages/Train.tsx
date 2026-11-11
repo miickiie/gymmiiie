@@ -28,9 +28,62 @@ import {
 } from '../components/ui';
 import { useWorkoutStart } from '../components/WorkoutStart';
 import { defaultPicks } from '../lib/exercises';
+import { useI18n } from '../lib/i18n';
 import { MUSCLE_LABEL, routineForWeek } from '../lib/stats';
 import { allExercises, useStore } from '../lib/store';
 import type { Exercise } from '../types';
+
+const TH: Record<string, string> = {
+  'Review your workout': 'ตรวจท่าก่อนเริ่ม',
+  'Start your workout': 'เริ่มฝึก',
+  'Arrange exercises, check your focus, then begin logging.':
+    'จัดลำดับท่า เช็กกล้ามเนื้อเป้าหมาย แล้วเริ่มบันทึก',
+  'Follow a routine or build as you go. Muscle suggestions are optional.':
+    'ทำตามตารางฝึกหรือสร้างไปเรื่อย ๆ คำแนะนำกล้ามเนื้อเป็นตัวเลือกเสริม',
+  'Freestyle session': 'ฝึกแบบอิสระ',
+  '{n} exercises': '{n} ท่า',
+  'Use a routine': 'ใช้ตารางฝึก',
+  'Your saved plans and ready-made templates':
+    'แผนที่บันทึกไว้และเทมเพลตสำเร็จรูป',
+  'Empty workout': 'ฝึกแบบไม่มีแผน',
+  'Add exercises as you train': 'เพิ่มท่าระหว่างฝึก',
+  'Your routines': 'ตารางฝึกของคุณ',
+  'Manage routines': 'จัดการตารางฝึก',
+  ' · planned today': ' · แผนวันนี้',
+  'No routines yet': 'ยังไม่มีตารางฝึก',
+  'Choose a template or create a routine to use again.':
+    'เลือกเทมเพลตหรือสร้างตารางฝึกเพื่อใช้ซ้ำ',
+  'Browse routines': 'ดูตารางฝึก',
+  'Suggest by muscle': 'แนะนำตามกล้ามเนื้อ',
+  'Optional · choose a focus and review suggested movements':
+    'ไม่บังคับ · เลือกเป้าหมายแล้วตรวจท่าที่แนะนำ',
+  'Select muscles on the map. Review every suggestion before starting.':
+    'เลือกกล้ามเนื้อบนแผนที่ ตรวจทุกท่าก่อนเริ่ม',
+  'Review suggestions': 'ตรวจท่าที่แนะนำ',
+  'Warm-up session': 'เซสชันวอร์มอัป',
+  'Cardio session': 'เซสชันคาร์ดิโอ',
+  'Suggestions are a starting point. Add, replace, remove, or reorder exercises for the workout you want.':
+    'คำแนะนำเป็นเพียงจุดเริ่มต้น เพิ่ม เปลี่ยน เอาออก หรือจัดลำดับท่าได้ตามต้องการ',
+  'No primary movement for {muscles}. Add an exercise or change the focus.':
+    'ยังไม่มีท่าหลักของ {muscles} เพิ่มท่าหรือเปลี่ยนเป้าหมาย',
+  'Add exercise': 'เพิ่มท่า',
+  'Warm-up / mobility': 'วอร์มอัป / ความคล่องตัว',
+  'Move {name} up': 'เลื่อน {name} ขึ้น',
+  'Move {name} down': 'เลื่อน {name} ลง',
+  Replace: 'เปลี่ยนท่า',
+  'Remove {name}': 'เอา {name} ออก',
+  'No exercises selected': 'ยังไม่ได้เลือกท่า',
+  'Change focus': 'เปลี่ยนเป้าหมาย',
+  'Replace exercise': 'เปลี่ยนท่า',
+  Cardio: 'คาร์ดิโอ',
+  Exercises: 'ท่าออกกำลัง',
+  'Resume workout': 'ฝึกต่อ',
+  Start: 'เริ่ม',
+  'Start workout': 'เริ่มฝึก',
+  Train: 'ฝึก',
+  'Warm-up': 'วอร์มอัป',
+  'Workout in progress': 'กำลังฝึกอยู่',
+};
 
 const WARMUP_IDS = [
   'jumping-jack',
@@ -43,6 +96,7 @@ const isWarmup = (ex: Exercise) =>
   ex.kind === 'warmup' || WARMUP_IDS.includes(ex.id);
 
 export default function Train() {
+  const { t, tm } = useI18n(TH);
   const navigate = useNavigate();
   const data = useStore((s) => s.data);
   const { requestStart, dialogs } = useWorkoutStart();
@@ -90,17 +144,19 @@ export default function Train() {
   return (
     <div className="page-enter">
       <PageHeader
-        eyebrow="Train"
-        title={reviewing ? 'Review your workout' : 'Start your workout'}
+        eyebrow={t('Train')}
+        title={reviewing ? t('Review your workout') : t('Start your workout')}
         subtitle={
           reviewing
-            ? 'Arrange exercises, check your focus, then begin logging.'
-            : 'Follow a routine or build as you go. Muscle suggestions are optional.'
+            ? t('Arrange exercises, check your focus, then begin logging.')
+            : t(
+                'Follow a routine or build as you go. Muscle suggestions are optional.',
+              )
         }
         action={
           <Link to="/library" className="btn btn-soft px-3 py-2 text-xs">
             <BookOpen size={16} />
-            Exercises
+            {t('Exercises')}
           </Link>
         }
       />
@@ -108,14 +164,14 @@ export default function Train() {
         <Card className="mb-4 flex flex-wrap items-center gap-3 border-[var(--accent-line)] bg-[var(--accent-soft)] p-4">
           <Flame size={20} className="text-[var(--accent)]" />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-black">Workout in progress</p>
+            <p className="text-sm font-black">{t('Workout in progress')}</p>
             <p className="text-xs font-semibold text-dim">
-              {data.active.name || 'Freestyle session'} ·{' '}
-              {data.active.exercises.length} exercises
+              {data.active.name || t('Freestyle session')} ·{' '}
+              {t('{n} exercises', { n: data.active.exercises.length })}
             </p>
           </div>
           <Btn variant="primary" onClick={() => navigate('/session')}>
-            Resume workout
+            {t('Resume workout')}
           </Btn>
         </Card>
       )}
@@ -125,22 +181,22 @@ export default function Train() {
           <div className="grid gap-3 sm:grid-cols-2">
             <Link
               to="/routines"
-              aria-label="Use a routine"
+              aria-label={t('Use a routine')}
               className="card flex items-center gap-4 p-5 transition hover:border-strong"
             >
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)]">
                 <CalendarDays size={24} />
               </span>
               <div>
-                <h2 className="text-lg font-black">Use a routine</h2>
+                <h2 className="text-lg font-black">{t('Use a routine')}</h2>
                 <p className="text-xs font-semibold text-dim">
-                  Your saved plans and ready-made templates
+                  {t('Your saved plans and ready-made templates')}
                 </p>
               </div>
             </Link>
             <button
               type="button"
-              aria-label="Empty workout"
+              aria-label={t('Empty workout')}
               onClick={() =>
                 requestStart(() => useStore.getState().startEmpty())
               }
@@ -150,22 +206,22 @@ export default function Train() {
                 <Plus size={24} />
               </span>
               <div>
-                <h2 className="text-lg font-black">Empty workout</h2>
+                <h2 className="text-lg font-black">{t('Empty workout')}</h2>
                 <p className="text-xs font-semibold text-dim">
-                  Add exercises as you train
+                  {t('Add exercises as you train')}
                 </p>
               </div>
             </button>
           </div>
           <section className="mt-5">
             <SectionHeader
-              title="Your routines"
+              title={t('Your routines')}
               action={
                 <Link
                   to="/routines"
                   className="text-xs font-black text-[var(--accent)]"
                 >
-                  Manage routines
+                  {t('Manage routines')}
                 </Link>
               }
             />
@@ -191,8 +247,12 @@ export default function Train() {
                           {routine.name}
                         </Link>
                         <p className="text-xs font-semibold text-mute">
-                          {routine.exerciseIds.length} exercises
-                          {routine.id === today?.id ? ' · planned today' : ''}
+                          {t('{n} exercises', {
+                            n: routine.exerciseIds.length,
+                          })}
+                          {routine.id === today?.id
+                            ? t(' · planned today')
+                            : ''}
                         </p>
                       </div>
                       <Btn
@@ -205,7 +265,7 @@ export default function Train() {
                         }
                         icon={<Play size={14} />}
                       >
-                        Start
+                        {t('Start')}
                       </Btn>
                     </Card>
                   ))}
@@ -213,14 +273,14 @@ export default function Train() {
             ) : (
               <EmptyState
                 icon={<CalendarDays size={22} />}
-                title="No routines yet"
-                body="Choose a template or create a routine to use again."
+                title={t('No routines yet')}
+                body={t('Choose a template or create a routine to use again.')}
                 action={
                   <Link
                     to="/routines"
                     className="btn btn-soft px-4 py-2 text-sm"
                   >
-                    Browse routines
+                    {t('Browse routines')}
                   </Link>
                 }
               />
@@ -229,7 +289,7 @@ export default function Train() {
           <section className="mt-5">
             <button
               type="button"
-              aria-label="Suggest by muscle"
+              aria-label={t('Suggest by muscle')}
               aria-expanded={focusOpen}
               aria-controls="muscle-suggestions"
               onClick={() => setFocusOpen((value) => !value)}
@@ -237,9 +297,13 @@ export default function Train() {
             >
               <Sparkles size={22} className="text-[var(--accent)]" />
               <div className="flex-1">
-                <h2 className="text-base font-black">Suggest by muscle</h2>
+                <h2 className="text-base font-black">
+                  {t('Suggest by muscle')}
+                </h2>
                 <p className="text-xs font-semibold text-dim">
-                  Optional · choose a focus and review suggested movements
+                  {t(
+                    'Optional · choose a focus and review suggested movements',
+                  )}
                 </p>
               </div>
               <Plus size={18} className={focusOpen ? 'rotate-45' : ''} />
@@ -253,13 +317,15 @@ export default function Train() {
                   <BodyMap selected={selected} onToggle={toggle} />
                   <div className="flex flex-col justify-center">
                     <p className="text-sm font-semibold text-dim">
-                      Select muscles on the map. Review every suggestion before
-                      starting.
+                      {t(
+                        'Select muscles on the map. Review every suggestion before starting.',
+                      )}
                     </p>
                     <div className="my-4 flex flex-wrap gap-2">
                       {selected.map((muscle) => (
                         <Chip key={muscle} on onClick={() => toggle(muscle)}>
-                          {MUSCLE_LABEL[muscle]} <X size={12} />
+                          {tm(muscle, MUSCLE_LABEL[muscle] ?? muscle)}{' '}
+                          <X size={12} />
                         </Chip>
                       ))}
                     </div>
@@ -268,7 +334,7 @@ export default function Train() {
                       disabled={!selected.length}
                       onClick={build}
                     >
-                      Review suggestions
+                      {t('Review suggestions')}
                     </Btn>
                   </div>
                 </div>
@@ -277,16 +343,16 @@ export default function Train() {
           </section>
           <div className="mt-4 flex flex-wrap gap-2">
             <Btn
-              onClick={() => startList(WARMUP_IDS, 'Warm-up')}
+              onClick={() => startList(WARMUP_IDS, t('Warm-up'))}
               icon={<Flame size={16} />}
             >
-              Warm-up session
+              {t('Warm-up session')}
             </Btn>
             <Btn
-              onClick={() => startList(CARDIO_IDS, 'Cardio')}
+              onClick={() => startList(CARDIO_IDS, t('Cardio'))}
               icon={<HeartPulse size={16} />}
             >
-              Cardio session
+              {t('Cardio session')}
             </Btn>
           </div>
         </>
@@ -296,34 +362,42 @@ export default function Train() {
             <div className="flex flex-wrap gap-2">
               {selected.map((muscle) => (
                 <Chip key={muscle} on>
-                  {MUSCLE_LABEL[muscle]}
+                  {tm(muscle, MUSCLE_LABEL[muscle] ?? muscle)}
                 </Chip>
               ))}
             </div>
             <p className="mt-3 text-xs font-semibold text-dim">
-              Suggestions are a starting point. Add, replace, remove, or reorder
-              exercises for the workout you want.
+              {t(
+                'Suggestions are a starting point. Add, replace, remove, or reorder exercises for the workout you want.',
+              )}
             </p>
             {uncovered.length > 0 && (
               <p
                 role="status"
                 className="mt-3 text-sm font-bold text-[var(--warn)]"
               >
-                No primary movement for{' '}
-                {uncovered.map((muscle) => MUSCLE_LABEL[muscle]).join(', ')}.
-                Add an exercise or change the focus.
+                {t(
+                  'No primary movement for {muscles}. Add an exercise or change the focus.',
+                  {
+                    muscles: uncovered
+                      .map((muscle) =>
+                        tm(muscle, MUSCLE_LABEL[muscle] ?? muscle),
+                      )
+                      .join(', '),
+                  },
+                )}
               </p>
             )}
           </Card>
           <SectionHeader
-            title={`${picks.length} exercises`}
+            title={t('{n} exercises', { n: picks.length })}
             action={
               <Btn
                 size="sm"
                 onClick={() => setPicker(true)}
                 icon={<Plus size={15} />}
               >
-                Add exercise
+                {t('Add exercise')}
               </Btn>
             }
           />
@@ -343,11 +417,12 @@ export default function Train() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-black">{ex.name}</p>
                       <p className="text-xs font-semibold text-mute">
-                        {MUSCLE_LABEL[ex.primary]} · {ex.equipment}
+                        {tm(ex.primary, MUSCLE_LABEL[ex.primary] ?? ex.primary)}{' '}
+                        · {t(ex.equipment)}
                       </p>
                       {isWarmup(ex) && (
                         <span className="mt-1 inline-block rounded-full bg-[var(--warn)]/15 px-2 py-0.5 text-[10px] font-black text-[var(--warn)]">
-                          Warm-up / mobility
+                          {t('Warm-up / mobility')}
                         </span>
                       )}
                     </div>
@@ -356,7 +431,7 @@ export default function Train() {
                     <Btn
                       size="icon"
                       disabled={index === 0}
-                      aria-label={`Move ${ex.name} up`}
+                      aria-label={t('Move {name} up', { name: ex.name })}
                       onClick={() => move(index, index - 1)}
                     >
                       <ArrowUp size={16} />
@@ -364,7 +439,7 @@ export default function Train() {
                     <Btn
                       size="icon"
                       disabled={index === picks.length - 1}
-                      aria-label={`Move ${ex.name} down`}
+                      aria-label={t('Move {name} down', { name: ex.name })}
                       onClick={() => move(index, index + 1)}
                     >
                       <ArrowDown size={16} />
@@ -374,11 +449,11 @@ export default function Train() {
                       onClick={() => setReplaceId(ex.id)}
                       icon={<RotateCcw size={14} />}
                     >
-                      Replace
+                      {t('Replace')}
                     </Btn>
                     <Btn
                       size="icon"
-                      aria-label={`Remove ${ex.name}`}
+                      aria-label={t('Remove {name}', { name: ex.name })}
                       onClick={() =>
                         setPicks((values) =>
                           values.filter((value) => value.id !== ex.id),
@@ -394,19 +469,21 @@ export default function Train() {
           ) : (
             <EmptyState
               icon={<Dumbbell size={22} />}
-              title="No exercises selected"
-              action={<Btn onClick={() => setPicker(true)}>Add exercise</Btn>}
+              title={t('No exercises selected')}
+              action={
+                <Btn onClick={() => setPicker(true)}>{t('Add exercise')}</Btn>
+              }
             />
           )}
           <div className="sticky bottom-20 z-10 mt-4 flex gap-2 rounded-2xl border border-line bg-[var(--bg)]/95 p-2 backdrop-blur lg:bottom-4">
-            <Btn onClick={() => setReviewing(false)}>Change focus</Btn>
+            <Btn onClick={() => setReviewing(false)}>{t('Change focus')}</Btn>
             <Btn
               variant="primary"
               className="flex-1"
               disabled={!picks.length}
               onClick={() => startList(picks.map((ex) => ex.id))}
             >
-              Start workout
+              {t('Start workout')}
             </Btn>
           </div>
         </>
@@ -420,7 +497,7 @@ export default function Train() {
       <ExercisePicker
         open={!!replaceId}
         onClose={() => setReplaceId(null)}
-        title="Replace exercise"
+        title={t('Replace exercise')}
         exclude={picks.map((ex) => ex.id)}
         onPick={(ex) => {
           setPicks((values) =>

@@ -1,4 +1,10 @@
+import { getLanguage, translateNow } from './i18n';
+
 export const DAY_MS = 86400000;
+
+function locale(): string | undefined {
+  return getLanguage() === 'th' ? 'th-TH-u-ca-gregory' : undefined;
+}
 
 export function pad(n: number) {
   return String(n).padStart(2, '0');
@@ -49,21 +55,21 @@ export function weekdayIndex(d: Date = new Date()): number {
 
 export function fmtDate(d: Date | string, opts?: Intl.DateTimeFormatOptions): string {
   const date = typeof d === 'string' ? new Date(d) : d;
-  return date.toLocaleDateString(undefined, opts ?? { weekday: 'short', day: 'numeric', month: 'short' });
+  return date.toLocaleDateString(locale(), opts ?? { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
 export function fmtTime(d: Date | string): string {
   const date = typeof d === 'string' ? new Date(d) : d;
-  return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 }
 
 export function relativeDay(key: string): string {
   const today = dateKey();
   const diff = daysBetween(key, today);
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Yesterday';
-  if (diff === -1) return 'Tomorrow';
-  if (diff > 1 && diff < 7) return `${diff} days ago`;
+  if (diff === 0) return translateNow('Today');
+  if (diff === 1) return translateNow('Yesterday');
+  if (diff === -1) return translateNow('Tomorrow');
+  if (diff > 1 && diff < 7) return translateNow('{n} days ago', { n: diff });
   return fmtDate(parseKey(key), { day: 'numeric', month: 'short', year: 'numeric' });
 }
 

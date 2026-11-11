@@ -34,11 +34,91 @@ import {
 } from '../lib/exercises';
 import { BODY_ZONES, MUSCLES, MUSCLE_LABEL, newId } from '../lib/stats';
 import { allExercises, useStore } from '../lib/store';
+import { useI18n } from '../lib/i18n';
 import type { Exercise, ExerciseMode, LoadKind, MuscleId } from '../types';
 
 type Sort = 'az' | 'muscle';
 
+const TH: Record<string, string> = {
+  'Exercise library': 'คลังท่าออกกำลัง',
+  'Find your movement': 'หาท่าที่ใช่',
+  '{n} exercises · {n2} custom · muscle, equipment and reviewed guides where available':
+    '{n} ท่า · {n2} ท่าที่สร้างเอง · เลือกตามกล้ามเนื้อ อุปกรณ์ พร้อมคู่มือที่ตรวจแล้ว',
+  Create: 'สร้าง',
+  'Search exercise library': 'ค้นหาคลังท่าออกกำลัง',
+  'Search exercises, muscles, equipment…': 'ค้นหาท่า กล้ามเนื้อ อุปกรณ์…',
+  Filters: 'ตัวกรอง',
+  Favourites: 'รายการโปรด',
+  Archived: 'เก็บถาวร',
+  '{n} result': '{n} รายการ',
+  '{n} results': '{n} รายการ',
+  Muscle: 'กล้ามเนื้อ',
+  'View exercise: {name}': 'ดูท่า: {name}',
+  custom: 'กำหนดเอง',
+  archived: 'เก็บถาวร',
+  'Removed from favourites': 'นำออกจากรายการโปรดแล้ว',
+  'Added to favourites': 'เพิ่มในรายการโปรดแล้ว',
+  'Remove favourite': 'นำออกจากรายการโปรด',
+  'Add favourite': 'เพิ่มในรายการโปรด',
+  'Show more ({n} left)': 'แสดงเพิ่ม ({n} ที่เหลือ)',
+  'Archive is empty': 'ยังไม่มีรายการเก็บถาวร',
+  'No exercises match': 'ไม่พบท่าที่ตรงกัน',
+  'Archived exercises are hidden from the picker. Unarchive one to use it again.':
+    'ท่าที่เก็บถาวรจะถูกซ่อนจากหน้าตัวเลือก ยกเลิกการเก็บถาวรเพื่อใช้ท่าอีกครั้ง',
+  'Try a different muscle, piece of equipment, or search term. Or create your own movement.':
+    'ลองเปลี่ยนกล้ามเนื้อ อุปกรณ์ หรือคำค้นหา หรือสร้างท่าของคุณเอง',
+  'Clear filters': 'ล้างตัวกรอง',
+  'Create exercise': 'สร้างท่า',
+  'Favourites only': 'เฉพาะรายการโปรด',
+  Reset: 'รีเซ็ต',
+  'Show {n}': 'แสดง {n}',
+  Equipment: 'อุปกรณ์',
+  '{name} created': 'สร้าง {name} แล้ว',
+  'Give the exercise a name.': 'ตั้งชื่อท่าก่อน',
+  'Exercise name': 'ชื่อท่า',
+  'e.g. Cable Y-raise': 'เช่น Cable Y-raise',
+  'Primary muscle': 'กล้ามเนื้อหลัก',
+  'Secondary muscles': 'กล้ามเนื้อรอง',
+  Difficulty: 'ระดับความยาก',
+  'Track by': 'วัดผลด้วย',
+  Repetitions: 'จำนวนครั้ง',
+  Time: 'เวลา',
+  'Distance and time': 'ระยะทางและเวลา',
+  'Load type': 'ประเภทน้ำหนัก',
+  'External weight': 'น้ำหนักภายนอก',
+  'Added bodyweight load': 'น้ำหนักที่เพิ่มจากตัว',
+  'Assistance weight': 'น้ำหนักช่วย',
+  'No weight': 'ไม่มีน้ำหนัก',
+  'Execution steps': 'ขั้นตอนการทำ',
+  'One step per line. These show on the exercise page.':
+    'หนึ่งขั้นตอนต่อหนึ่งบรรทัด จะแสดงในหน้าท่า',
+  'Set up the bench…\nBrace your core…\nPress…':
+    'ตั้งม้านั่ง…\nเกร็งแกนกลางลำตัว…\nดัน…',
+  'Custom exercises save with your account and work offline.':
+    'ท่าที่สร้างเองจะบันทึกกับบัญชีและใช้ได้แบบออฟไลน์',
+  Beginner: 'เริ่มต้น',
+  Intermediate: 'ปานกลาง',
+  Advanced: 'ขั้นสูง',
+  Barbell: 'บาร์เบล',
+  Dumbbell: 'ดัมเบล',
+  Cable: 'เคเบิล',
+  Machine: 'เครื่อง',
+  Bodyweight: 'น้ำหนักตัว',
+  Weighted: 'เพิ่มน้ำหนัก',
+  Band: 'ยางยืด',
+  Kettlebell: 'เคตเทิลเบล',
+  Rings: 'ห่วง',
+  Other: 'อื่น ๆ',
+  Chest: 'อก',
+  Back: 'หลัง',
+  Shoulders: 'ไหล่',
+  Arms: 'แขน',
+  Core: 'แกนกลาง',
+  Legs: 'ขา',
+};
+
 export default function Library() {
+  const { t, tm } = useI18n(TH);
   const navigate = useNavigate();
   const { key } = useLocation();
   const accountId = useStore((s) => s.account?.id);
@@ -133,9 +213,12 @@ export default function Library() {
   return (
     <div className="page-enter">
       <PageHeader
-        eyebrow="Exercise library"
-        title="Find your movement"
-        subtitle={`${all.length} exercises · ${data.customExercises.length} custom · muscle, equipment and reviewed guides where available`}
+        eyebrow={t('Exercise library')}
+        title={t('Find your movement')}
+        subtitle={t(
+          '{n} exercises · {n2} custom · muscle, equipment and reviewed guides where available',
+          { n: all.length, n2: data.customExercises.length },
+        )}
         action={
           <Btn
             variant="primary"
@@ -143,7 +226,7 @@ export default function Library() {
             onClick={() => setCreateOpen(true)}
             icon={<Plus size={15} />}
           >
-            Create
+            {t('Create')}
           </Btn>
         }
       />
@@ -157,8 +240,8 @@ export default function Library() {
             />
             <input
               className="input pl-9"
-              aria-label="Search exercise library"
-              placeholder="Search exercises, muscles, equipment…"
+              aria-label={t('Search exercise library')}
+              placeholder={t('Search exercises, muscles, equipment…')}
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
@@ -175,14 +258,14 @@ export default function Library() {
             variant={filters ? 'primary' : 'soft'}
             size="icon"
             onClick={() => setFiltersOpen(true)}
-            aria-label="Filters"
+            aria-label={t('Filters')}
           >
             <SlidersHorizontal size={17} />
           </Btn>
         </div>
       <div ref={filterStrip} className="scroll-x mt-2 pb-1">
           <Chip on={fav} onClick={() => setFav(!fav)}>
-            <Star size={12} /> Favourites{' '}
+            <Star size={12} /> {t('Favourites')}{' '}
             {Object.keys(data.favorites).length || ''}
           </Chip>
           {Object.keys(BODY_ZONES).map((z) => (
@@ -194,15 +277,15 @@ export default function Library() {
                 setMuscle(null);
               }}
             >
-              {z}
+              {t(z)}
             </Chip>
           ))}
           <Chip on={archived} onClick={() => setArchived(!archived)}>
-            <Archive size={12} /> Archived
+            <Archive size={12} /> {t('Archived')}
           </Chip>
           {muscle && (
             <Chip on onClick={() => setMuscle(null)}>
-              <X size={12} /> {MUSCLE_LABEL[muscle]}
+              <X size={12} /> {tm(muscle, MUSCLE_LABEL[muscle])}
             </Chip>
           )}
         </div>
@@ -210,17 +293,19 @@ export default function Library() {
 
       <div className="mb-3 flex items-center justify-between gap-2">
         <p className="text-xs font-bold text-mute">
-          {results.length} result{results.length === 1 ? '' : 's'}
-          {zone ? ` · ${zone}` : ''}
-          {muscle ? ` · ${MUSCLE_LABEL[muscle]}` : ''}
-          {equipment ? ` · ${equipment}` : ''}
+          {results.length === 1
+            ? t('{n} result', { n: results.length })
+            : t('{n} results', { n: results.length })}
+          {zone ? ` · ${t(zone)}` : ''}
+          {muscle ? ` · ${tm(muscle, MUSCLE_LABEL[muscle])}` : ''}
+          {equipment ? ` · ${t(equipment)}` : ''}
         </p>
         <Segmented
           value={sort}
           onChange={setSort}
           options={[
             { value: 'az', label: 'A–Z' },
-            { value: 'muscle', label: 'Muscle' },
+            { value: 'muscle', label: t('Muscle') },
           ]}
         />
       </div>
@@ -237,7 +322,7 @@ export default function Library() {
                 >
                   <button
                     onClick={() => navigate(`/library/${ex.id}`)}
-                    aria-label={`View exercise: ${ex.name}`}
+                    aria-label={t('View exercise: {name}', { name: ex.name })}
                     className="flex min-w-0 flex-1 items-center gap-3 text-left"
                   >
                     <ArtThumb
@@ -250,21 +335,23 @@ export default function Library() {
                         {ex.name}
                         {customIds.has(ex.id) && (
                           <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-black text-[var(--accent)]">
-                            custom
+                            {t('custom')}
                           </span>
                         )}
                         {data.archived.includes(ex.id) && (
                           <span className="rounded-full bg-[var(--surface-3)] px-1.5 py-0.5 text-[9px] font-black text-mute">
-                            archived
+                            {t('archived')}
                           </span>
                         )}
                       </p>
                       <p className="truncate text-[11px] font-bold text-mute">
-                        {MUSCLE_LABEL[ex.primary] ?? ex.primary}
+                        {tm(ex.primary, MUSCLE_LABEL[ex.primary] ?? ex.primary)}
                         {ex.secondary.length
-                          ? ` + ${ex.secondary.map((m) => MUSCLE_LABEL[m] ?? m).join(', ')}`
+                          ? ` + ${ex.secondary
+                              .map((m) => tm(m, MUSCLE_LABEL[m] ?? m))
+                              .join(', ')}`
                           : ''}{' '}
-                        · {ex.equipment} · {ex.difficulty}
+                        · {t(ex.equipment)} · {t(ex.difficulty)}
                       </p>
                     </div>
                     <ChevronRight size={16} className="text-mute" />
@@ -274,12 +361,14 @@ export default function Library() {
                       toggleFavorite(ex.id);
                       toast.push(
                         isFav
-                          ? 'Removed from favourites'
-                          : 'Added to favourites',
+                          ? t('Removed from favourites')
+                          : t('Added to favourites'),
                       );
                     }}
                     className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${isFav ? 'text-[var(--warn)]' : 'text-mute hover:bg-[var(--surface-3)]'}`}
-                    aria-label={isFav ? 'Remove favourite' : 'Add favourite'}
+                    aria-label={
+                      isFav ? t('Remove favourite') : t('Add favourite')
+                    }
                   >
                     <Star size={16} fill={isFav ? 'currentColor' : 'none'} />
                   </button>
@@ -290,7 +379,7 @@ export default function Library() {
           {results.length > limit && (
             <div className="mt-3 text-center">
               <Btn onClick={() => setLimit(limit + 80)}>
-                Show more ({results.length - limit} left)
+                {t('Show more ({n} left)', { n: results.length - limit })}
               </Btn>
             </div>
           )}
@@ -298,17 +387,21 @@ export default function Library() {
       ) : (
         <EmptyState
           icon={<BookOpen size={24} />}
-          title={archived ? 'Archive is empty' : 'No exercises match'}
+          title={archived ? t('Archive is empty') : t('No exercises match')}
           body={
             archived
-              ? 'Archived exercises are hidden from the picker. Unarchive one to use it again.'
-              : 'Try a different muscle, piece of equipment, or search term. Or create your own movement.'
+              ? t(
+                  'Archived exercises are hidden from the picker. Unarchive one to use it again.',
+                )
+              : t(
+                  'Try a different muscle, piece of equipment, or search term. Or create your own movement.',
+                )
           }
           action={
             <div className="flex gap-2">
-              <Btn onClick={clear}>Clear filters</Btn>
+              <Btn onClick={clear}>{t('Clear filters')}</Btn>
               <Btn variant="primary" onClick={() => setCreateOpen(true)}>
-                Create exercise
+                {t('Create exercise')}
               </Btn>
             </div>
           }
@@ -318,11 +411,11 @@ export default function Library() {
       <Sheet
         open={filtersOpen}
         onClose={() => setFiltersOpen(false)}
-        title="Filters"
+        title={t('Filters')}
       >
         <div className="space-y-4">
           <div>
-            <p className="label mb-2">Muscle</p>
+            <p className="label mb-2">{t('Muscle')}</p>
             <div className="flex flex-wrap gap-1.5">
               {MUSCLES.map((m) => (
                 <Chip
@@ -333,13 +426,13 @@ export default function Library() {
                     setMuscle(muscle === m.id ? null : m.id);
                   }}
                 >
-                  {m.label}
+                  {tm(m.id, m.label)}
                 </Chip>
               ))}
             </div>
           </div>
           <div>
-            <p className="label mb-2">Equipment</p>
+            <p className="label mb-2">{t('Equipment')}</p>
             <div className="flex flex-wrap gap-1.5">
               {EQUIPMENT.map((e) => (
                 <Chip
@@ -347,29 +440,29 @@ export default function Library() {
                   on={equipment === e}
                   onClick={() => setEquipment(equipment === e ? null : e)}
                 >
-                  {e}
+                  {t(e)}
                 </Chip>
               ))}
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Chip on={fav} onClick={() => setFav(!fav)}>
-              <Star size={12} /> Favourites only
+              <Star size={12} /> {t('Favourites only')}
             </Chip>
             <Chip on={archived} onClick={() => setArchived(!archived)}>
-              <Archive size={12} /> Archived
+              <Archive size={12} /> {t('Archived')}
             </Chip>
           </div>
           <div className="flex gap-2">
             <Btn className="flex-1" onClick={clear}>
-              Reset
+              {t('Reset')}
             </Btn>
             <Btn
               className="flex-1"
               variant="primary"
               onClick={() => setFiltersOpen(false)}
             >
-              Show {results.length}
+              {t('Show {n}', { n: results.length })}
             </Btn>
           </div>
         </div>
@@ -381,7 +474,7 @@ export default function Library() {
         onCreate={(ex) => {
           addCustomExercise(ex);
           setCreateOpen(false);
-          toast.push(`${ex.name} created`, 'good');
+          toast.push(t('{name} created', { name: ex.name }), 'good');
           navigate(`/library/${ex.id}`);
         }}
       />
@@ -398,6 +491,7 @@ function CreateExercise({
   onClose: () => void;
   onCreate: (ex: Exercise) => void;
 }) {
+  const { t, tm } = useI18n(TH);
   const [name, setName] = useState('');
   const [primary, setPrimary] = useState<MuscleId>('chest');
   const [secondary, setSecondary] = useState<string[]>([]);
@@ -410,7 +504,7 @@ function CreateExercise({
 
   const submit = () => {
     if (name.trim().length < 2) {
-      setError('Give the exercise a name.');
+      setError(t('Give the exercise a name.'));
       return;
     }
     onCreate({
@@ -440,7 +534,7 @@ function CreateExercise({
     <Sheet
       open={open}
       onClose={onClose}
-      title="Create exercise"
+      title={t('Create exercise')}
       footer={
         <Btn
           variant="primary"
@@ -448,16 +542,16 @@ function CreateExercise({
           onClick={submit}
           icon={<Plus size={16} />}
         >
-          Create exercise
+          {t('Create exercise')}
         </Btn>
       }
       size="lg"
     >
       <div className="space-y-4">
-        <Field label="Exercise name">
+        <Field label={t('Exercise name')}>
           <input
             className="input"
-            placeholder="e.g. Cable Y-raise"
+            placeholder={t('e.g. Cable Y-raise')}
             value={name}
             onChange={(e) => {
               setName(e.target.value);
@@ -469,7 +563,7 @@ function CreateExercise({
           <p className="text-xs font-bold text-[var(--bad)]">{error}</p>
         )}
         <div>
-          <p className="label mb-2">Primary muscle</p>
+          <p className="label mb-2">{t('Primary muscle')}</p>
           <div className="flex flex-wrap gap-1.5">
             {MUSCLES.map((m) => (
               <Chip
@@ -477,13 +571,13 @@ function CreateExercise({
                 on={primary === m.id}
                 onClick={() => setPrimary(m.id)}
               >
-                {m.label}
+                {tm(m.id, m.label)}
               </Chip>
             ))}
           </div>
         </div>
         <div>
-          <p className="label mb-2">Secondary muscles</p>
+          <p className="label mb-2">{t('Secondary muscles')}</p>
           <div className="flex flex-wrap gap-1.5">
             {MUSCLES.filter((m) => m.id !== primary).map((m) => (
               <Chip
@@ -497,76 +591,76 @@ function CreateExercise({
                   )
                 }
               >
-                {m.label}
+                {tm(m.id, m.label)}
               </Chip>
             ))}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Equipment">
+          <Field label={t('Equipment')}>
             <select
               className="input"
               value={equipment}
               onChange={(e) => setEquipment(e.target.value)}
             >
               {EQUIPMENT.map((e) => (
-                <option key={e}>{e}</option>
+                <option key={e}>{t(e)}</option>
               ))}
             </select>
           </Field>
-          <Field label="Difficulty">
+          <Field label={t('Difficulty')}>
             <select
               className="input"
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
             >
               {DIFFICULTIES.map((d) => (
-                <option key={d}>{d}</option>
+                <option key={d}>{t(d)}</option>
               ))}
             </select>
           </Field>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Track by">
+          <Field label={t('Track by')}>
             <select
               className="input"
               value={mode}
               onChange={(e) => setMode(e.target.value as ExerciseMode)}
             >
-              <option value="">Repetitions</option>
-              <option value="time">Time</option>
-              <option value="cardio">Distance and time</option>
+              <option value="">{t('Repetitions')}</option>
+              <option value="time">{t('Time')}</option>
+              <option value="cardio">{t('Distance and time')}</option>
             </select>
           </Field>
           {mode !== 'cardio' && (
-            <Field label="Load type">
+            <Field label={t('Load type')}>
               <select
                 className="input"
                 value={loadKind}
                 onChange={(e) => setLoadKind(e.target.value as LoadKind)}
               >
-                <option value="external">External weight</option>
-                <option value="added">Added bodyweight load</option>
-                <option value="assistance">Assistance weight</option>
-                <option value="none">No weight</option>
+                <option value="external">{t('External weight')}</option>
+                <option value="added">{t('Added bodyweight load')}</option>
+                <option value="assistance">{t('Assistance weight')}</option>
+                <option value="none">{t('No weight')}</option>
               </select>
             </Field>
           )}
         </div>
         <Field
-          label="Execution steps"
-          hint="One step per line. These show on the exercise page."
+          label={t('Execution steps')}
+          hint={t('One step per line. These show on the exercise page.')}
         >
           <textarea
             className="input min-h-[96px]"
-            placeholder={'Set up the bench…\nBrace your core…\nPress…'}
+            placeholder={t('Set up the bench…\nBrace your core…\nPress…')}
             value={steps}
             onChange={(e) => setSteps(e.target.value)}
           />
         </Field>
         <div className="flex items-center gap-2 rounded-xl border border-line bg-[var(--surface-2)] px-3 py-2 text-[11px] font-semibold text-mute">
-          <Filter size={13} /> Custom exercises save with your account and work
-          offline.
+          <Filter size={13} />{' '}
+          {t('Custom exercises save with your account and work offline.')}
         </div>
       </div>
     </Sheet>

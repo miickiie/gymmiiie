@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Btn, Field, NumField, Segmented, Stepper } from '../components/ui';
 import { fromDisplayWeight, toDisplayWeight } from '../lib/stats';
+import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import { useAccount } from '../components/AccountGate';
 import type { Unit } from '../types';
@@ -27,7 +28,64 @@ const ACTIVITIES = [
   { value: 1.9, label: 'Very active', hint: 'Physical job or athlete' },
 ];
 
+const TH: Record<string, string> = {
+  'Signed in as {name}': 'เข้าสู่ระบบเป็น {name}',
+  'Offline-first gym log': 'บันทึกยิมแบบออฟไลน์',
+  'Your training.': 'การฝึกของคุณ',
+  'Your account.': 'บัญชีของคุณ',
+  'Anywhere.': 'ทุกที่',
+  'Tap the muscles you want to train, log every set, and watch your strength climb. Your account keeps the log together across devices.':
+    'เลือกกล้ามเนื้อที่อยากฝึก บันทึกทุกเซ็ต แล้วดูความแข็งแรงเพิ่มขึ้น บัญชีของคุณช่วยเก็บข้อมูลให้ตรงกันทุกอุปกรณ์',
+  'Smart picks': 'เลือกให้อัตโนมัติ',
+  'Live rest': 'พักแบบเรียลไทม์',
+  'PR tracking': 'ติดตาม PR',
+  'Step 1 · Units': 'ขั้นที่ 1 · หน่วย',
+  'How do you lift?': 'คุณยกด้วยหน่วยไหน?',
+  'This sets weight units. Heights and distances stay in cm and km. Change the setting anytime.':
+    'ตั้งหน่วยน้ำหนัก ส่วนส่วนสูงและระยะทางใช้ cm และ km เปลี่ยนได้ทุกเมื่อ',
+  Kilograms: 'กิโลกรัม',
+  Pounds: 'ปอนด์',
+  'Metric plates · 2.5 kg steps': 'แผ่นเมตริก · ทีละ 2.5 kg',
+  'Imperial plates · 5 lb steps': 'แผ่นอิมพีเรียล · ทีละ 5 lb',
+  Selected: 'เลือกแล้ว',
+  'Step 2 · Your profile': 'ขั้นที่ 2 · โปรไฟล์',
+  'A little about you': 'เล่าเกี่ยวกับคุณหน่อย',
+  'This powers calorie estimates and strength scores. It is saved with your account and cached on this device for offline logging.':
+    'ใช้คำนวณแคลอรีและคะแนนความแข็งแรง ข้อมูลนี้บันทึกกับบัญชีและเก็บในเครื่องเพื่อใช้งานออฟไลน์',
+  'Display name': 'ชื่อที่แสดง',
+  'What should we call you?': 'ให้เราเรียกคุณว่าอะไร?',
+  Sex: 'เพศ',
+  Male: 'ชาย',
+  Female: 'หญิง',
+  Age: 'อายุ',
+  yrs: 'ปี',
+  Height: 'ส่วนสูง',
+  'Step 3 · Your goal': 'ขั้นที่ 3 · เป้าหมาย',
+  'Set the pace': 'กำหนดจังหวะ',
+  'Pick a weekly target and how active you are outside the gym.':
+    'เลือกเป้าหมายต่อสัปดาห์และระดับกิจกรรมนอกยิม',
+  'Workouts per week': 'จำนวนฝึกต่อสัปดาห์',
+  'Consistency beats intensity.': 'สม่ำเสมอดีกว่าเข้มข้น',
+  'Daily activity': 'กิจกรรมประจำวัน',
+  Sedentary: 'นั่งทำงาน',
+  'Desk job, little movement': 'ทำงานโต๊ะ ขยับตัวน้อย',
+  Light: 'เบา',
+  '1–2 sessions a week': '1–2 ครั้งต่อสัปดาห์',
+  Moderate: 'ปานกลาง',
+  '3–4 sessions a week': '3–4 ครั้งต่อสัปดาห์',
+  Active: 'สูง',
+  '5–6 hard sessions': '5–6 ครั้งที่หนัก',
+  'Very active': 'สูงมาก',
+  'Physical job or athlete': 'งานที่ใช้แรงหรือนักกีฬา',
+  'Set up later': 'ตั้งค่าทีหลัง',
+  'Get started': 'เริ่มเลย',
+  'Enter Gymmiie': 'เข้าสู่ Gymmiie',
+  'Based on GymMane by InlitX · GPL-3.0 · Offline logging with account sync':
+    'สร้างจาก GymMane โดย InlitX · GPL-3.0 · บันทึกออฟไลน์พร้อมซิงก์บัญชี',
+};
+
 export default function Onboarding() {
+  const { t } = useI18n(TH);
   const { account, signOut } = useAccount();
   const navigate = useNavigate();
   const completeOnboarding = useStore((s) => s.completeOnboarding);
@@ -83,7 +141,7 @@ export default function Onboarding() {
             <div>
               <p className="text-base font-black leading-none">Gymmiie</p>
               <p className="mt-1 text-[9px] font-black uppercase tracking-[0.2em] text-mute">
-                Lift · log · grow
+                {t('Lift · log · grow')}
               </p>
             </div>
           </div>
@@ -98,9 +156,9 @@ export default function Onboarding() {
         </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-dim">
-          <p>Signed in as {account.name}</p>
+          <p>{t('Signed in as {name}', { name: account.name })}</p>
           <Btn size="sm" variant="ghost" onClick={() => void signOut()}>
-            Sign out
+            {t('Sign out')}
           </Btn>
         </div>
         <div className="flex flex-1 flex-col justify-center py-8">
@@ -109,16 +167,17 @@ export default function Onboarding() {
               <div className="mx-auto mb-6 grid h-24 w-24 place-items-center rounded-[2rem] bg-[var(--accent-soft)] text-[var(--accent)] shadow-glow">
                 <Dumbbell size={48} strokeWidth={1.8} />
               </div>
-              <p className="label mb-2">Offline-first gym log</p>
+              <p className="label mb-2">{t('Offline-first gym log')}</p>
               <h1 className="text-3xl font-black leading-[1.05] tracking-tight sm:text-4xl">
-                Your training.
+                {t('Your training.')}
                 <br />
-                <span className="text-accent">Your account.</span> Anywhere.
+                <span className="text-accent">{t('Your account.')}</span>{' '}
+                {t('Anywhere.')}
               </h1>
               <p className="mx-auto mt-4 max-w-sm text-sm font-semibold leading-relaxed text-dim">
-                Tap the muscles you want to train, log every set, and watch your
-                strength climb. Your account keeps the log together across
-                devices.
+                {t(
+                  'Tap the muscles you want to train, log every set, and watch your strength climb. Your account keeps the log together across devices.',
+                )}
               </p>
               <div className="mx-auto mt-7 grid max-w-sm grid-cols-3 gap-2 text-left">
                 {[
@@ -132,7 +191,7 @@ export default function Onboarding() {
                   >
                     <span className="text-[var(--accent)]">{x.icon}</span>
                     <p className="mt-2 text-[11px] font-extrabold leading-tight">
-                      {x.t}
+                      {t(x.t)}
                     </p>
                   </div>
                 ))}
@@ -142,13 +201,14 @@ export default function Onboarding() {
 
           {step === 1 && (
             <div className="animate-fadeUp">
-              <p className="label mb-2">Step 1 · Units</p>
+              <p className="label mb-2">{t('Step 1 · Units')}</p>
               <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-                How do you lift?
+                {t('How do you lift?')}
               </h1>
               <p className="mt-2 text-sm font-semibold text-dim">
-                This sets weight units. Heights and distances stay in cm and km.
-                Change the setting anytime.
+                {t(
+                  'This sets weight units. Heights and distances stay in cm and km. Change the setting anytime.',
+                )}
               </p>
               <div className="mt-6 grid grid-cols-2 gap-3">
                 {(['kg', 'lb'] as const).map((u) => (
@@ -164,16 +224,16 @@ export default function Onboarding() {
                       }
                     />
                     <p className="mt-4 text-2xl font-black">
-                      {u === 'kg' ? 'Kilograms' : 'Pounds'}
+                      {u === 'kg' ? t('Kilograms') : t('Pounds')}
                     </p>
                     <p className="mt-1 text-xs font-bold text-mute">
                       {u === 'kg'
-                        ? 'Metric plates · 2.5 kg steps'
-                        : 'Imperial plates · 5 lb steps'}
+                        ? t('Metric plates · 2.5 kg steps')
+                        : t('Imperial plates · 5 lb steps')}
                     </p>
                     {unit === u && (
                       <span className="mt-4 inline-flex items-center gap-1 text-[11px] font-black text-[var(--accent)]">
-                        <Check size={13} /> Selected
+                        <Check size={13} /> {t('Selected')}
                       </span>
                     )}
                   </button>
@@ -184,47 +244,48 @@ export default function Onboarding() {
 
           {step === 2 && (
             <div className="animate-fadeUp">
-              <p className="label mb-2">Step 2 · Your profile</p>
+              <p className="label mb-2">{t('Step 2 · Your profile')}</p>
               <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-                A little about you
+                {t('A little about you')}
               </h1>
               <p className="mt-2 text-sm font-semibold text-dim">
-                This powers calorie estimates and strength scores. It is saved
-                with your account and cached on this device for offline logging.
+                {t(
+                  'This powers calorie estimates and strength scores. It is saved with your account and cached on this device for offline logging.',
+                )}
               </p>
               <div className="mt-5 space-y-4">
-                <Field label="Display name">
+                <Field label={t('Display name')}>
                   <input
                     className="input"
-                    placeholder="What should we call you?"
+                    placeholder={t('What should we call you?')}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                 </Field>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Sex">
+                  <Field label={t('Sex')}>
                     <Segmented
                       value={sex}
                       options={[
-                        { value: 'male', label: 'Male' },
-                        { value: 'female', label: 'Female' },
-                        { value: 'other', label: 'Other' },
+                        { value: 'male', label: t('Male') },
+                        { value: 'female', label: t('Female') },
+                        { value: 'other', label: t('Other') },
                       ]}
                       onChange={setSex}
                     />
                   </Field>
-                  <Field label="Age">
+                  <Field label={t('Age')}>
                     <NumField
                       value={age}
                       onChange={(v) => setAge(Math.round(v))}
-                      unit="yrs"
+                      unit={t('yrs')}
                       min={13}
                       max={100}
                     />
                   </Field>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Height">
+                  <Field label={t('Height')}>
                     <NumField
                       value={height}
                       onChange={setHeight}
@@ -233,7 +294,7 @@ export default function Onboarding() {
                       max={250}
                     />
                   </Field>
-                  <Field label="Weight">
+                  <Field label={t('Weight')}>
                     <NumField
                       value={weight}
                       onChange={setWeight}
@@ -249,19 +310,23 @@ export default function Onboarding() {
 
           {step === 3 && (
             <div className="animate-fadeUp">
-              <p className="label mb-2">Step 3 · Your goal</p>
+              <p className="label mb-2">{t('Step 3 · Your goal')}</p>
               <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-                Set the pace
+                {t('Set the pace')}
               </h1>
               <p className="mt-2 text-sm font-semibold text-dim">
-                Pick a weekly target and how active you are outside the gym.
+                {t(
+                  'Pick a weekly target and how active you are outside the gym.',
+                )}
               </p>
               <div className="mt-5 rounded-3xl border border-line bg-[var(--surface)] p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-extrabold">Workouts per week</p>
+                    <p className="text-sm font-extrabold">
+                      {t('Workouts per week')}
+                    </p>
                     <p className="mt-0.5 text-xs font-semibold text-mute">
-                      Consistency beats intensity.
+                      {t('Consistency beats intensity.')}
                     </p>
                   </div>
                   <Stepper
@@ -282,7 +347,7 @@ export default function Onboarding() {
                 </div>
               </div>
               <div className="mt-4 space-y-2">
-                <p className="label">Daily activity</p>
+                <p className="label">{t('Daily activity')}</p>
                 {ACTIVITIES.map((a) => (
                   <button
                     key={a.value}
@@ -302,10 +367,10 @@ export default function Onboarding() {
                     </span>
                     <span className="flex-1">
                       <span className="block text-sm font-extrabold">
-                        {a.label}
+                        {t(a.label)}
                       </span>
                       <span className="block text-[11px] font-semibold text-mute">
-                        {a.hint}
+                        {t(a.hint)}
                       </span>
                     </span>
                     {activity === a.value && (
@@ -321,7 +386,7 @@ export default function Onboarding() {
         <div className="relative flex items-center gap-2">
           {step === 0 && (
             <Btn variant="ghost" onClick={finish}>
-              Set up later
+              {t('Set up later')}
             </Btn>
           )}
           {step > 0 && (
@@ -330,7 +395,7 @@ export default function Onboarding() {
               onClick={() => setStep(step - 1)}
               icon={<ArrowLeft size={16} />}
             >
-              Back
+              {t('Back')}
             </Btn>
           )}
           <Btn
@@ -340,13 +405,18 @@ export default function Onboarding() {
             onClick={() => (last ? finish() : setStep(step + 1))}
             trailing={<ArrowRight size={17} />}
           >
-            {step === 0 ? 'Get started' : last ? 'Enter Gymmiie' : 'Continue'}
+            {step === 0
+              ? t('Get started')
+              : last
+                ? t('Enter Gymmiie')
+                : t('Continue')}
           </Btn>
         </div>
 
         <p className="mt-4 text-center text-[10px] font-bold text-mute">
-          Based on GymMane by InlitX · GPL-3.0 · Offline logging with account
-          sync
+          {t(
+            'Based on GymMane by InlitX · GPL-3.0 · Offline logging with account sync',
+          )}
         </p>
       </div>
     </div>

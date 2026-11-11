@@ -39,12 +39,53 @@ import {
   totalVolume,
   volumeLabel,
 } from '../lib/stats';
+import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import type { LoggedSession } from '../types';
 
 type Range = 'all' | '30' | '90' | '365';
 
+const TH: Record<string, string> = {
+  'Every rep counted': 'ทุกเรปมีความหมาย',
+  '{n} workouts · {dur} under the bar · {vol} lifted':
+    '{n} การฝึก · {dur} อยู่ใต้บาร์ · ยกไป {vol}',
+  'all time': 'ทั้งหมด',
+  'working only': 'เฉพาะเซ็ตทำงาน',
+  Time: 'เวลา',
+  'in the gym': 'ในยิม',
+  'total lifted': 'น้ำหนักรวมที่ยก',
+  'Training heatmap': 'ฮีตแมปการฝึก',
+  'last 17 weeks': '17 สัปดาห์ล่าสุด',
+  '{date} · level {n}': '{date} · ระดับ {n}',
+  Less: 'น้อย',
+  More: 'มาก',
+  'Search exercises, workouts, routines…': 'ค้นหาท่า การฝึก ตารางฝึก…',
+  Year: 'ปี',
+  'All routines': 'ทุกตารางฝึก',
+  '{n} workout · {vol}': '{n} การฝึก · {vol}',
+  '{n} workouts · {vol}': '{n} การฝึก · {vol}',
+  deload: 'ลดโหลด',
+  'No exercises': 'ไม่มีท่า',
+  '{n} sets': '{n} เซ็ต',
+  'No workouts match': 'ไม่พบการฝึกที่ตรงกัน',
+  'Your log starts here': 'บันทึกของคุณเริ่มที่นี่',
+  'Try a wider date range, another routine, or a different search.':
+    'ลองช่วงวันที่กว้างขึ้น ตารางฝึกรูปแบบอื่น หรือคำค้นอื่น',
+  'Finish your first session and it will appear here, set by set.':
+    'จบเซสชันแรกแล้วมันจะมาแสดงที่นี่ทีละเซ็ต',
+  'Showing {shown} of {total} workouts · {range}':
+    'แสดง {shown} จาก {total} การฝึก · {range}',
+  All: 'ทั้งหมด',
+  History: 'ประวัติ',
+  Sets: 'เซ็ต',
+  'Start training': 'เริ่มฝึก',
+  Volume: 'ปริมาณรวม',
+  Workout: 'การฝึก',
+  Workouts: 'การฝึก',
+};
+
 export default function History() {
+  const { t, language } = useI18n(TH);
   const data = useStore((s) => s.data);
   const unit = data.settings.unit;
   const [q, setQ] = useState('');
@@ -74,7 +115,7 @@ export default function History() {
     const map = new Map<string, LoggedSession[]>();
     for (const s of filtered) {
       const d = new Date(s.date);
-      const key = d.toLocaleDateString(undefined, {
+      const key = fmtDate(d, {
         month: 'long',
         year: 'numeric',
       });
@@ -83,7 +124,7 @@ export default function History() {
       map.set(key, list);
     }
     return [...map.entries()];
-  }, [filtered]);
+  }, [filtered, language]);
 
   const levels = useMemo(
     () => heatmapLevels(data.sessions, 119),
@@ -94,36 +135,43 @@ export default function History() {
   return (
     <div className="page-enter">
       <PageHeader
-        eyebrow="History"
-        title="Every rep counted"
-        subtitle={`${data.sessions.length} workouts · ${fmtDuration(totalTime)} under the bar · ${volumeLabel(totalVolume(data.sessions), unit)} lifted`}
+        eyebrow={t('History')}
+        title={t('Every rep counted')}
+        subtitle={t(
+          '{n} workouts · {dur} under the bar · {vol} lifted',
+          {
+            n: data.sessions.length,
+            dur: fmtDuration(totalTime),
+            vol: volumeLabel(totalVolume(data.sessions), unit),
+          },
+        )}
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
           {
-            label: 'Workouts',
+            label: t('Workouts'),
             value: data.sessions.length,
             icon: <Dumbbell size={14} />,
-            sub: 'all time',
+            sub: t('all time'),
           },
           {
-            label: 'Sets',
+            label: t('Sets'),
             value: totalSets(data.sessions).toLocaleString(),
             icon: <TrendingUp size={14} />,
-            sub: 'working only',
+            sub: t('working only'),
           },
           {
-            label: 'Time',
+            label: t('Time'),
             value: fmtDuration(totalTime),
             icon: <Clock size={14} />,
-            sub: 'in the gym',
+            sub: t('in the gym'),
           },
           {
-            label: 'Volume',
+            label: t('Volume'),
             value: volumeLabel(totalVolume(data.sessions), unit),
             icon: <Flame size={14} />,
-            sub: 'total lifted',
+            sub: t('total lifted'),
           },
         ].map((s) => (
           <Card key={s.label} className="p-4">
@@ -134,8 +182,10 @@ export default function History() {
 
       <Card className="mt-4 p-4">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-black">Training heatmap</p>
-          <p className="text-[10px] font-bold text-mute">last 17 weeks</p>
+          <p className="text-sm font-black">{t('Training heatmap')}</p>
+          <p className="text-[10px] font-bold text-mute">
+            {t('last 17 weeks')}
+          </p>
         </div>
         <div className="flex gap-[3px] overflow-x-auto pb-1">
           {Array.from({ length: 17 }, (_, week) => (
@@ -148,7 +198,7 @@ export default function History() {
                 return (
                   <span
                     key={day}
-                    title={`${date} · level ${lvl}`}
+                    title={t('{date} · level {n}', { date, n: lvl })}
                     className="h-3 w-3 rounded-[3px]"
                     style={{
                       background: lvl
@@ -162,7 +212,7 @@ export default function History() {
           ))}
         </div>
         <div className="mt-2 flex items-center justify-end gap-1.5 text-[9px] font-bold text-mute">
-          Less{' '}
+          {t('Less')}{' '}
           {[0, 1, 2, 3, 4].map((l) => (
             <span
               key={l}
@@ -174,7 +224,7 @@ export default function History() {
               }}
             />
           ))}{' '}
-          More
+          {t('More')}
         </div>
       </Card>
 
@@ -186,7 +236,7 @@ export default function History() {
           />
           <input
             className="input pl-9"
-            placeholder="Search exercises, workouts, routines…"
+            placeholder={t('Search exercises, workouts, routines…')}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -203,8 +253,8 @@ export default function History() {
           value={range}
           onChange={(v) => setRange(v)}
           options={[
-            { value: 'all', label: 'All' },
-            { value: '365', label: 'Year' },
+            { value: 'all', label: t('All') },
+            { value: '365', label: t('Year') },
             { value: '90', label: '90d' },
             { value: '30', label: '30d' },
           ]}
@@ -214,7 +264,7 @@ export default function History() {
       {data.routines.length > 0 && (
         <div className="scroll-x mt-2 pb-1">
           <Chip on={routineId == null} onClick={() => setRoutineId(null)}>
-            All routines
+            {t('All routines')}
           </Chip>
           {data.routines.map((r) => (
             <Chip
@@ -234,11 +284,21 @@ export default function History() {
             <div className="mb-2 flex items-center justify-between">
               <h2 className="text-sm font-black">{month}</h2>
               <span className="text-[10px] font-bold text-mute">
-                {list.length} workout{list.length === 1 ? '' : 's'} ·{' '}
-                {volumeLabel(
-                  list.reduce((n, s) => n + sessionVolume(s), 0),
-                  unit,
-                )}
+                {list.length === 1
+                  ? t('{n} workout · {vol}', {
+                      n: list.length,
+                      vol: volumeLabel(
+                        list.reduce((n, s) => n + sessionVolume(s), 0),
+                        unit,
+                      ),
+                    })
+                  : t('{n} workouts · {vol}', {
+                      n: list.length,
+                      vol: volumeLabel(
+                        list.reduce((n, s) => n + sessionVolume(s), 0),
+                        unit,
+                      ),
+                    })}
               </span>
             </div>
             <div className="space-y-2">
@@ -255,13 +315,13 @@ export default function History() {
                   >
                     <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[var(--surface-2)]">
                       <span className="text-[9px] font-black uppercase leading-none text-mute">
-                        {d.toLocaleDateString(undefined, { month: 'short' })}
+                        {fmtDate(d, { month: 'short' })}
                       </span>
                       <span className="num text-xl font-black leading-none">
                         {d.getDate()}
                       </span>
                       <span className="text-[8px] font-bold uppercase leading-none text-mute">
-                        {d.toLocaleDateString(undefined, { weekday: 'short' })}
+                        {fmtDate(d, { weekday: 'short' })}
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
@@ -270,7 +330,7 @@ export default function History() {
                           {s.name ||
                             routine?.name ||
                             s.exercises[0]?.name ||
-                            'Workout'}
+                            t('Workout')}
                         </p>
                         {prs > 0 && (
                           <span className="flex items-center gap-0.5 rounded-full bg-[var(--warn)]/15 px-1.5 py-0.5 text-[9px] font-black text-[var(--warn)]">
@@ -279,20 +339,21 @@ export default function History() {
                         )}
                         {s.deload && (
                           <span className="rounded-full bg-[var(--surface-2)] px-1.5 py-0.5 text-[9px] font-black text-mute">
-                            deload
+                            {t('deload')}
                           </span>
                         )}
                       </div>
                       <p className="mt-0.5 truncate text-[11px] font-bold text-mute">
                         {s.exercises.map((e) => e.name).join(' · ') ||
-                          'No exercises'}
+                          t('No exercises')}
                       </p>
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-bold text-mute">
                         <span className="flex items-center gap-1">
                           <Clock size={10} /> {fmtDuration(s.durationSec)}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Dumbbell size={10} /> {sessionSets(s)} sets
+                          <Dumbbell size={10} />{' '}
+                          {t('{n} sets', { n: sessionSets(s) })}
                         </span>
                         <span className="flex items-center gap-1">
                           <TrendingUp size={10} />{' '}
@@ -316,17 +377,21 @@ export default function History() {
             icon={<CalendarDays size={24} />}
             title={
               data.sessions.length
-                ? 'No workouts match'
-                : 'Your log starts here'
+                ? t('No workouts match')
+                : t('Your log starts here')
             }
             body={
               data.sessions.length
-                ? 'Try a wider date range, another routine, or a different search.'
-                : 'Finish your first session and it will appear here, set by set.'
+                ? t(
+                    'Try a wider date range, another routine, or a different search.',
+                  )
+                : t(
+                    'Finish your first session and it will appear here, set by set.',
+                  )
             }
             action={
               <Link to="/train">
-                <Btn variant="primary">Start training</Btn>
+                <Btn variant="primary">{t('Start training')}</Btn>
               </Link>
             }
           />
@@ -335,10 +400,14 @@ export default function History() {
 
       {filtered.length > 0 && (
         <p className="mt-6 text-center text-[11px] font-bold text-mute">
-          Showing {filtered.length} of {data.sessions.length} workouts ·{' '}
-          {filtered.length === 1
-            ? relativeDay(dateKey(filtered[0].date))
-            : `${fmtDate(filtered[filtered.length - 1].date, { day: 'numeric', month: 'short' })} — ${fmtDate(filtered[0].date, { day: 'numeric', month: 'short' })}`}
+          {t('Showing {shown} of {total} workouts · {range}', {
+            shown: filtered.length,
+            total: data.sessions.length,
+            range:
+              filtered.length === 1
+                ? relativeDay(dateKey(filtered[0].date))
+                : `${fmtDate(filtered[filtered.length - 1].date, { day: 'numeric', month: 'short' })} — ${fmtDate(filtered[0].date, { day: 'numeric', month: 'short' })}`,
+          })}
         </p>
       )}
     </div>

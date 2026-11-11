@@ -37,6 +37,7 @@ import { instructionsOf, stepsFor, tipsFor } from '../lib/art';
 import { beep, unlockAudio, vibrate } from '../lib/audio';
 import { fmtClock, fmtDuration } from '../lib/date';
 import { isCompletableSet, loadKindFor, modeFor } from '../lib/exercises';
+import { useI18n } from '../lib/i18n';
 import {
   activeElapsed,
   activeVolume,
@@ -69,9 +70,130 @@ const KIND_SHORT: Record<string, string> = {
   cluster: 'Cl',
 };
 
+const TH: Record<string, string> = {
+  'Rest time is up. Start your next set when you’re ready.':
+    'หมดเวลาพักแล้ว เริ่มเซ็ตต่อไปได้เลย',
+  'No workout in progress': 'ไม่มีการฝึกที่กำลังทำอยู่',
+  'Follow a routine or start an empty workout.':
+    'ทำตามตารางฝึก หรือเริ่มฝึกแบบว่าง',
+  'Start workout': 'เริ่มฝึก',
+  'Freestyle session': 'ฝึกอิสระ',
+  '{done}/{total} sets': '{done}/{total} เซ็ต',
+  'Resume workout': 'ฝึกต่อ',
+  'Pause workout': 'พักการฝึก',
+  'Session options': 'ตัวเลือกการฝึก',
+  'Workout paused · resume to continue logging':
+    'หยุดการฝึกชั่วคราว · ทำต่อเพื่อบันทึกต่อ',
+  'Rest timer': 'จับเวลาพัก',
+  'Subtract 15 seconds rest': 'ลดเวลาพัก 15 วินาที',
+  'Add 15 seconds rest': 'เพิ่มเวลาพัก 15 วินาที',
+  Skip: 'ข้าม',
+  'Workout exercises': 'ท่าออกกำลังในการฝึก',
+  Add: 'เพิ่ม',
+  'All sets completed. Finish when the workout is ready to save.':
+    'ทำครบทุกเซ็ตแล้ว กดจบเมื่อพร้อมบันทึก',
+  ' · assistance load': ' · แรงช่วย',
+  ' · added load': ' · โหลดเพิ่ม',
+  'Top weight': 'น้ำหนักสูงสุด',
+  'Longest time': 'นานที่สุด',
+  'Farthest distance': 'ไกลที่สุด',
+  'Most repetitions': 'เรปมากที่สุด',
+  ' · e1RM {n} {unit}': ' · e1RM {n} {unit}',
+  'Form guide': 'คู่มือท่า',
+  'Last time': 'ครั้งก่อน',
+  'Log sets for {name}': 'บันทึกเซ็ตสำหรับ {name}',
+  Set: 'เซ็ต',
+  Distance: 'ระยะทาง',
+  Seconds: 'วินาที',
+  Assistance: 'แรงช่วย',
+  Load: 'โหลด',
+  Reps: 'ครั้ง',
+  Complete: 'เสร็จ',
+  'Set {n} details': 'รายละเอียดเซ็ต {n}',
+  'Set {n} distance': 'ระยะทางเซ็ต {n}',
+  'Set {n} seconds': 'วินาทีเซ็ต {n}',
+  'Set {n} weight': 'น้ำหนักเซ็ต {n}',
+  'Set {n} repetitions': 'เรปเซ็ต {n}',
+  'No load': 'ไม่มีโหลด',
+  'Mark set {n} incomplete': 'ทำเครื่องหมายเซ็ต {n} ว่ายังไม่เสร็จ',
+  'Complete set {n}': 'ทำเซ็ต {n} ให้เสร็จ',
+  'Set details': 'รายละเอียดเซ็ต',
+  ' · note': ' · โน้ต',
+  'Add set': 'เพิ่มเซ็ต',
+  'Remove last set': 'ลบเซ็ตสุดท้าย',
+  'Swap exercise': 'เปลี่ยนท่า',
+  'Remove exercise': 'ลบท่า',
+  Rest: 'พัก',
+  'Default {n}s': 'ค่าเริ่มต้น {n} วิ',
+  'No exercises yet': 'ยังไม่มีท่า',
+  'Add a movement to begin logging.': 'เพิ่มท่าก่อนเริ่มบันทึก',
+  'Add exercise': 'เพิ่มท่า',
+  'Finish workout': 'จบการฝึก',
+  'Form guide · {name}': 'คู่มือท่า · {name}',
+  Exercise: 'ท่าออกกำลัง',
+  'Verified form guidance is not available for this movement.':
+    'ยังไม่มีคำแนะนำท่าที่ตรวจสอบแล้วสำหรับท่านี้',
+  'Your exercise instructions': 'คำแนะนำท่าของคุณ',
+  'Reviewed form guide': 'คู่มือท่าที่ตรวจแล้ว',
+  Reference: 'อ้างอิง',
+  'No form guide is available for this saved exercise.':
+    'ไม่มีคู่มือท่าสำหรับท่าที่บันทึกไว้นี้',
+  Done: 'เสร็จ',
+  'Set type': 'ประเภทเซ็ต',
+  'Reps in reserve (RIR)': 'เรปที่เหลือ (RIR)',
+  'Rate of perceived exertion (RPE)': 'ระดับความเหนื่อยที่รับรู้ (RPE)',
+  'Not recorded': 'ยังไม่บันทึก',
+  'Effort tracking is off. Enable RPE or RIR in Settings.':
+    'ปิดการวัดความเหนื่อยอยู่ เปิด RPE หรือ RIR ได้ในตั้งค่า',
+  'Set note': 'โน้ตเซ็ต',
+  'Setup, cues, or how the set felt':
+    'การจัดท่า สิ่งที่ต้องจำ หรือความรู้สึกตอนเซ็ต',
+  'Finish workout?': 'จบการฝึก?',
+  'Keep going': 'ฝึกต่อ',
+  'Saving…': 'กำลังบันทึก…',
+  'Save workout': 'บันทึกการฝึก',
+  'Discard empty workout': 'ทิ้งการฝึกว่าง',
+  Duration: 'ระยะเวลา',
+  'Completed sets': 'เซ็ตที่ทำแล้ว',
+  Volume: 'ปริมาณรวม',
+  Exercises: 'ท่าออกกำลัง',
+  'Only completed sets are saved. Unchecked sets and empty exercises are dropped.':
+    'บันทึกเฉพาะเซ็ตที่ทำเสร็จ เซ็ตที่ยังไม่ติ๊กและท่าว่างจะถูกตัดออก',
+  'No sets have been completed. This empty workout will be discarded.':
+    'ยังไม่มีเซ็ตที่ทำเสร็จ การฝึกว่างนี้จะถูกทิ้ง',
+  'Discard workout?': 'ทิ้งการฝึก?',
+  'Completed and unfinished sets in this workout will be lost.':
+    'เซ็ตที่ทำแล้วและยังไม่เสร็จในการฝึกนี้จะหายไป',
+  'Discard workout': 'ทิ้งการฝึก',
+  'Resolve the storage issue before discarding this workout.':
+    'แก้ปัญหาที่เก็บข้อมูลก่อนทิ้งการฝึกนี้',
+  'Remove exercise?': 'ลบท่า?',
+  'All sets recorded for this exercise will be removed from this workout.':
+    'ทุกเซ็ตของท่านี้จะถูกลบออกจากการฝึกนี้',
+  'Workout name': 'ชื่อการฝึก',
+  'Save name': 'บันทึกชื่อ',
+  'Rename workout': 'เปลี่ยนชื่อการฝึก',
+  'Discard workout…': 'ทิ้งการฝึก…',
+  'Exercise order': 'ลำดับท่า',
+  'Move {name} up': 'เลื่อน {name} ขึ้น',
+  'Move {name} down': 'เลื่อน {name} ลง',
+  'Workout saved': 'บันทึกการฝึกแล้ว',
+  'No completed sets — session discarded': 'ไม่มีเซ็ตที่ทำเสร็จ — ทิ้งการฝึกแล้ว',
+  'Could not save this workout. The session is kept.':
+    'บันทึกการฝึกไม่ได้ การฝึกยังถูกเก็บไว้',
+  'Enter a duration before completing this set':
+    'ใส่ระยะเวลาก่อนทำเซ็ตนี้ให้เสร็จ',
+  'Enter a duration or distance before completing this set':
+    'ใส่ระยะเวลาหรือระยะทางก่อนทำเซ็ตนี้ให้เสร็จ',
+  'Enter repetitions before completing this set':
+    'ใส่จำนวนเรปก่อนทำเซ็ตนี้ให้เสร็จ',
+  'Back to Today': 'กลับไปหน้าวันนี้',
+};
+
 export default function Session() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { t, tm } = useI18n(TH);
   const data = useStore((s) => s.data);
   const status = useStore((s) => s.persistenceStatus);
   const isCommitting = useStore((s) => s.isCommitting);
@@ -113,7 +235,9 @@ export default function Session() {
     ) {
       if (data.settings.sound) beep(3);
       if (data.settings.vibrate) vibrate([120, 60, 120]);
-      toast.push('Rest time is up. Start your next set when you’re ready.');
+      toast.push(
+        t('Rest time is up. Start your next set when you’re ready.'),
+      );
     }
     previousRest.current = restLeft;
   }, [
@@ -123,6 +247,7 @@ export default function Session() {
     data.settings.sound,
     data.settings.vibrate,
     toast.push,
+    t,
   ]);
 
   const current = active?.exercises[active.currentIndex];
@@ -153,11 +278,11 @@ export default function Session() {
     return (
       <EmptyState
         icon={<Dumbbell size={26} />}
-        title="No workout in progress"
-        body="Follow a routine or start an empty workout."
+        title={t('No workout in progress')}
+        body={t('Follow a routine or start an empty workout.')}
         action={
           <Btn variant="primary" onClick={() => navigate('/train')}>
-            Start workout
+            {t('Start workout')}
           </Btn>
         }
       />
@@ -198,10 +323,10 @@ export default function Session() {
       const tracking = modeFor(exercise);
       toast.push(
         tracking === 'time'
-          ? 'Enter a duration before completing this set'
+          ? t('Enter a duration before completing this set')
           : tracking === 'cardio'
-            ? 'Enter a duration or distance before completing this set'
-            : 'Enter repetitions before completing this set',
+            ? t('Enter a duration or distance before completing this set')
+            : t('Enter repetitions before completing this set'),
         'bad',
       );
       return;
@@ -236,17 +361,17 @@ export default function Session() {
       }
       setFinishOpen(false);
       if (result.status === 'saved') {
-    toast.push('Workout saved', 'good');
+        toast.push(t('Workout saved'), 'good');
         navigate(`/history/${result.id}`);
       } else {
-        toast.push('No completed sets — session discarded');
+        toast.push(t('No completed sets — session discarded'));
         navigate('/train');
       }
     } catch (error) {
       setFinishError(
         error instanceof Error
           ? error.message
-          : 'Could not save this workout. The session is kept.',
+          : t('Could not save this workout. The session is kept.'),
       );
     } finally {
       setFinishing(false);
@@ -261,7 +386,7 @@ export default function Session() {
       <div className="mb-3 flex items-center gap-2">
         <Btn
           size="icon"
-          aria-label="Back to Today"
+          aria-label={t('Back to Today')}
           onClick={() => navigate('/')}
         >
           <ArrowLeft size={18} />
@@ -274,26 +399,27 @@ export default function Session() {
             className="flex items-center gap-1.5 text-left"
           >
             <span className="truncate text-base font-black">
-              {active.name || 'Freestyle session'}
+              {active.name || t('Freestyle session')}
             </span>
             <Pencil size={12} />
           </button>
           <p className="text-[11px] font-bold text-mute">
-            {fmtDuration(elapsed)} · {doneSets}/{totalSets} sets ·{' '}
+            {fmtDuration(elapsed)} ·{' '}
+            {t('{done}/{total} sets', { done: doneSets, total: totalSets })} ·{' '}
             {volumeLabel(volume, unit)}
           </p>
         </div>
         <Btn
           size="icon"
           disabled={readOnly}
-          aria-label={paused ? 'Resume workout' : 'Pause workout'}
+          aria-label={paused ? t('Resume workout') : t('Pause workout')}
           onClick={actions.toggleSessionPause}
         >
           {paused ? <Play size={16} /> : <Pause size={16} />}
         </Btn>
         <Btn
           size="icon"
-          aria-label="Session options"
+          aria-label={t('Session options')}
           onClick={() => setMenuOpen(true)}
         >
           <MoreHorizontal size={18} />
@@ -305,14 +431,14 @@ export default function Session() {
           className="mb-3 flex items-center gap-2 rounded-2xl bg-[var(--warn)]/10 px-4 py-3 text-xs font-black text-[var(--warn)]"
         >
           <Pause size={15} />
-          Workout paused · resume to continue logging
+          {t('Workout paused · resume to continue logging')}
         </div>
       )}
       {restLeft > 0 && !paused && (
         <Card className="mb-3 flex items-center gap-2 border-[var(--accent-line)] bg-[var(--accent-soft)] p-3">
           <Timer size={20} className="text-[var(--accent)]" />
           <div className="flex-1">
-            <p className="text-xs font-black">Rest timer</p>
+            <p className="text-xs font-black">{t('Rest timer')}</p>
             <p
               role="timer"
               aria-live="off"
@@ -324,7 +450,7 @@ export default function Session() {
           <Btn
             size="icon"
             disabled={readOnly}
-            aria-label="Subtract 15 seconds rest"
+            aria-label={t('Subtract 15 seconds rest')}
             onClick={() => actions.nudgeRest(-15)}
           >
             <Minus size={15} />
@@ -332,7 +458,7 @@ export default function Session() {
           <Btn
             size="icon"
             disabled={readOnly}
-            aria-label="Add 15 seconds rest"
+            aria-label={t('Add 15 seconds rest')}
             onClick={() => actions.nudgeRest(15)}
           >
             <Plus size={15} />
@@ -343,12 +469,12 @@ export default function Session() {
             onClick={actions.skipRest}
             icon={<SkipForward size={14} />}
           >
-            Skip
+            {t('Skip')}
           </Btn>
         </Card>
       )}
       <fieldset disabled={blocked} className="mb-3 min-w-0">
-        <legend className="sr-only">Workout exercises</legend>
+        <legend className="sr-only">{t('Workout exercises')}</legend>
         <div className="scroll-x pb-1">
           {active.exercises.map((ex, index) => (
             <button
@@ -374,7 +500,7 @@ export default function Session() {
             onClick={() => setPicker(true)}
             icon={<Plus size={14} />}
           >
-            Add
+            {t('Add')}
           </Btn>
         </div>
       </fieldset>
@@ -383,7 +509,7 @@ export default function Session() {
           role="status"
           className="mb-3 rounded-xl bg-[var(--good-soft)] p-3 text-sm font-bold text-[var(--good)]"
         >
-          All sets completed. Finish when the workout is ready to save.
+          {t('All sets completed. Finish when the workout is ready to save.')}
         </p>
       )}
       {current ? (
@@ -399,25 +525,31 @@ export default function Session() {
             <div className="min-w-0 flex-1">
               <h1 className="text-base font-black">{current.name}</h1>
               <p className="mt-1 text-xs font-semibold text-mute">
-                {MUSCLE_LABEL[current.primary] ?? current.primary}
+                {tm(
+                  current.primary,
+                  MUSCLE_LABEL[current.primary] ?? current.primary,
+                )}
                 {load === 'assistance'
-                  ? ' · assistance load'
+                  ? t(' · assistance load')
                   : load === 'added'
-                    ? ' · added load'
+                    ? t(' · added load')
                     : ''}
               </p>
               {record && (
                 <p className="mt-1 text-[10px] font-bold text-[var(--warn)]">
-                  {recordLabel(record.kind)} {recordValue(record, unit)}
+                  {t(recordLabel(record.kind))} {recordValue(record, unit)}
                   {record.kind === 'weight' && record.oneRm > 0
-                    ? ` · e1RM ${toDisplayWeight(record.oneRm, unit).toFixed(1)} ${unit}`
+                    ? t(' · e1RM {n} {unit}', {
+                        n: toDisplayWeight(record.oneRm, unit).toFixed(1),
+                        unit,
+                      })
                     : ''}
                 </p>
               )}
             </div>
             <Btn
               size="icon"
-              aria-label="Form guide"
+              aria-label={t('Form guide')}
               onClick={() => setHowToOpen(true)}
             >
               <BookOpen size={16} />
@@ -425,7 +557,7 @@ export default function Session() {
           </div>
           {previousSets.length > 0 && (
             <div className="border-b border-line bg-[var(--surface-2)] px-4 py-2">
-              <p className="label">Last time</p>
+              <p className="label">{t('Last time')}</p>
               <p className="mt-1 text-xs font-semibold text-dim">
                 {previousSets
                   .slice(0, 5)
@@ -435,28 +567,30 @@ export default function Session() {
             </div>
           )}
           <fieldset disabled={blocked} className="min-w-0 p-3 sm:p-4">
-            <legend className="sr-only">Log sets for {current.name}</legend>
+            <legend className="sr-only">
+              {t('Log sets for {name}', { name: current.name })}
+            </legend>
             <div className="mb-2 grid grid-cols-[40px_1fr_1fr_44px] items-center gap-2 text-[10px] font-black uppercase text-mute">
-              <span>Set</span>
+              <span>{t('Set')}</span>
               <span>
                 {mode === 'cardio'
-                  ? 'Distance'
+                  ? t('Distance')
                   : mode === 'time'
-                    ? 'Seconds'
+                    ? t('Seconds')
                     : load === 'assistance'
-                      ? 'Assistance'
+                      ? t('Assistance')
                       : load === 'none'
-                        ? 'Load'
+                        ? t('Load')
                         : unit}
               </span>
               <span>
                 {mode === 'cardio'
-                  ? 'Seconds'
+                  ? t('Seconds')
                   : mode === 'time'
-                    ? 'Load'
-                    : 'Reps'}
+                    ? t('Load')
+                    : t('Reps')}
               </span>
-              <span className="sr-only">Complete</span>
+              <span className="sr-only">{t('Complete')}</span>
             </div>
             <div className="space-y-2">
               {current.sets.map((set, index) => (
@@ -470,7 +604,7 @@ export default function Session() {
                   <div className="grid grid-cols-[40px_1fr_1fr_44px] items-center gap-2">
                     <button
                       type="button"
-                      aria-label={`Set ${index + 1} details`}
+                      aria-label={t('Set {n} details', { n: index + 1 })}
                       onClick={() => setDetail({ uid: current.uid, index })}
                       className="grid min-h-11 place-items-center rounded-lg bg-[var(--surface-2)] text-[10px] font-black"
                     >
@@ -480,7 +614,7 @@ export default function Session() {
                     {mode === 'cardio' ? (
                       <>
                         <SetInput
-                          label={`Set ${index + 1} distance`}
+                          label={t('Set {n} distance', { n: index + 1 })}
                           value={set.km ?? 0}
                           onChange={(km) =>
                             actions.updateSet(current.uid, index, { km })
@@ -489,7 +623,7 @@ export default function Session() {
                           suffix="km"
                         />
                         <SetInput
-                          label={`Set ${index + 1} seconds`}
+                          label={t('Set {n} seconds', { n: index + 1 })}
                           value={set.sec ?? 0}
                           onChange={(sec) =>
                             actions.updateSet(current.uid, index, {
@@ -503,7 +637,7 @@ export default function Session() {
                     ) : mode === 'time' ? (
                       <>
                         <SetInput
-                          label={`Set ${index + 1} seconds`}
+                          label={t('Set {n} seconds', { n: index + 1 })}
                           value={set.sec ?? 0}
                           onChange={(sec) =>
                             actions.updateSet(current.uid, index, {
@@ -515,11 +649,11 @@ export default function Session() {
                         />
                         {load === 'none' ? (
                           <span className="text-center text-xs font-bold text-mute">
-                            No load
+                            {t('No load')}
                           </span>
                         ) : (
                           <SetInput
-                            label={`Set ${index + 1} weight`}
+                            label={t('Set {n} weight', { n: index + 1 })}
                             value={toDisplayWeight(set.weight, unit)}
                             onChange={(weight) =>
                               actions.updateSet(current.uid, index, {
@@ -535,11 +669,11 @@ export default function Session() {
                       <>
                         {load === 'none' ? (
                           <span className="text-center text-xs font-bold text-mute">
-                            No load
+                            {t('No load')}
                           </span>
                         ) : (
                           <SetInput
-                            label={`Set ${index + 1} weight`}
+                            label={t('Set {n} weight', { n: index + 1 })}
                             value={toDisplayWeight(set.weight, unit)}
                             onChange={(weight) =>
                               actions.updateSet(current.uid, index, {
@@ -551,7 +685,7 @@ export default function Session() {
                           />
                         )}
                         <SetInput
-                          label={`Set ${index + 1} repetitions`}
+                          label={t('Set {n} repetitions', { n: index + 1 })}
                           value={set.reps}
                           onChange={(reps) =>
                             actions.updateSet(current.uid, index, {
@@ -567,8 +701,8 @@ export default function Session() {
                       type="button"
                       aria-label={
                         set.done
-                          ? `Mark set ${index + 1} incomplete`
-                          : `Complete set ${index + 1}`
+                          ? t('Mark set {n} incomplete', { n: index + 1 })
+                          : t('Complete set {n}', { n: index + 1 })
                       }
                       aria-pressed={set.done}
                       onClick={() => complete(current.uid, index)}
@@ -587,11 +721,11 @@ export default function Session() {
                     onClick={() => setDetail({ uid: current.uid, index })}
                     className="ml-12 mt-1 min-h-8 text-left text-[11px] font-bold text-dim"
                   >
-                    Set details
+                    {t('Set details')}
                     {set.rpe != null
                       ? ` · ${data.settings.effort === 'rir' ? `RIR ${10 - set.rpe}` : `RPE ${set.rpe}`}`
                       : ''}
-                    {set.note ? ' · note' : ''}
+                    {set.note ? t(' · note') : ''}
                   </button>
                 </div>
               ))}
@@ -602,7 +736,7 @@ export default function Session() {
                 onClick={() => actions.addSet(current.uid)}
                 icon={<Plus size={14} />}
               >
-                Add set
+                {t('Add set')}
               </Btn>
               {current.sets.length > 1 && (
                 <Btn
@@ -612,7 +746,7 @@ export default function Session() {
                   }
                   icon={<Minus size={14} />}
                 >
-                  Remove last set
+                  {t('Remove last set')}
                 </Btn>
               )}
               <Btn
@@ -620,7 +754,7 @@ export default function Session() {
                 onClick={() => setSwapUid(current.uid)}
                 icon={<RotateCcw size={14} />}
               >
-                Swap exercise
+                {t('Swap exercise')}
               </Btn>
               <Btn
                 size="sm"
@@ -628,12 +762,12 @@ export default function Session() {
                 onClick={() => setRemoveUid(current.uid)}
                 icon={<Trash2 size={14} />}
               >
-                Remove exercise
+                {t('Remove exercise')}
               </Btn>
             </div>
             {restLeft <= 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
-                <span className="label">Rest</span>
+                <span className="label">{t('Rest')}</span>
                 {[60, 90, 120].map((seconds) => (
                   <Btn
                     key={seconds}
@@ -653,7 +787,7 @@ export default function Session() {
                     actions.startRest(data.settings.restSec);
                   }}
                 >
-                  Default {data.settings.restSec}s
+                  {t('Default {n}s', { n: data.settings.restSec })}
                 </Btn>
               </div>
             )}
@@ -662,11 +796,11 @@ export default function Session() {
       ) : (
         <EmptyState
           icon={<Dumbbell size={24} />}
-          title="No exercises yet"
-          body="Add a movement to begin logging."
+          title={t('No exercises yet')}
+          body={t('Add a movement to begin logging.')}
           action={
             <Btn disabled={blocked} onClick={() => setPicker(true)}>
-              Add exercise
+              {t('Add exercise')}
             </Btn>
           }
         />
@@ -677,7 +811,7 @@ export default function Session() {
           className="min-h-11 flex-1 sm:text-sm"
           onClick={() => setMenuOpen(true)}
         >
-          Session options
+          {t('Session options')}
         </Btn>
         <Btn
           variant="primary"
@@ -689,7 +823,7 @@ export default function Session() {
             setFinishOpen(true);
           }}
         >
-          Finish workout
+          {t('Finish workout')}
         </Btn>
       </div>
       <ExercisePicker
@@ -701,7 +835,7 @@ export default function Session() {
       <ExercisePicker
         open={!!swapUid && !blocked}
         onClose={() => setSwapUid(null)}
-        title="Swap exercise"
+        title={t('Swap exercise')}
         exclude={active.exercises.map((ex) => ex.id)}
         onPick={(ex) => {
           if (swapUid) actions.replaceSessionExercise(swapUid, ex.id);
@@ -711,7 +845,9 @@ export default function Session() {
       <Sheet
         open={howToOpen}
         onClose={() => setHowToOpen(false)}
-        title={`Form guide · ${current?.name ?? 'Exercise'}`}
+        title={t('Form guide · {name}', {
+          name: current?.name ?? t('Exercise'),
+        })}
       >
         {catalog ? (
           <>
@@ -728,7 +864,7 @@ export default function Session() {
               </ol>
             ) : (
               <p className="mt-3 text-sm font-semibold text-mute">
-                Verified form guidance is not available for this movement.
+                {t('Verified form guidance is not available for this movement.')}
               </p>
             )}
             {tipsFor(catalog).length > 0 && (
@@ -740,12 +876,12 @@ export default function Session() {
             )}
             {catalog.kind === 'custom' && (
               <p className="mt-3 text-xs text-mute">
-                Your exercise instructions
+                {t('Your exercise instructions')}
               </p>
             )}
             {guide && (
               <p className="mt-3 text-xs text-mute">
-                Reviewed form guide
+                {t('Reviewed form guide')}
                 {guide.url && (
                   <>
                     {' '}
@@ -756,7 +892,7 @@ export default function Session() {
                       rel="noreferrer"
                       className="text-[var(--accent)] underline"
                     >
-                      Reference
+                      {t('Reference')}
                     </a>
                   </>
                 )}
@@ -765,23 +901,23 @@ export default function Session() {
           </>
         ) : (
           <p className="text-sm text-mute">
-            No form guide is available for this saved exercise.
+            {t('No form guide is available for this saved exercise.')}
           </p>
         )}
       </Sheet>
       <Sheet
         open={!!detail && !!detailSet}
         onClose={() => setDetail(null)}
-        title={`Set ${(detail?.index ?? 0) + 1} details`}
+        title={t('Set {n} details', { n: (detail?.index ?? 0) + 1 })}
         footer={
           <Btn className="w-full" onClick={() => setDetail(null)}>
-            Done
+            {t('Done')}
           </Btn>
         }
       >
         {detailSet && (
           <fieldset disabled={blocked} className="min-w-0 space-y-4">
-            <Field label="Set type">
+            <Field label={t('Set type')}>
               <select
                 className="input"
                 value={detailSet.kind}
@@ -800,8 +936,8 @@ export default function Session() {
               <Field
                 label={
                   data.settings.effort === 'rir'
-                    ? 'Reps in reserve (RIR)'
-                    : 'Rate of perceived exertion (RPE)'
+                    ? t('Reps in reserve (RIR)')
+                    : t('Rate of perceived exertion (RPE)')
                 }
               >
                 <select
@@ -824,7 +960,7 @@ export default function Session() {
                     })
                   }
                 >
-                  <option value="">Not recorded</option>
+                  <option value="">{t('Not recorded')}</option>
                   {Array.from({ length: 9 }, (_, index) =>
                     data.settings.effort === 'rir' ? index / 2 : 6 + index / 2,
                   ).map((value) => (
@@ -836,15 +972,15 @@ export default function Session() {
               </Field>
             ) : (
               <p className="text-xs text-mute">
-                Effort tracking is off. Enable RPE or RIR in Settings.
+                {t('Effort tracking is off. Enable RPE or RIR in Settings.')}
               </p>
             )}
-            <Field label="Set note">
+            <Field label={t('Set note')}>
               <textarea
                 className="input min-h-[100px]"
                 value={detailSet.note ?? ''}
                 onChange={(event) => setDetails({ note: event.target.value })}
-                placeholder="Setup, cues, or how the set felt"
+                placeholder={t('Setup, cues, or how the set felt')}
               />
             </Field>
           </fieldset>
@@ -854,7 +990,7 @@ export default function Session() {
         open={finishOpen}
         onClose={() => setFinishOpen(false)}
         dismissible={!finishing}
-        title="Finish workout?"
+        title={t('Finish workout?')}
         footer={
           <div className="flex gap-2">
             <Btn
@@ -862,7 +998,7 @@ export default function Session() {
               className="flex-1"
               onClick={() => setFinishOpen(false)}
             >
-              Keep going
+              {t('Keep going')}
             </Btn>
             <Btn
               disabled={finishing || readOnly}
@@ -871,10 +1007,10 @@ export default function Session() {
               onClick={() => void finish()}
             >
               {finishing
-                ? 'Saving…'
+                ? t('Saving…')
                 : doneSets
-                  ? 'Save workout'
-                  : 'Discard empty workout'}
+                  ? t('Save workout')
+                  : t('Discard empty workout')}
             </Btn>
           </div>
         }
@@ -896,18 +1032,19 @@ export default function Session() {
               key={stat.label}
               className="rounded-xl bg-[var(--surface-2)] p-3"
             >
-              <p className="label">{stat.label}</p>
+              <p className="label">{t(stat.label)}</p>
               <p className="mt-1 font-black">{stat.value}</p>
             </div>
           ))}
         </div>
         <p className="mt-3 text-sm font-semibold text-dim">
-          Only completed sets are saved. Unchecked sets and empty exercises are
-          dropped.
+          {t(
+            'Only completed sets are saved. Unchecked sets and empty exercises are dropped.',
+          )}
         </p>
         {doneSets === 0 && (
           <p className="mt-3 text-sm font-bold text-[var(--warn)]">
-            No sets have been completed. This empty workout will be discarded.
+            {t('No sets have been completed. This empty workout will be discarded.')}
           </p>
         )}
         {finishError && (
@@ -919,14 +1056,16 @@ export default function Session() {
       <Confirm
         open={discardOpen}
         onClose={() => setDiscardOpen(false)}
-        title="Discard workout?"
-        body="Completed and unfinished sets in this workout will be lost."
-        confirmLabel="Discard workout"
+        title={t('Discard workout?')}
+        body={t(
+          'Completed and unfinished sets in this workout will be lost.',
+        )}
+        confirmLabel={t('Discard workout')}
         onConfirm={() => {
           actions.discardSession();
           if (useStore.getState().data.active)
             throw new Error(
-              'Resolve the storage issue before discarding this workout.',
+              t('Resolve the storage issue before discarding this workout.'),
             );
           setMenuOpen(false);
           navigate('/');
@@ -935,9 +1074,11 @@ export default function Session() {
       <Confirm
         open={!!removeUid}
         onClose={() => setRemoveUid(null)}
-        title="Remove exercise?"
-        body="All sets recorded for this exercise will be removed from this workout."
-        confirmLabel="Remove exercise"
+        title={t('Remove exercise?')}
+        body={t(
+          'All sets recorded for this exercise will be removed from this workout.',
+        )}
+        confirmLabel={t('Remove exercise')}
         onConfirm={() => {
           if (removeUid && !blocked) actions.removeSessionExercise(removeUid);
         }}
@@ -945,7 +1086,7 @@ export default function Session() {
       <Sheet
         open={nameOpen}
         onClose={() => setNameOpen(false)}
-        title="Workout name"
+        title={t('Workout name')}
         footer={
           <Btn
             disabled={readOnly}
@@ -955,11 +1096,11 @@ export default function Session() {
               setNameOpen(false);
             }}
           >
-            Save name
+            {t('Save name')}
           </Btn>
         }
       >
-        <Field label="Workout name">
+        <Field label={t('Workout name')}>
           <input
             autoFocus
             className="input"
@@ -971,11 +1112,11 @@ export default function Session() {
       <Sheet
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
-        title="Session options"
+        title={t('Session options')}
       >
         <div className="flex flex-wrap gap-2">
           <Btn disabled={readOnly} onClick={openName}>
-            Rename workout
+            {t('Rename workout')}
           </Btn>
           <Btn
             disabled={blocked}
@@ -984,7 +1125,7 @@ export default function Session() {
               setPicker(true);
             }}
           >
-            Add exercise
+            {t('Add exercise')}
           </Btn>
           <Btn
             disabled={readOnly}
@@ -993,17 +1134,17 @@ export default function Session() {
               setMenuOpen(false);
             }}
           >
-            {paused ? 'Resume workout' : 'Pause workout'}
+            {paused ? t('Resume workout') : t('Pause workout')}
           </Btn>
           <Btn
             disabled={readOnly}
             variant="danger"
             onClick={() => setDiscardOpen(true)}
           >
-            Discard workout…
+            {t('Discard workout…')}
           </Btn>
         </div>
-        <h2 className="label mb-3 mt-5">Exercise order</h2>
+        <h2 className="label mb-3 mt-5">{t('Exercise order')}</h2>
         <div className="space-y-2">
           {active.exercises.map((ex, index) => (
             <div
@@ -1016,7 +1157,7 @@ export default function Session() {
               <Btn
                 size="icon"
                 disabled={blocked || index === 0}
-                aria-label={`Move ${ex.name} up`}
+                aria-label={t('Move {name} up', { name: ex.name })}
                 onClick={() => actions.moveSessionExercise(index, index - 1)}
               >
                 <ArrowUp size={15} />
@@ -1024,7 +1165,7 @@ export default function Session() {
               <Btn
                 size="icon"
                 disabled={blocked || index === active.exercises.length - 1}
-                aria-label={`Move ${ex.name} down`}
+                aria-label={t('Move {name} down', { name: ex.name })}
                 onClick={() => actions.moveSessionExercise(index, index + 1)}
               >
                 <ArrowDown size={15} />

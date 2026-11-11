@@ -13,7 +13,25 @@ import React, {
 import { createPortal } from 'react-dom';
 import { CatCompanion } from './CatCompanion';
 import { NumberPad } from './NumberPad';
+import { useI18n } from '../lib/i18n';
 import { useAppUpdate } from '../lib/useAppUpdate';
+
+const TH: Record<string, string> = {
+  'Psst! A newer Gymmiie is ready. Want to refresh and check it out? Mochi will keep your saved workout safe.':
+    'แจ้งเตือน! Gymmiie เวอร์ชันใหม่พร้อมแล้ว อยากรีเฟรชลองดูไหม? Mochi จะเก็บข้อมูลฝึกของคุณไว้ให้',
+  'Refresh app': 'รีเฟรชแอป',
+  'Refreshing…': 'กำลังรีเฟรช…',
+  'Enter a number': 'กรอกตัวเลข',
+  'Number pad': 'แป้นตัวเลข',
+  Dialog: 'หน้าต่าง',
+  'Close dialog': 'ปิดหน้าต่าง',
+  'Could not complete this action. Try again.':
+    'ทำรายการนี้ไม่สำเร็จ ลองใหม่อีกครั้ง',
+  Decrease: 'ลดลง',
+  Increase: 'เพิ่มขึ้น',
+  'Decrease {unit}': 'ลด {unit}',
+  'Increase {unit}': 'เพิ่ม {unit}',
+};
 
 /* ------------------------------------------------------------------ */
 /* Toast                                                               */
@@ -39,6 +57,7 @@ const ToastCtx = createContext<{
 export const useToast = () => useContext(ToastCtx);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useI18n(TH);
   const update = useAppUpdate();
   const [items, setItems] = useState<ToastItem[]>([]);
   const [catHosts, setCatHosts] = useState<HTMLElement[]>([]);
@@ -56,11 +75,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const encourage = useCallback((msg: string) => push(msg, 'good'), [push]);
   const updateNotice: ToastItem | undefined = update.version ? {
     id: -1,
-    msg: update.error || 'Psst! A newer Gymmiie is ready. Want to refresh and check it out? Mochi will keep your saved workout safe.',
+    msg: update.error || t('Psst! A newer Gymmiie is ready. Want to refresh and check it out? Mochi will keep your saved workout safe.'),
     tone: update.error ? 'bad' : 'default',
     persistent: true,
     action: {
-      label: update.refreshing ? 'Refreshing…' : 'Refresh app',
+      label: update.refreshing ? t('Refreshing…') : t('Refresh app'),
       onClick: () => { void update.refresh(); },
       disabled: update.refreshing,
     },
@@ -355,6 +374,7 @@ export function NumericInput({
   onValueCommit?: (value: string) => void;
   unit?: string;
 }) {
+  const { t } = useI18n(TH);
   const input = useRef<HTMLInputElement>(null);
   const [mobile, setMobile] = useState(() => window.matchMedia('(pointer: coarse)').matches);
   const [open, setOpen] = useState(false);
@@ -404,10 +424,10 @@ export function NumericInput({
           }
         }}
       />
-      <Sheet open={open} onClose={() => setOpen(false)} title="Number pad" placement="bottom">
+      <Sheet open={open} onClose={() => setOpen(false)} title={t('Number pad')} placement="bottom">
         <NumberPad
           value={value}
-          label={label}
+          label={t(label)}
           unit={unit}
           onCancel={() => setOpen(false)}
           onApply={(raw) => {
@@ -491,13 +511,14 @@ export function Stepper({
   max?: number;
   unit?: string;
 }) {
+  const { t } = useI18n(TH);
   const set = (v: number) =>
     onChange(Math.max(min, Math.min(max, Math.round(v * 100) / 100)));
   return (
     <div className="flex items-center gap-1.5 rounded-xl border border-line bg-[var(--surface-2)] p-1">
       <button
         type="button"
-        aria-label={`Decrease${unit ? ` ${unit}` : ''}`}
+        aria-label={unit ? t('Decrease {unit}', { unit }) : t('Decrease')}
         onClick={() => set(value - step)}
         className="grid h-8 w-8 place-items-center rounded-lg text-dim hover:bg-[var(--surface-3)]"
       >
@@ -511,7 +532,7 @@ export function Stepper({
       </div>
       <button
         type="button"
-        aria-label={`Increase${unit ? ` ${unit}` : ''}`}
+        aria-label={unit ? t('Increase {unit}', { unit }) : t('Increase')}
         onClick={() => set(value + step)}
         className="grid h-8 w-8 place-items-center rounded-lg text-dim hover:bg-[var(--surface-3)]"
       >
@@ -571,6 +592,7 @@ export function Sheet({
   dismissible?: boolean;
   placement?: 'auto' | 'bottom';
 }) {
+  const { t } = useI18n(TH);
   const id = useId();
   const layerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -698,11 +720,11 @@ export function Sheet({
       >
         <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-4">
           <h2 id={`${id}-title`} className="text-base font-black">
-            {title ?? 'Dialog'}
+            {t(title ?? 'Dialog')}
           </h2>
           <button
             type="button"
-            aria-label="Close dialog"
+            aria-label={t('Close dialog')}
             disabled={!dismissible}
             onClick={onClose}
             className="grid h-10 w-10 place-items-center rounded-full bg-[var(--surface-2)] text-dim hover:text-[var(--text)] disabled:opacity-40"
@@ -740,6 +762,7 @@ export function Confirm({
   confirmLabel?: string;
   danger?: boolean;
 }) {
+  const { t } = useI18n(TH);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   useEffect(() => {
@@ -756,7 +779,7 @@ export function Confirm({
       setError(
         err instanceof Error
           ? err.message
-          : 'Could not complete this action. Try again.',
+          : t('Could not complete this action. Try again.'),
       );
     } finally {
       setBusy(false);
@@ -771,7 +794,7 @@ export function Confirm({
       footer={
         <div className="flex gap-2">
           <Btn disabled={busy} className="flex-1" onClick={onClose}>
-            Cancel
+            {t('Cancel')}
           </Btn>
           <Btn
             disabled={busy}
@@ -779,7 +802,7 @@ export function Confirm({
             variant={danger ? 'danger' : 'primary'}
             onClick={() => void confirm()}
           >
-            {busy ? 'Working…' : confirmLabel}
+            {busy ? t('Working…') : t(confirmLabel)}
           </Btn>
         </div>
       }

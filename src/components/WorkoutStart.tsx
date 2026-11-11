@@ -1,10 +1,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useI18n } from '../lib/i18n';
 import { useStore, type StartResult } from '../lib/store';
 import { Btn, Confirm, Sheet, useToast } from './ui';
 
+const TH: Record<string, string> = {
+  'No available exercises were found for this workout':
+    'ไม่พบท่าออกกำลังที่ใช้ได้สำหรับการฝึกนี้',
+  'Resolve the storage issue before starting a workout':
+    'แก้ปัญหาพื้นที่เก็บข้อมูลก่อนเริ่มฝึก',
+  'Resume the current workout, or discard it before starting another. Completed sets are saved only when the workout is finished.':
+    'ฝึกต่อจากเดิม หรือทิ้งก่อนเริ่มใหม่ เซ็ตที่ทำเสร็จจะบันทึกเมื่อจบการฝึกเท่านั้น',
+  'Discard & start…': 'ทิ้งแล้วเริ่มใหม่…',
+  'All completed and unfinished sets in this workout will be lost. The new workout will then start.':
+    'เซ็ตทั้งหมดในการฝึกนี้จะหายไป แล้วจะเริ่มการฝึกใหม่',
+  'Discard & start': 'ทิ้งแล้วเริ่มใหม่',
+  'Resolve the storage issue before replacing this workout.':
+    'แก้ปัญหาพื้นที่เก็บข้อมูลก่อนแทนที่การฝึกนี้',
+};
+
 /** Every workout entry point uses the same active-session protection. */
 export function useWorkoutStart() {
+  const { t } = useI18n(TH);
   const navigate = useNavigate();
   const toast = useToast();
   const [pending, setPending] = useState<{ run: () => StartResult } | null>(
@@ -21,8 +38,8 @@ export function useWorkoutStart() {
     else
       toast.push(
         result.status === 'not-found'
-          ? 'No available exercises were found for this workout'
-          : 'Resolve the storage issue before starting a workout',
+          ? t('No available exercises were found for this workout')
+          : t('Resolve the storage issue before starting a workout'),
         'bad',
       );
   };
@@ -39,11 +56,12 @@ export function useWorkoutStart() {
       <Sheet
         open={!!pending}
         onClose={close}
-        title="Workout already in progress"
+        title={t('Workout already in progress')}
       >
         <p className="text-sm font-semibold text-dim">
-          Resume the current workout, or discard it before starting another.
-          Completed sets are saved only when the workout is finished.
+          {t(
+            'Resume the current workout, or discard it before starting another. Completed sets are saved only when the workout is finished.',
+          )}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Btn
@@ -54,32 +72,34 @@ export function useWorkoutStart() {
               navigate('/session');
             }}
           >
-            Resume workout
+            {t('Resume workout')}
           </Btn>
           <Btn className="flex-1" onClick={close}>
-            Cancel
+            {t('Cancel')}
           </Btn>
           <Btn
             variant="danger"
             className="w-full"
             onClick={() => setReplace(true)}
           >
-            Discard & start…
+            {t('Discard & start…')}
           </Btn>
         </div>
       </Sheet>
       <Confirm
         open={replace}
         onClose={() => setReplace(false)}
-        title="Discard the current workout?"
-        body="All completed and unfinished sets in this workout will be lost. The new workout will then start."
-        confirmLabel="Discard & start"
+        title={t('Discard the current workout?')}
+        body={t(
+          'All completed and unfinished sets in this workout will be lost. The new workout will then start.',
+        )}
+        confirmLabel={t('Discard & start')}
         onConfirm={() => {
           if (!pending) return;
           useStore.getState().discardSession();
           if (useStore.getState().data.active)
             throw new Error(
-              'Resolve the storage issue before replacing this workout.',
+              t('Resolve the storage issue before replacing this workout.'),
             );
           begin(pending.run);
         }}

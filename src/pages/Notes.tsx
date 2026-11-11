@@ -30,6 +30,7 @@ import {
   useToast,
 } from '../components/ui';
 import { dateKey, fmtDate, relativeDay } from '../lib/date';
+import { useI18n } from '../lib/i18n';
 import { allExercises, useStore } from '../lib/store';
 import type { Note } from '../types';
 
@@ -70,7 +71,58 @@ const KIND_MAP = Object.fromEntries(KINDS.map((k) => [k.id, k])) as Record<
   (typeof KINDS)[number]
 >;
 
+const TH: Record<string, string> = {
+  Journal: 'บันทึก',
+  'Notes that train with you': 'โน้ตที่ฝึกไปกับคุณ',
+  '{n} entries · pin cues, plans and pain flags to exercises or days':
+    '{n} รายการ · ปักหมุดเทคนิค แผน และอาการเจ็บไว้กับท่าหรือวัน',
+  'New note': 'โน้ตใหม่',
+  Note: 'โน้ต',
+  Plan: 'แผน',
+  Done: 'เสร็จ',
+  Pain: 'เจ็บ',
+  '{kind}s': '{kind}',
+  'Search notes, folders, exercises…': 'ค้นหาโน้ต โฟลเดอร์ ท่า…',
+  All: 'ทั้งหมด',
+  'All folders': 'ทุกโฟลเดอร์',
+  'Added {date}': 'เพิ่มเมื่อ {date}',
+  Pin: 'ปักหมุด',
+  Edit: 'แก้ไข',
+  Delete: 'ลบ',
+  'No notes match': 'ไม่พบโน้ตที่ตรงกัน',
+  'Your journal is empty': 'บันทึกของคุณยังว่าง',
+  'Try another search or filter.': 'ลองค้นหาหรือกรองแบบอื่น',
+  'Write cues that worked, plan next week, or flag a niggle before it becomes an injury.':
+    'เขียนเทคนิคที่ได้ผล วางแผนสัปดาห์หน้า หรือจดอาการเล็ก ๆ ก่อนจะกลายเป็นบาดเจ็บ',
+  'Write a note': 'เขียนโน้ต',
+  'Edit note': 'แก้ไขโน้ต',
+  Cancel: 'ยกเลิก',
+  'Save changes': 'บันทึกการแก้ไข',
+  'Save note': 'บันทึกโน้ต',
+  Type: 'ประเภท',
+  'Where does it hurt? What movement triggers it?':
+    'เจ็บตรงไหน ท่าไหนทำให้เจ็บ?',
+  'Next session plan, targets, cues…': 'แผนครั้งหน้า เป้าหมาย เทคนิค…',
+  'What do you want to remember?': 'อยากจำอะไรไว้?',
+  Date: 'วันที่',
+  Folder: 'โฟลเดอร์',
+  'Optional, e.g. Technique': 'ไม่บังคับ เช่น เทคนิค',
+  'Exercise (optional)': 'ท่า (ไม่บังคับ)',
+  'Attach exercise': 'แนบท่า',
+  'Pin to top': 'ปักหมุดไว้บนสุด',
+  'Keep this note visible in the journal': 'ให้โน้ตนี้แสดงในบันทึกเสมอ',
+  'Delete note?': 'ลบโน้ต?',
+  'This journal entry will be permanently removed.':
+    'รายการในบันทึกนี้จะถูกลบถาวร',
+  'Delete note': 'ลบโน้ต',
+  'Write something first': 'เขียนอะไรก่อน',
+  'Note updated': 'อัปเดตโน้ตแล้ว',
+  'Note saved': 'บันทึกโน้ตแล้ว',
+  'Note deleted': 'ลบโน้ตแล้ว',
+};
+
 export default function Notes() {
+  const { t } = useI18n(TH);
   const toast = useToast();
   const data = useStore((s) => s.data);
   const saveNote = useStore((s) => s.saveNote);
@@ -140,7 +192,7 @@ export default function Notes() {
 
   const submit = () => {
     if (!text.trim()) {
-      toast.push('Write something first', 'bad');
+      toast.push(t('Write something first'), 'bad');
       return;
     }
     saveNote({
@@ -153,7 +205,7 @@ export default function Notes() {
       pinned,
     });
     setOpen(false);
-    toast.push(editing ? 'Note updated' : 'Note saved', 'good');
+    toast.push(editing ? t('Note updated') : t('Note saved'), 'good');
   };
 
   const togglePin = (n: Note) => saveNote({ ...n, pinned: !n.pinned });
@@ -161,9 +213,12 @@ export default function Notes() {
   return (
     <div className="page-enter">
       <PageHeader
-        eyebrow="Journal"
-        title="Notes that train with you"
-        subtitle={`${data.notes.length} entries · pin cues, plans and pain flags to exercises or days`}
+        eyebrow={t('Journal')}
+        title={t('Notes that train with you')}
+        subtitle={t(
+          '{n} entries · pin cues, plans and pain flags to exercises or days',
+          { n: data.notes.length },
+        )}
         action={
           <Btn
             variant="primary"
@@ -171,7 +226,7 @@ export default function Notes() {
             onClick={openNew}
             icon={<Plus size={15} />}
           >
-            New note
+            {t('New note')}
           </Btn>
         }
       />
@@ -188,7 +243,7 @@ export default function Notes() {
               <span className={k.tone}>{k.icon}</span>
               <p className="mt-1 text-sm font-black">{count}</p>
               <p className="text-[10px] font-black uppercase text-mute">
-                {k.label}s
+                {t('{kind}s', { kind: t(k.label) })}
               </p>
             </button>
           );
@@ -203,7 +258,7 @@ export default function Notes() {
           />
           <input
             className="input pl-9"
-            placeholder="Search notes, folders, exercises…"
+            placeholder={t('Search notes, folders, exercises…')}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -220,8 +275,8 @@ export default function Notes() {
           value={filter}
           onChange={(v) => setFilter(v)}
           options={[
-            { value: 'all', label: 'All' },
-            ...KINDS.map((k) => ({ value: k.id, label: k.label })),
+            { value: 'all', label: t('All') },
+            ...KINDS.map((k) => ({ value: k.id, label: t(k.label) })),
           ]}
         />
       </div>
@@ -229,7 +284,7 @@ export default function Notes() {
       {folders.length > 0 && (
         <div className="scroll-x mt-2 pb-1">
           <Chip on={!folderFilter} onClick={() => setFolderFilter('')}>
-            All folders
+            {t('All folders')}
           </Chip>
           {folders.map((f) => (
             <Chip
@@ -264,7 +319,7 @@ export default function Notes() {
                       <span
                         className={`text-[10px] font-black uppercase tracking-wide ${k.tone}`}
                       >
-                        {k.label}
+                        {t(k.label)}
                       </span>
                       <span className="text-[10px] font-bold text-mute">
                         · {relativeDay(n.date)}
@@ -298,28 +353,32 @@ export default function Notes() {
                 </div>
                 <div className="mt-3 flex items-center justify-between border-t border-line pt-2.5">
                   <span className="text-[9px] font-bold text-mute">
-                    Added{' '}
-                    {fmtDate(n.createdAt, { day: 'numeric', month: 'short' })}
+                    {t('Added {date}', {
+                      date: fmtDate(n.createdAt, {
+                        day: 'numeric',
+                        month: 'short',
+                      }),
+                    })}
                   </span>
                   <div className="flex gap-0.5">
                     <button
                       onClick={() => togglePin(n)}
                       className={`grid h-7 w-7 place-items-center rounded-full hover:bg-[var(--surface-2)] ${n.pinned ? 'text-[var(--accent)]' : 'text-mute'}`}
-                      title="Pin"
+                      title={t('Pin')}
                     >
                       <Pin size={13} />
                     </button>
                     <button
                       onClick={() => openEdit(n)}
                       className="grid h-7 w-7 place-items-center rounded-full text-mute hover:bg-[var(--surface-2)]"
-                      title="Edit"
+                      title={t('Edit')}
                     >
                       <Pencil size={13} />
                     </button>
                     <button
                       onClick={() => setConfirmDelete(n)}
                       className="grid h-7 w-7 place-items-center rounded-full text-mute hover:bg-[var(--surface-2)] hover:text-[var(--bad)]"
-                      title="Delete"
+                      title={t('Delete')}
                     >
                       <Trash2 size={13} />
                     </button>
@@ -332,15 +391,19 @@ export default function Notes() {
       ) : (
         <EmptyState
           icon={<NotebookPen size={24} />}
-          title={data.notes.length ? 'No notes match' : 'Your journal is empty'}
+          title={
+            data.notes.length ? t('No notes match') : t('Your journal is empty')
+          }
           body={
             data.notes.length
-              ? 'Try another search or filter.'
-              : 'Write cues that worked, plan next week, or flag a niggle before it becomes an injury.'
+              ? t('Try another search or filter.')
+              : t(
+                  'Write cues that worked, plan next week, or flag a niggle before it becomes an injury.',
+                )
           }
           action={
             <Btn variant="primary" onClick={openNew} icon={<Plus size={15} />}>
-              Write a note
+              {t('Write a note')}
             </Btn>
           }
         />
@@ -349,12 +412,12 @@ export default function Notes() {
       <Sheet
         open={open}
         onClose={() => setOpen(false)}
-        title={editing ? 'Edit note' : 'New note'}
+        title={editing ? t('Edit note') : t('New note')}
         size="lg"
         footer={
           <div className="flex gap-2">
             <Btn className="flex-1" onClick={() => setOpen(false)}>
-              Cancel
+              {t('Cancel')}
             </Btn>
             <Btn
               className="flex-1"
@@ -362,14 +425,14 @@ export default function Notes() {
               onClick={submit}
               icon={<CheckCircle2 size={16} />}
             >
-              {editing ? 'Save changes' : 'Save note'}
+              {editing ? t('Save changes') : t('Save note')}
             </Btn>
           </div>
         }
       >
         <div className="space-y-4">
           <div>
-            <p className="label mb-2">Type</p>
+            <p className="label mb-2">{t('Type')}</p>
             <div className="grid grid-cols-4 gap-1.5">
               {KINDS.map((k) => (
                 <button
@@ -377,28 +440,28 @@ export default function Notes() {
                   onClick={() => setKind(k.id)}
                   className={`flex flex-col items-center gap-1 rounded-xl border py-2 text-[10px] font-black ${kind === k.id ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]' : 'border-line bg-[var(--surface-2)] text-mute'}`}
                 >
-                  {k.icon} {k.label}
+                  {k.icon} {t(k.label)}
                 </button>
               ))}
             </div>
           </div>
-          <Field label="Note">
+          <Field label={t('Note')}>
             <textarea
               autoFocus
               className="input min-h-[120px]"
               placeholder={
                 kind === 'pain'
-                  ? 'Where does it hurt? What movement triggers it?'
+                  ? t('Where does it hurt? What movement triggers it?')
                   : kind === 'plan'
-                    ? 'Next session plan, targets, cues…'
-                    : 'What do you want to remember?'
+                    ? t('Next session plan, targets, cues…')
+                    : t('What do you want to remember?')
               }
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Date">
+            <Field label={t('Date')}>
               <input
                 type="date"
                 className="input"
@@ -406,17 +469,17 @@ export default function Notes() {
                 onChange={(e) => setDate(e.target.value)}
               />
             </Field>
-            <Field label="Folder" hint="Optional, e.g. Technique">
+            <Field label={t('Folder')} hint={t('Optional, e.g. Technique')}>
               <input
                 className="input"
-                placeholder="Folder"
+                placeholder={t('Folder')}
                 value={folder}
                 onChange={(e) => setFolder(e.target.value)}
               />
             </Field>
           </div>
           <div>
-            <p className="label mb-2">Exercise (optional)</p>
+            <p className="label mb-2">{t('Exercise (optional)')}</p>
             <div className="flex flex-wrap items-center gap-2">
               {exerciseId ? (
                 <span className="flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-3 py-1.5 text-xs font-black text-[var(--accent)]">
@@ -432,7 +495,7 @@ export default function Notes() {
                   onClick={() => setPicker(true)}
                   icon={<Dumbbell size={13} />}
                 >
-                  Attach exercise
+                  {t('Attach exercise')}
                 </Btn>
               )}
             </div>
@@ -442,9 +505,11 @@ export default function Notes() {
             className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left ${pinned ? 'border-[var(--accent-line)] bg-[var(--accent-soft)]' : 'border-line bg-[var(--surface-2)]'}`}
           >
             <span>
-              <span className="block text-sm font-extrabold">Pin to top</span>
+              <span className="block text-sm font-extrabold">
+                {t('Pin to top')}
+              </span>
               <span className="block text-[10px] font-semibold text-mute">
-                Keep this note visible in the journal
+                {t('Keep this note visible in the journal')}
               </span>
             </span>
             <span
@@ -460,7 +525,7 @@ export default function Notes() {
         open={picker}
         onClose={() => setPicker(false)}
         onPick={(ex) => setExerciseId(ex.id)}
-        title="Attach exercise"
+        title={t('Attach exercise')}
       />
 
       <Confirm
@@ -469,12 +534,12 @@ export default function Notes() {
         onConfirm={() => {
           if (confirmDelete) {
             deleteNote(confirmDelete.id);
-            toast.push('Note deleted');
+            toast.push(t('Note deleted'));
           }
         }}
-        title="Delete note?"
-        body="This journal entry will be permanently removed."
-        confirmLabel="Delete note"
+        title={t('Delete note?')}
+        body={t('This journal entry will be permanently removed.')}
+        confirmLabel={t('Delete note')}
       />
     </div>
   );

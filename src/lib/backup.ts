@@ -164,6 +164,7 @@ export function parseBackup(input: unknown): AppData {
   );
   settings.theme = normalizeTheme(settings.theme, prefersLightMode());
   enumeration(settings.weekStart, [0, 1, 6], 'settings.weekStart');
+  enumeration(settings.language, ['en', 'th'], 'settings.language');
   enumeration(settings.effort, ['off', 'rpe', 'rir'], 'settings.effort');
   array(settings.plates, 'settings.plates').forEach((v, i) =>
     number(v, `settings.plates[${i}]`, Number.MIN_VALUE),

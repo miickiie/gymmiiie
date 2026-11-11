@@ -21,6 +21,7 @@ import { Btn, Card, Confirm, EmptyState, useToast } from '../components/ui';
 import { useWorkoutStart } from '../components/WorkoutStart';
 import { fmtDate, fmtDuration, fmtTime } from '../lib/date';
 import { EXERCISES } from '../lib/exercises';
+import { useI18n } from '../lib/i18n';
 import {
   exerciseVolume,
   MUSCLE_LABEL,
@@ -34,7 +35,50 @@ import {
 import { useStore } from '../lib/store';
 import type { Exercise, LoggedExercise } from '../types';
 
+const TH: Record<string, string> = {
+  'Workout not found': 'ไม่พบการฝึก',
+  'It may have been deleted, or the link is incomplete.':
+    'อาจถูกลบไปแล้ว หรือลิงก์ไม่ครบ',
+  'Back to history': 'กลับไปประวัติ',
+  'Gymmiie · {name}': 'Gymmiie · {name}',
+  'Gymmiie workout': 'การฝึก Gymmiie',
+  'warm-up:': 'วอร์มอัป:',
+  'Workout copied to clipboard': 'คัดลอกการฝึกแล้ว',
+  'Could not share': 'แชร์ไม่สำเร็จ',
+  'Workout deleted': 'ลบการฝึกแล้ว',
+  'started {time}': 'เริ่ม {time}',
+  '{n} total sets': '{n} เซ็ตรวม',
+  'Working sets': 'เซ็ตทำงาน',
+  'excluding warm-ups': 'ไม่รวมวอร์มอัป',
+  '{n} new PR': '{n} PR ใหม่',
+  '{n} new PRs': '{n} PR ใหม่',
+  'no new PRs': 'ไม่มี PR ใหม่',
+  'Repeat workout': 'ฝึกซ้ำ',
+  'Copy / share': 'คัดลอก / แชร์',
+  'Session note': 'โน้ตการฝึก',
+  '{m} · {n} sets': '{m} · {n} เซ็ต',
+  '{unit} vol': '{unit} ปริมาณ',
+  'SESSION RECAP': 'สรุปการฝึก',
+  'You trained {muscles} for {dur} and moved {vol}.':
+    'คุณฝึก {muscles} นาน {dur} และยกไป {vol}',
+  'No sets were recorded in this session.': 'ไม่มีเซ็ตที่บันทึกในเซสชันนี้',
+  '{name} routine': 'ตารางฝึก {name}',
+  'Delete workout?': 'ลบการฝึกนี้?',
+  'This permanently removes the session from history and all progress calculations.':
+    'จะลบเซสชันนี้ออกจากประวัติและการคำนวณความก้าวหน้าอย่างถาวร',
+  'Delete workout': 'ลบการฝึก',
+  'Share workout': 'แชร์การฝึก',
+  '{n} exercises · {sets} working sets · {vol} volume':
+    '{n} ท่า · {sets} เซ็ตทำงาน · ปริมาณ {vol}',
+  Delete: 'ลบ',
+  Duration: 'ระยะเวลา',
+  Exercises: 'ท่าออกกำลัง',
+  Volume: 'ปริมาณรวม',
+  Workout: 'การฝึก',
+};
+
 export default function SessionDetail() {
+  const { t, tm } = useI18n(TH);
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -58,11 +102,11 @@ export default function SessionDetail() {
     return (
       <EmptyState
         icon={<CalendarDays size={24} />}
-        title="Workout not found"
-        body="It may have been deleted, or the link is incomplete."
+        title={t('Workout not found')}
+        body={t('It may have been deleted, or the link is incomplete.')}
         action={
           <Btn variant="primary" onClick={() => navigate('/history')}>
-            Back to history
+            {t('Back to history')}
           </Btn>
         }
       />
@@ -76,13 +120,19 @@ export default function SessionDetail() {
   const sets = sessionSets(session);
 
   const shareText = [
-    `Gymmiie · ${session.name || routine?.name || 'Workout'}`,
+    t('Gymmiie · {name}', {
+      name: session.name || routine?.name || t('Workout'),
+    }),
     `${fmtDate(d, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${fmtDuration(session.durationSec)}`,
-    `${session.exercises.length} exercises · ${sets} working sets · ${volumeLabel(volume, unit)} volume`,
+    t('{n} exercises · {sets} working sets · {vol} volume', {
+      n: session.exercises.length,
+      sets,
+      vol: volumeLabel(volume, unit),
+    }),
     '',
     ...session.exercises.map(
       (e) =>
-        `${e.name}\n${e.sets.map((s) => (s.kind === 'warmup' ? `  warm-up: ${formatLoggedSet(s, e, unit)}` : `  ${formatLoggedSet(s, e, unit)}`)).join('\n')}`,
+        `${e.name}\n${e.sets.map((s) => (s.kind === 'warmup' ? `  ${t('warm-up:')} ${formatLoggedSet(s, e, unit)}` : `  ${formatLoggedSet(s, e, unit)}`)).join('\n')}`,
     ),
   ].join('\n');
 
@@ -90,15 +140,15 @@ export default function SessionDetail() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: session.name || 'Gymmiie workout',
+          title: session.name || t('Gymmiie workout'),
           text: shareText,
         });
       } else {
         await navigator.clipboard.writeText(shareText);
-        toast.push('Workout copied to clipboard', 'good');
+        toast.push(t('Workout copied to clipboard'), 'good');
       }
     } catch {
-      toast.push('Could not share', 'bad');
+      toast.push(t('Could not share'), 'bad');
     }
   };
 
@@ -108,7 +158,7 @@ export default function SessionDetail() {
 
   const remove = () => {
     deleteSession(session.id);
-    toast.push('Workout deleted');
+    toast.push(t('Workout deleted'));
     navigate('/history');
   };
 
@@ -134,13 +184,13 @@ export default function SessionDetail() {
             {session.name ||
               routine?.name ||
               session.exercises[0]?.name ||
-              'Workout'}
+              t('Workout')}
           </h1>
         </div>
         <button
           onClick={share}
           className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
-          title="Share workout"
+          title={t('Share workout')}
         >
           <Share2 size={17} />
         </button>
@@ -149,28 +199,32 @@ export default function SessionDetail() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
           {
-            label: 'Duration',
+            label: t('Duration'),
             value: fmtDuration(session.durationSec),
             icon: <Clock size={14} />,
-            sub: `started ${fmtTime(d)}`,
+            sub: t('started {time}', { time: fmtTime(d) }),
           },
           {
-            label: 'Exercises',
+            label: t('Exercises'),
             value: String(session.exercises.length),
             icon: <Dumbbell size={14} />,
-            sub: `${session.exercises.reduce((n, e) => n + e.sets.length, 0)} total sets`,
+            sub: t('{n} total sets', {
+              n: session.exercises.reduce((n, e) => n + e.sets.length, 0),
+            }),
           },
           {
-            label: 'Working sets',
+            label: t('Working sets'),
             value: String(sets),
             icon: <TrendingUp size={14} />,
-            sub: 'excluding warm-ups',
+            sub: t('excluding warm-ups'),
           },
           {
-            label: 'Volume',
+            label: t('Volume'),
             value: volumeLabel(volume, unit),
             icon: <Flame size={14} />,
-            sub: prs ? `${prs} new PR${prs === 1 ? '' : 's'}` : 'no new PRs',
+            sub: prs
+              ? t(prs === 1 ? '{n} new PR' : '{n} new PRs', { n: prs })
+              : t('no new PRs'),
           },
         ].map((x) => (
           <Card key={x.label} className="p-4">
@@ -186,17 +240,17 @@ export default function SessionDetail() {
 
       <div className="mt-4 flex flex-wrap gap-2">
         <Btn variant="primary" onClick={repeat} icon={<RotateCcw size={16} />}>
-          Repeat workout
+          {t('Repeat workout')}
         </Btn>
         <Btn onClick={share} icon={<Copy size={15} />}>
-          Copy / share
+          {t('Copy / share')}
         </Btn>
         <Btn
           variant="ghost"
           onClick={() => setConfirmDelete(true)}
           icon={<Trash2 size={15} />}
         >
-          Delete
+          {t('Delete')}
         </Btn>
         {prs > 0 && (
           <span className="ml-auto flex items-center gap-1 rounded-full bg-[var(--warn)]/15 px-3 py-1.5 text-xs font-black text-[var(--warn)]">
@@ -207,7 +261,7 @@ export default function SessionDetail() {
 
       {session.note && (
         <Card className="mt-4 p-4">
-          <p className="label mb-1">Session note</p>
+          <p className="label mb-1">{t('Session note')}</p>
           <p className="text-sm font-semibold text-dim">{session.note}</p>
         </Card>
       )}
@@ -230,8 +284,10 @@ export default function SessionDetail() {
                 </Link>
                 <p className="mt-0.5 flex items-center gap-1.5 text-[11px] font-bold text-mute">
                   <MuscleDot id={ex.primary} />{' '}
-                  {MUSCLE_LABEL[ex.primary] ?? ex.primary} · {ex.sets.length}{' '}
-                  sets
+                  {t('{m} · {n} sets', {
+                    m: tm(ex.primary, MUSCLE_LABEL[ex.primary] ?? ex.primary),
+                    n: ex.sets.length,
+                  })}
                 </p>
               </div>
               <div className="text-right">
@@ -241,7 +297,7 @@ export default function SessionDetail() {
                   ).toLocaleString()}
                 </p>
                 <p className="text-[9px] font-black uppercase text-mute">
-                  {unit} vol
+                  {t('{unit} vol', { unit })}
                 </p>
               </div>
             </div>
@@ -280,19 +336,30 @@ export default function SessionDetail() {
 
       <div className="mt-5 rounded-2xl border border-line bg-[var(--surface)] p-4">
         <div className="flex items-center gap-2 text-[11px] font-black text-mute">
-          <Timer size={13} /> SESSION RECAP
+          <Timer size={13} /> {t('SESSION RECAP')}
         </div>
         <p className="mt-1 text-sm font-semibold text-dim">
           {session.exercises.length
-            ? `You trained ${[...new Set(session.exercises.map((e) => MUSCLE_LABEL[e.primary] ?? e.primary))].join(', ')} for ${fmtDuration(session.durationSec)} and moved ${volumeLabel(volume, unit)}.`
-            : 'No sets were recorded in this session.'}
+            ? t('You trained {muscles} for {dur} and moved {vol}.', {
+                muscles: [
+                  ...new Set(
+                    session.exercises.map((e) =>
+                      tm(e.primary, MUSCLE_LABEL[e.primary] ?? e.primary),
+                    ),
+                  ),
+                ].join(', '),
+                dur: fmtDuration(session.durationSec),
+                vol: volumeLabel(volume, unit),
+              })
+            : t('No sets were recorded in this session.')}
         </p>
         {routine && (
           <Link
             to={`/routines/${routine.id}`}
             className="mt-2 inline-flex items-center gap-1 text-[11px] font-black text-[var(--accent)]"
           >
-            <CalendarDays size={12} /> {routine.name} routine
+            <CalendarDays size={12} />{' '}
+            {t('{name} routine', { name: routine.name })}
           </Link>
         )}
       </div>
@@ -302,9 +369,11 @@ export default function SessionDetail() {
         open={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         onConfirm={remove}
-        title="Delete workout?"
-        body="This permanently removes the session from history and all progress calculations."
-        confirmLabel="Delete workout"
+        title={t('Delete workout?')}
+        body={t(
+          'This permanently removes the session from history and all progress calculations.',
+        )}
+        confirmLabel={t('Delete workout')}
       />
     </div>
   );

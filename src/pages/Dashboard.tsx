@@ -56,9 +56,108 @@ import {
   volumeLabel,
   workoutsThisWeek,
 } from '../lib/stats';
+import { useI18n } from '../lib/i18n';
 import { allExercises, useStore } from '../lib/store';
 
+const DAY_KEYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
+const TH: Record<string, string> = {
+  'Good morning': 'สวัสดีตอนเช้า',
+  'Good afternoon': 'สวัสดีตอนบ่าย',
+  'Good evening': 'สวัสดีตอนเย็น',
+  'You have a workout in progress. Pick up where you left off.':
+    'มีการฝึกที่ยังไม่จบ ทำต่อจากที่ค้างไว้ได้เลย',
+  'Rest day. Recovery is training too.': 'วันพัก การพักก็คือการฝึก',
+  'Tap a muscle or follow today’s plan.': 'แตะกล้ามเนื้อหรือทำตามแผนวันนี้',
+  'Freestyle session': 'ฝึกแบบอิสระ',
+  '{n} exercises · {time} start': '{n} ท่า · เริ่ม {time}',
+  'of {n}': 'จาก {n}',
+  '{n} day streak': 'สตรีค {n} วัน',
+  'Lv {n}': 'เลเวล {n}',
+  'Weekly goal smashed.': 'ถึงเป้าหมายสัปดาห์แล้ว!',
+  'Week starts with one rep.': 'เริ่มสัปดาห์ด้วยเรปเดียว',
+  '{n} more to hit your goal.': 'อีก {n} ครั้งถึงเป้าหมาย',
+  'Today’s plan: {name} · {n} exercises': 'แผนวันนี้: {name} · {n} ท่า',
+  'You marked today as a rest day.': 'คุณตั้งวันนี้เป็นวันพัก',
+  '{xp} XP · {n} to level {lvl}': '{xp} XP · อีก {n} ถึงเลเวล {lvl}',
+  'Working sets': 'เซ็ตทำงาน',
+  'all time': 'ทั้งหมด',
+  'total lifted': 'น้ำหนักรวมที่ยก',
+  '{n} this week': '{n} ครั้งสัปดาห์นี้',
+  'of {n} kcal': 'จาก {n} kcal',
+  'Today’s plan': 'แผนวันนี้',
+  'Rest and recover': 'พักและฟื้นตัว',
+  '{n} exercises ready': '{n} ท่าพร้อมแล้ว',
+  'No routine planned': 'ยังไม่มีตารางฝึก',
+  'Edit plan': 'แก้ไขแผน',
+  '{n} exercises · {s} sets': '{n} ท่า · {s} เซ็ต',
+  '{m} · {n} sets': '{m} · {n} เซ็ต',
+  '+{n} more exercises': '+{n} ท่าเพิ่ม',
+  'Pick muscles and let Gymmiie suggest the session, or set a weekly plan.':
+    'เลือกกล้ามเนื้อให้ Gymmiie แนะนำเซสชัน หรือตั้งแผนรายสัปดาห์',
+  '{date} · {dur} · {n} exercises': '{date} · {dur} · {n} ท่า',
+  '{unit} vol': '{unit} ปริมาณ',
+  'Start with a muscle group and Gymmiie will build a session with warm-ups.':
+    'เริ่มจากกลุ่มกล้ามเนื้อ แล้ว Gymmiie จะสร้างเซสชันพร้อมวอร์มอัปให้',
+  'By muscle': 'ตามกล้ามเนื้อ',
+  'Body map picks': 'เลือกจากแผนที่ร่างกาย',
+  Browse: 'ดูทั้งหมด',
+  '{n} exercises': '{n} ท่า',
+  'Plans & splits': 'แผนและตาราง',
+  '{n} foods': '{n} อาหาร',
+  'Top weight': 'น้ำหนักสูงสุด',
+  time: 'เวลา',
+  distance: 'ระยะทาง',
+  reps: 'ครั้ง',
+  '{n} reps': '{n} ครั้ง',
+  Latest: 'ล่าสุด',
+  'Goal {w} {unit}': 'เป้าหมาย {w} {unit}',
+  'Log your weight to see the trend.': 'บันทึกน้ำหนักเพื่อดูแนวโน้ม',
+  'Write a note, plan or pain flag': 'เขียนโน้ต แผน หรือจุดที่เจ็บ',
+  '{n} journal entries': '{n} รายการบันทึก',
+  'Track how training feels': 'ติดตามความรู้สึกระหว่างฝึก',
+  '{n} h trained': 'ฝึกแล้ว {n} ชม.',
+  'All PRs': 'สถิติทั้งหมด',
+  'Bodyweight': 'น้ำหนักตัว',
+  Calories: 'แคลอรี',
+  'Check in': 'เช็กอิน',
+  'Checked in': 'เช็กอินแล้ว',
+  'Daily journal': 'บันทึกประจำวัน',
+  Food: 'อาหาร',
+  'Log': 'บันทึก',
+  'Mark rest': 'ทำเครื่องหมายวันพัก',
+  'No plan set for today. Train by muscle instead.':
+    'วันนี้ยังไม่มีแผน ลองเลือกตามกล้ามเนื้อ',
+  'No workouts yet': 'ยังไม่มีการฝึก',
+  'Nothing planned for today': 'วันนี้ยังไม่มีแผน',
+  'Offline logging · account sync when connected':
+    'บันทึกแบบออฟไลน์ · ซิงก์บัญชีเมื่อออนไลน์',
+  Open: 'เปิด',
+  'Pick muscles': 'เลือกกล้ามเนื้อ',
+  Progress: 'ความก้าวหน้า',
+  'Quick start': 'เริ่มเร็ว',
+  'Ready when you are': 'พร้อมเมื่อคุณพร้อม',
+  'Recent bests': 'สถิติล่าสุด',
+  'Recent workouts': 'การฝึกล่าสุด',
+  'Recovery is part of the program. Come back stronger tomorrow.':
+    'การพักคือส่วนหนึ่งของแผน พรุ่งนี้กลับมาให้ดีกว่าเดิม',
+  'Rest day': 'วันพัก',
+  'Resume workout': 'ฝึกต่อ',
+  Routines: 'ตารางฝึก',
+  'Start routine': 'เริ่มตาราง',
+  'Start training': 'เริ่มฝึก',
+  'Start workout': 'เริ่มฝึก',
+  'This week': 'สัปดาห์นี้',
+  'Trained today': 'ฝึกวันนี้แล้ว',
+  'View all': 'ดูทั้งหมด',
+  Volume: 'ปริมาณรวม',
+  Workout: 'การฝึก',
+  'Workout in progress': 'กำลังฝึกอยู่',
+  Workouts: 'การฝึก',
+};
+
 export default function Dashboard() {
+  const { t, tm, language } = useI18n(TH);
   const navigate = useNavigate();
   const data = useStore((s) => s.data);
   const startFromRoutine = useStore((s) => s.startFromRoutine);
@@ -97,10 +196,10 @@ export default function Dashboard() {
   const unit = data.settings.unit;
   const greeting =
     new Date().getHours() < 12
-      ? 'Good morning'
+      ? t('Good morning')
       : new Date().getHours() < 18
-        ? 'Good afternoon'
-        : 'Good evening';
+        ? t('Good afternoon')
+        : t('Good evening');
 
   const startRoutine = () => {
     if (!todayRoutine) {
@@ -121,10 +220,10 @@ export default function Dashboard() {
         title={`${greeting}${data.profile.name ? `, ${data.profile.name.split(' ')[0]}` : ''}`}
         subtitle={
           active
-            ? 'You have a workout in progress. Pick up where you left off.'
+            ? t('You have a workout in progress. Pick up where you left off.')
             : isOff
-              ? 'Rest day. Recovery is training too.'
-              : 'Tap a muscle or follow today’s plan.'
+              ? t('Rest day. Recovery is training too.')
+              : t('Tap a muscle or follow today’s plan.')
         }
         action={
           <Link to="/settings">
@@ -142,13 +241,17 @@ export default function Dashboard() {
               <Activity size={22} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="label text-[var(--accent)]">Workout in progress</p>
+              <p className="label text-[var(--accent)]">
+                {t('Workout in progress')}
+              </p>
               <p className="mt-0.5 truncate text-sm font-black">
-                {active.name || 'Freestyle session'}
+                {active.name || t('Freestyle session')}
               </p>
               <p className="text-xs font-semibold text-dim">
-                {active.exercises.length} exercises ·{' '}
-                {fmtTime(new Date(active.startedAt))} start
+                {t('{n} exercises · {time} start', {
+                  n: active.exercises.length,
+                  time: fmtTime(new Date(active.startedAt)),
+                })}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -172,32 +275,36 @@ export default function Dashboard() {
               <div className="text-center">
                 <p className="num text-2xl font-black leading-none">{week}</p>
                 <p className="text-[10px] font-black uppercase tracking-wider text-mute">
-                  of {goal}
+                  {t('of {n}', { n: goal })}
                 </p>
               </div>
             </Ring>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="flex items-center gap-1 rounded-full bg-[var(--warn)]/10 px-2 py-1 text-[11px] font-black text-[var(--warn)]">
-                  <Flame size={13} /> {streak} day streak
+                  <Flame size={13} />{' '}
+                  {t('{n} day streak', { n: streak })}
                 </span>
                 <span className="rounded-full bg-[var(--surface-2)] px-2 py-1 text-[11px] font-black text-mute">
-                  Lv {level.level}
+                  {t('Lv {n}', { n: level.level })}
                 </span>
               </div>
               <h2 className="mt-2 text-xl font-black tracking-tight">
                 {week >= goal
-                  ? 'Weekly goal smashed.'
+                  ? t('Weekly goal smashed.')
                   : week === 0
-                    ? 'Week starts with one rep.'
-                    : `${goal - week} more to hit your goal.`}
+                    ? t('Week starts with one rep.')
+                    : t('{n} more to hit your goal.', { n: goal - week })}
               </h2>
               <p className="mt-1 text-xs font-semibold text-dim">
                 {todayRoutine
-                  ? `Today’s plan: ${todayRoutine.name} · ${todayRoutine.exerciseIds.length} exercises`
+                  ? t('Today’s plan: {name} · {n} exercises', {
+                      name: todayRoutine.name,
+                      n: todayRoutine.exerciseIds.length,
+                    })
                   : isOff
-                    ? 'You marked today as a rest day.'
-                    : 'No plan set for today. Train by muscle instead.'}
+                    ? t('You marked today as a rest day.')
+                    : t('No plan set for today. Train by muscle instead.')}
               </p>
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
                 <div
@@ -206,9 +313,11 @@ export default function Dashboard() {
                 />
               </div>
               <p className="mt-1 text-[10px] font-bold text-mute">
-                {level.xp.toLocaleString()} XP ·{' '}
-                {level.next - (level.xp % level.next)} to level{' '}
-                {level.level + 1}
+                {t('{xp} XP · {n} to level {lvl}', {
+                  xp: level.xp.toLocaleString(),
+                  n: level.next - (level.xp % level.next),
+                  lvl: level.level + 1,
+                })}
               </p>
             </div>
           </div>
@@ -220,7 +329,7 @@ export default function Dashboard() {
                 onClick={() => navigate('/session')}
                 icon={<Play size={17} />}
               >
-                Resume workout
+                {t('Resume workout')}
               </Btn>
             ) : (
               <Btn
@@ -229,7 +338,7 @@ export default function Dashboard() {
                 onClick={() => navigate('/train')}
                 icon={<Zap size={17} />}
               >
-                Start workout
+                {t('Start workout')}
               </Btn>
             )}
           </div>
@@ -237,13 +346,13 @@ export default function Dashboard() {
 
         <Card className="min-w-0 p-5">
           <SectionHeader
-            title="This week"
+            title={t('This week')}
             action={
               <Link
                 to="/progress"
                 className="text-[11px] font-black text-[var(--accent)]"
               >
-                Progress
+                {t('Progress')}
               </Link>
             }
           />
@@ -258,7 +367,9 @@ export default function Dashboard() {
               return (
                 <div key={key} className="flex min-w-0 flex-col items-center gap-1.5">
                   <span className="text-[9px] font-black uppercase text-mute">
-                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'][d.getDay()]}
+                    {language === 'th'
+                      ? t(DAY_KEYS[d.getDay()])
+                      : DAY_KEYS[d.getDay()][0]}
                   </span>
                   <div
                     className={`grid aspect-square w-full max-w-9 place-items-center rounded-xl border text-xs font-black transition ${done ? 'border-transparent bg-[var(--good)] text-black' : off ? 'border-line bg-[var(--surface-2)] text-mute' : planned ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]' : isToday ? 'border-strong bg-[var(--surface-2)]' : 'border-line bg-[var(--surface-2)] text-dim'}`}
@@ -285,16 +396,18 @@ export default function Dashboard() {
             >
               <Check size={13} />{' '}
               {trainedDays.has(today)
-                ? 'Trained today'
+                ? t('Trained today')
                 : isCheckin
-                  ? 'Checked in'
-                  : 'Check in'}
+                  ? t('Checked in')
+                  : t('Check in')}
             </button>
             <button
-              onClick={() => toggleDayOff(today, isOff ? null : 'Rest day')}
+              onClick={() =>
+                toggleDayOff(today, isOff ? null : t('Rest day'))
+              }
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-[11px] font-black transition ${isOff ? 'border-transparent bg-[var(--surface-3)] text-[var(--text)]' : 'border-line bg-[var(--surface-2)] text-dim hover:border-strong'}`}
             >
-              <Moon size={13} /> {isOff ? 'Rest day' : 'Mark rest'}
+              <Moon size={13} /> {isOff ? t('Rest day') : t('Mark rest')}
             </button>
           </div>
         </Card>
@@ -303,27 +416,27 @@ export default function Dashboard() {
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
           {
-            label: 'Workouts',
+            label: t('Workouts'),
             value: data.sessions.length,
-            sub: `${daysDoneThisWeek(data)} this week`,
+            sub: t('{n} this week', { n: daysDoneThisWeek(data) }),
             icon: <Dumbbell size={14} />,
           },
           {
-            label: 'Working sets',
+            label: t('Working sets'),
             value: sets.toLocaleString(),
-            sub: 'all time',
+            sub: t('all time'),
             icon: <TrendingUp size={14} />,
           },
           {
-            label: 'Volume',
+            label: t('Volume'),
             value: volumeLabel(volume, unit),
-            sub: 'total lifted',
+            sub: t('total lifted'),
             icon: <Activity size={14} />,
           },
           {
-            label: 'Calories',
+            label: t('Calories'),
             value: `${Math.round(kcal)}`,
-            sub: `of ${kcalGoal} kcal`,
+            sub: t('of {n} kcal', { n: kcalGoal }),
             icon: <Salad size={14} />,
           },
         ].map((s) => (
@@ -336,20 +449,22 @@ export default function Dashboard() {
       <div className="mt-6 grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
         <div>
           <SectionHeader
-            title="Today’s plan"
+            title={t('Today’s plan')}
             subtitle={
               isOff
-                ? 'Rest and recover'
+                ? t('Rest and recover')
                 : todayRoutine
-                  ? `${todayRoutine.exerciseIds.length} exercises ready`
-                  : 'No routine planned'
+                  ? t('{n} exercises ready', {
+                      n: todayRoutine.exerciseIds.length,
+                    })
+                  : t('No routine planned')
             }
             action={
               <Link
                 to="/routines"
                 className="text-[11px] font-black text-[var(--accent)]"
               >
-                Edit plan
+                {t('Edit plan')}
               </Link>
             }
           />
@@ -364,16 +479,17 @@ export default function Dashboard() {
                     {todayRoutine.name}
                   </p>
                   <p className="text-xs font-semibold text-mute">
-                    {todayRoutine.exerciseIds.length} exercises ·{' '}
-                    {Object.values(todayRoutine.sets).reduce(
-                      (a, b) => a + b,
-                      0,
-                    )}{' '}
-                    sets
+                    {t('{n} exercises · {s} sets', {
+                      n: todayRoutine.exerciseIds.length,
+                      s: Object.values(todayRoutine.sets).reduce(
+                        (a, b) => a + b,
+                        0,
+                      ),
+                    })}
                   </p>
                 </div>
                 <Btn size="sm" onClick={startRoutine}>
-                  Start routine
+                  {t('Start routine')}
                 </Btn>
               </div>
               <div className="divide-y divide-[var(--line)]">
@@ -396,8 +512,13 @@ export default function Dashboard() {
                           {ex.name}
                         </p>
                         <p className="text-[11px] font-bold text-mute">
-                          {MUSCLE_LABEL[ex.primary] ?? ex.primary} ·{' '}
-                          {todayRoutine.sets[id] ?? 3} sets
+                          {t('{m} · {n} sets', {
+                            m: tm(
+                              ex.primary,
+                              MUSCLE_LABEL[ex.primary] ?? ex.primary,
+                            ),
+                            n: todayRoutine.sets[id] ?? 3,
+                          })}
                         </p>
                       </div>
                       <ChevronRight size={16} className="text-mute" />
@@ -406,7 +527,9 @@ export default function Dashboard() {
                 })}
                 {todayRoutine.exerciseIds.length > 5 && (
                   <p className="px-4 py-2.5 text-[11px] font-bold text-mute">
-                    +{todayRoutine.exerciseIds.length - 5} more exercises
+                    {t('+{n} more exercises', {
+                      n: todayRoutine.exerciseIds.length - 5,
+                    })}
                   </p>
                 )}
               </div>
@@ -414,11 +537,15 @@ export default function Dashboard() {
           ) : (
             <EmptyState
               icon={<CalendarDays size={24} />}
-              title={isOff ? 'Rest day' : 'Nothing planned for today'}
+              title={isOff ? t('Rest day') : t('Nothing planned for today')}
               body={
                 isOff
-                  ? 'Recovery is part of the program. Come back stronger tomorrow.'
-                  : 'Pick muscles and let Gymmiie suggest the session, or set a weekly plan.'
+                  ? t(
+                      'Recovery is part of the program. Come back stronger tomorrow.',
+                    )
+                  : t(
+                      'Pick muscles and let Gymmiie suggest the session, or set a weekly plan.',
+                    )
               }
               action={
                 <Btn
@@ -426,20 +553,20 @@ export default function Dashboard() {
                   size="sm"
                   onClick={() => navigate('/train')}
                 >
-                  Pick muscles
+                  {t('Pick muscles')}
                 </Btn>
               }
             />
           )}
 
           <SectionHeader
-            title="Recent workouts"
+            title={t('Recent workouts')}
             action={
               <Link
                 to="/history"
                 className="text-[11px] font-black text-[var(--accent)]"
               >
-                View all
+                {t('View all')}
               </Link>
             }
           />
@@ -458,16 +585,18 @@ export default function Dashboard() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-extrabold">
-                        {s.name || s.exercises[0]?.name || 'Workout'}
+                        {s.name || s.exercises[0]?.name || t('Workout')}
                       </p>
                       <p className="text-[11px] font-bold text-mute">
-                        {fmtDate(s.date, {
-                          weekday: 'short',
-                          day: 'numeric',
-                          month: 'short',
-                        })}{' '}
-                        · {fmtDuration(s.durationSec)} · {s.exercises.length}{' '}
-                        exercises
+                        {t('{date} · {dur} · {n} exercises', {
+                          date: fmtDate(s.date, {
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short',
+                          }),
+                          dur: fmtDuration(s.durationSec),
+                          n: s.exercises.length,
+                        })}
                       </p>
                     </div>
                     <div className="text-right">
@@ -475,7 +604,7 @@ export default function Dashboard() {
                         {volumeLabel(vol, unit).replace(` ${unit}`, '')}
                       </p>
                       <p className="text-[9px] font-black uppercase text-mute">
-                        {unit} vol
+                        {t('{unit} vol', { unit })}
                       </p>
                     </div>
                   </Link>
@@ -485,15 +614,17 @@ export default function Dashboard() {
           ) : (
             <EmptyState
               icon={<Dumbbell size={24} />}
-              title="No workouts yet"
-              body="Start with a muscle group and Gymmiie will build a session with warm-ups."
+              title={t('No workouts yet')}
+              body={t(
+                'Start with a muscle group and Gymmiie will build a session with warm-ups.',
+              )}
               action={
                 <Btn
                   variant="primary"
                   size="sm"
                   onClick={() => navigate('/train')}
                 >
-                  Start training
+                  {t('Start training')}
                 </Btn>
               }
             />
@@ -501,30 +632,30 @@ export default function Dashboard() {
         </div>
 
         <div>
-          <SectionHeader title="Quick start" />
+          <SectionHeader title={t('Quick start')} />
           <div className="grid grid-cols-2 gap-2">
             {[
               {
-                title: 'By muscle',
-                hint: 'Body map picks',
+                title: t('By muscle'),
+                hint: t('Body map picks'),
                 icon: <Dumbbell size={18} />,
                 to: '/train',
               },
               {
-                title: 'Browse',
-                hint: '466 exercises',
+                title: t('Browse'),
+                hint: t('{n} exercises', { n: 466 }),
                 icon: <BookOpen size={18} />,
                 to: '/library',
               },
               {
-                title: 'Routines',
-                hint: 'Plans & splits',
+                title: t('Routines'),
+                hint: t('Plans & splits'),
                 icon: <CalendarDays size={18} />,
                 to: '/routines',
               },
               {
-                title: 'Food',
-                hint: '561 foods',
+                title: t('Food'),
+                hint: t('{n} foods', { n: 561 }),
                 icon: <Salad size={18} />,
                 to: '/nutrition',
               },
@@ -546,13 +677,13 @@ export default function Dashboard() {
           {prs.length > 0 && (
             <>
               <SectionHeader
-                title="Recent bests"
+                title={t('Recent bests')}
                 action={
                   <Link
                     to="/progress"
                     className="text-[11px] font-black text-[var(--accent)]"
                   >
-                    All PRs
+                    {t('All PRs')}
                   </Link>
                 }
               />
@@ -569,7 +700,7 @@ export default function Dashboard() {
                         {p.name}
                       </p>
                       <p className="text-[10px] font-bold text-mute">
-                        {p.kind === 'weight' ? 'Top weight' : p.kind}
+                        {p.kind === 'weight' ? t('Top weight') : t(p.kind)}
                       </p>
                     </div>
                     <span className="num text-sm font-black">
@@ -579,7 +710,7 @@ export default function Dashboard() {
                           ? `${p.best}s`
                           : p.kind === 'distance'
                             ? `${p.best} km`
-                            : `${p.best} reps`}
+                            : t('{n} reps', { n: p.best })}
                     </span>
                   </Link>
                 ))}
@@ -588,20 +719,20 @@ export default function Dashboard() {
           )}
 
           <SectionHeader
-            title="Bodyweight"
+            title={t('Bodyweight')}
             action={
               <Link
                 to="/progress"
                 className="text-[11px] font-black text-[var(--accent)]"
               >
-                Log
+                {t('Log')}
               </Link>
             }
           />
           <Card className="p-4">
             <div className="flex items-end justify-between">
               <div>
-                <p className="label">Latest</p>
+                <p className="label">{t('Latest')}</p>
                 <p className="num mt-1 text-2xl font-black">
                   {toDisplayWeight(data.profile.weightKg, unit).toFixed(1)}{' '}
                   <span className="text-sm text-mute">{unit}</span>
@@ -609,8 +740,10 @@ export default function Dashboard() {
               </div>
               {data.bodyGoalKg != null && (
                 <p className="text-[11px] font-bold text-mute">
-                  Goal {toDisplayWeight(data.bodyGoalKg, unit).toFixed(1)}{' '}
-                  {unit}
+                  {t('Goal {w} {unit}', {
+                    w: toDisplayWeight(data.bodyGoalKg, unit).toFixed(1),
+                    unit,
+                  })}
                 </p>
               )}
             </div>
@@ -619,20 +752,20 @@ export default function Dashboard() {
                 <Sparkline data={lastWeights} height={44} />
               ) : (
                 <p className="py-3 text-[11px] font-semibold text-mute">
-                  Log your weight to see the trend.
+                  {t('Log your weight to see the trend.')}
                 </p>
               )}
             </div>
           </Card>
 
           <SectionHeader
-            title="Daily journal"
+            title={t('Daily journal')}
             action={
               <Link
                 to="/notes"
                 className="text-[11px] font-black text-[var(--accent)]"
               >
-                Open
+                {t('Open')}
               </Link>
             }
           />
@@ -646,12 +779,12 @@ export default function Dashboard() {
             <div className="min-w-0">
               <p className="text-sm font-extrabold">
                 {data.notes[0]?.text?.slice(0, 70) ||
-                  'Write a note, plan or pain flag'}
+                  t('Write a note, plan or pain flag')}
               </p>
               <p className="mt-1 text-[11px] font-bold text-mute">
                 {data.notes.length
-                  ? `${data.notes.length} journal entries`
-                  : 'Track how training feels'}
+                  ? t('{n} journal entries', { n: data.notes.length })
+                  : t('Track how training feels')}
               </p>
             </div>
           </Link>
@@ -661,13 +794,18 @@ export default function Dashboard() {
       {dialogs}
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-[var(--surface)] px-4 py-3">
         <div className="flex items-center gap-2 text-[11px] font-bold text-mute">
-          <Scale size={14} /> Offline logging · account sync when connected
+          <Scale size={14} />{' '}
+          {t('Offline logging · account sync when connected')}
         </div>
         <div className="flex items-center gap-3 text-[11px] font-bold text-mute">
           <Timer size={14} />{' '}
           {data.sessions.reduce((n, s) => n + s.durationSec, 0) / 3600 > 0
-            ? `${(data.sessions.reduce((n, s) => n + s.durationSec, 0) / 3600).toFixed(1)} h trained`
-            : 'Ready when you are'}
+            ? t('{n} h trained', {
+                n: (
+                  data.sessions.reduce((n, s) => n + s.durationSec, 0) / 3600
+                ).toFixed(1),
+              })
+            : t('Ready when you are')}
         </div>
       </div>
     </div>

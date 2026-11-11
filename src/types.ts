@@ -167,6 +167,7 @@ export interface Profile {
 export interface Settings {
   unit: Unit;
   theme: ThemePref;
+  language: 'en' | 'th';
   restSec: number;
   miniRestSec: number;
   weeklyGoal: number;

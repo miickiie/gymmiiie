@@ -1,6 +1,18 @@
 import { Delete } from 'lucide-react';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useI18n } from '../lib/i18n';
 import './NumberPad.css';
+
+const TH: Record<string, string> = {
+  'Number to enter': 'ตัวเลขที่จะกรอก',
+  'Change sign': 'สลับเครื่องหมาย',
+  'Clear number': 'ล้างตัวเลข',
+  Clear: 'ล้าง',
+  'Decimal point': 'จุดทศนิยม',
+  'Delete digit': 'ลบหลักสุดท้าย',
+  Cancel: 'ยกเลิก',
+  'Apply number': 'ใช้ตัวเลขนี้',
+};
 
 export function NumberPad({ value, label, unit, onApply, onCancel }: {
   value: string | number;
@@ -9,6 +21,7 @@ export function NumberPad({ value, label, unit, onApply, onCancel }: {
   onApply: (value: string) => void;
   onCancel: () => void;
 }) {
+  const { t } = useI18n(TH);
   const [draft, setDraft] = useState(String(value));
   const [replace, setReplace] = useState(true);
   const form = useRef<HTMLFormElement>(null);
@@ -71,24 +84,24 @@ export function NumberPad({ value, label, unit, onApply, onCancel }: {
       <div className="number-pad-display">
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-black text-dim">{label}</p>
-          <output aria-label="Number to enter" aria-live="polite" className="number-pad-value">
+          <output aria-label={t('Number to enter')} aria-live="polite" className="number-pad-value">
             {draft || '—'} <span>{unit}</span>
           </output>
         </div>
-        <button type="button" className="number-pad-tool" aria-label="Change sign" onClick={sign}>±</button>
-        <button type="button" className="number-pad-tool" aria-label="Clear number" onClick={clear}>Clear</button>
+        <button type="button" className="number-pad-tool" aria-label={t('Change sign')} onClick={sign}>±</button>
+        <button type="button" className="number-pad-tool" aria-label={t('Clear number')} onClick={clear}>{t('Clear')}</button>
       </div>
       <div className="number-pad-keys">
         {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((key) => (
           <button key={key} type="button" className="number-pad-key" onClick={() => digit(key)}>{key}</button>
         ))}
-        <button type="button" className="number-pad-key" aria-label="Decimal point" onClick={decimal}>.</button>
+        <button type="button" className="number-pad-key" aria-label={t('Decimal point')} onClick={decimal}>.</button>
         <button type="button" className="number-pad-key" onClick={() => digit('0')}>0</button>
-        <button type="button" className="number-pad-key" aria-label="Delete digit" onClick={erase}><Delete size={22} aria-hidden="true" /></button>
+        <button type="button" className="number-pad-key" aria-label={t('Delete digit')} onClick={erase}><Delete size={22} aria-hidden="true" /></button>
       </div>
       <div className="number-pad-actions">
-        <button type="button" className="btn btn-soft" onClick={onCancel}>Cancel</button>
-        <button type="submit" className="btn btn-primary" disabled={!valid}>Apply number</button>
+        <button type="button" className="btn btn-soft" onClick={onCancel}>{t('Cancel')}</button>
+        <button type="submit" className="btn btn-primary" disabled={!valid}>{t('Apply number')}</button>
       </div>
     </form>
   );

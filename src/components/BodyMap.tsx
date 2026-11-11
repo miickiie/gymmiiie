@@ -1,7 +1,15 @@
 import clsx from 'clsx';
 import { useState } from 'react';
 import { MUSCLE_LABEL } from '../lib/stats';
+import { useI18n } from '../lib/i18n';
 import type { MuscleId } from '../types';
+
+const TH: Record<string, string> = {
+  front: 'ด้านหน้า',
+  back: 'ด้านหลัง',
+  '{side} body map': 'แผนที่ร่างกาย{side}',
+  '{muscle}: {n} working sets': '{muscle}: {n} เซ็ตทำงาน',
+};
 
 interface Props {
   selected?: string[];
@@ -168,6 +176,7 @@ function Body({
   onToggle,
   heat,
 }: { side: 'front' | 'back' } & Props) {
+  const { t, tm } = useI18n(TH);
   const regions = side === 'front' ? FRONT : BACK;
   const [hover, setHover] = useState<string | null>(null);
   const maxHeat = heat ? Math.max(1, ...Object.values(heat)) : 1;
@@ -179,7 +188,7 @@ function Body({
       viewBox="0 0 220 390"
       className="h-auto w-full max-w-[240px] select-none"
       role="group"
-      aria-label={`${side} body map`}
+      aria-label={t('{side} body map', { side: t(side) })}
     >
       <defs>
         <filter
@@ -254,8 +263,11 @@ function Body({
             tabIndex={onToggle ? 0 : undefined}
             aria-label={
               heat
-                ? `${MUSCLE_LABEL[id]}: ${Math.round(hv * 10) / 10} working sets`
-                : MUSCLE_LABEL[id]
+                ? t('{muscle}: {n} working sets', {
+                    muscle: tm(id, MUSCLE_LABEL[id]),
+                    n: Math.round(hv * 10) / 10,
+                  })
+                : tm(id, MUSCLE_LABEL[id])
             }
             aria-pressed={onToggle ? on : undefined}
             onClick={onToggle ? () => onToggle(id) : undefined}
@@ -294,7 +306,7 @@ function Body({
               className="pointer-events-none"
               fontSize="0"
             >
-              {MUSCLE_LABEL[id]}
+              {tm(id, MUSCLE_LABEL[id])}
             </text>
           </g>
         );
@@ -309,7 +321,7 @@ function Body({
         fill="var(--text-mute)"
         className="pointer-events-none uppercase tracking-widest"
       >
-        {side}
+        {t(side)}
       </text>
       {hover && (
         <text
@@ -321,7 +333,7 @@ function Body({
           fill="var(--accent)"
           className="pointer-events-none"
         >
-          {MUSCLE_LABEL[hover as MuscleId]}
+          {tm(hover, MUSCLE_LABEL[hover as MuscleId])}
         </text>
       )}
     </svg>
@@ -334,6 +346,7 @@ export default function BodyMap({
   heat,
   compact,
 }: Props) {
+  const { t } = useI18n(TH);
   const [tab, setTab] = useState<'front' | 'back'>('front');
   return (
     <div>
@@ -368,20 +381,20 @@ export default function BodyMap({
         </div>
       </div>
       <div className="mt-2 flex justify-center gap-2 sm:hidden">
-        {(['front', 'back'] as const).map((t) => (
+        {(['front', 'back'] as const).map((s) => (
           <button
-            key={t}
+            key={s}
             type="button"
-            aria-pressed={tab === t}
-            onClick={() => setTab(t)}
+            aria-pressed={tab === s}
+            onClick={() => setTab(s)}
             className={clsx(
               'rounded-full px-4 py-1.5 text-xs font-black capitalize',
-              tab === t
+              tab === s
                 ? 'bg-[var(--surface-3)] text-[var(--text)]'
                 : 'text-mute',
             )}
           >
-            {t}
+            {t(s)}
           </button>
         ))}
       </div>

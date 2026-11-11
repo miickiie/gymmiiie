@@ -7,10 +7,27 @@ import {
   searchExercises,
 } from '../lib/exercises';
 import { BODY_ZONES } from '../lib/stats';
+import { useI18n } from '../lib/i18n';
 import { allExercises, useStore } from '../lib/store';
 import type { Exercise } from '../types';
 import { ExerciseRow } from './ExerciseTile';
 import { Chip, Sheet } from './ui';
+
+const TH: Record<string, string> = {
+  'Add exercise': 'เพิ่มท่า',
+  'Search exercises': 'ค้นหาท่าออกกำลัง',
+  'Search exercises…': 'ค้นหาท่าออกกำลัง…',
+  'Clear exercise search': 'ล้างการค้นหา',
+  Favourites: 'รายการโปรด',
+  Chest: 'อก',
+  Back: 'หลัง',
+  Shoulders: 'ไหล่',
+  Arms: 'แขน',
+  Core: 'แกนกลางลำตัว',
+  Legs: 'ขา',
+  'No exercises match those filters.': 'ไม่พบท่าที่ตรงกับตัวกรอง',
+  'Clear filters': 'ล้างตัวกรอง',
+};
 
 export default function ExercisePicker({
   open,
@@ -25,6 +42,7 @@ export default function ExercisePicker({
   exclude?: string[];
   title?: string;
 }) {
+  const { t } = useI18n(TH);
   const data = useStore((s) => s.data);
   const [q, setQ] = useState('');
   const [zone, setZone] = useState<string | null>(null);
@@ -43,7 +61,7 @@ export default function ExercisePicker({
   }, [all, q, zone, equip, fav, exclude, data.archived, data.favorites]);
 
   return (
-    <Sheet open={open} onClose={onClose} title={title} size="lg">
+    <Sheet open={open} onClose={onClose} title={t(title)} size="lg">
       <div className="sticky top-0 z-10 -mx-5 -mt-4 mb-2 bg-[var(--surface)] px-5 pb-2 pt-4">
         <div className="relative">
           <Search
@@ -53,14 +71,14 @@ export default function ExercisePicker({
           <input
             autoFocus
             className="input pl-9"
-            aria-label="Search exercises"
-            placeholder="Search exercises…"
+            aria-label={t('Search exercises')}
+            placeholder={t('Search exercises…')}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
           {q && (
             <button
-              aria-label="Clear exercise search"
+              aria-label={t('Clear exercise search')}
               onClick={() => setQ('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-mute"
             >
@@ -70,7 +88,7 @@ export default function ExercisePicker({
         </div>
         <div className="scroll-x mt-2 pb-1">
           <Chip on={fav} onClick={() => setFav(!fav)}>
-            <Star size={12} /> Favourites
+            <Star size={12} /> {t('Favourites')}
           </Chip>
           {Object.keys(BODY_ZONES).map((z) => (
             <Chip
@@ -78,7 +96,7 @@ export default function ExercisePicker({
               on={zone === z}
               onClick={() => setZone(zone === z ? null : z)}
             >
-              {z}
+              {t(z)}
             </Chip>
           ))}
         </div>
@@ -97,7 +115,7 @@ export default function ExercisePicker({
               on={equip === e}
               onClick={() => setEquip(equip === e ? null : e)}
             >
-              {e}
+              {t(e)}
             </Chip>
           ))}
         </div>
@@ -113,7 +131,7 @@ export default function ExercisePicker({
             }}
             right={
               <span className="rounded-full bg-[var(--surface-2)] px-2 py-1 text-[10px] font-black text-mute">
-                {ex.difficulty}
+                {t(ex.difficulty)}
               </span>
             }
           />
@@ -121,7 +139,7 @@ export default function ExercisePicker({
         {!results.length && (
           <div className="py-6 text-center">
             <p className="text-sm font-semibold text-mute">
-              No exercises match those filters.
+              {t('No exercises match those filters.')}
             </p>
             <button
               type="button"
@@ -133,7 +151,7 @@ export default function ExercisePicker({
                 setFav(false);
               }}
             >
-              Clear filters
+              {t('Clear filters')}
             </button>
           </div>
         )}

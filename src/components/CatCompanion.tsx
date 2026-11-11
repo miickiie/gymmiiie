@@ -2,7 +2,26 @@ import { ChevronRight, Heart, X } from 'lucide-react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
+import { useI18n } from '../lib/i18n';
 import './CatCompanion.css';
+
+const TH: Record<string, string> = {
+  'One rep at a time. Your effort counts, and this cat is cheering for you!':
+    'ทีละครั้ง ความพยายามของคุณมีความหมาย เจ้าแมวน้อยเชียร์อยู่!',
+  'Tiny steps, strong habits. Pick a pace that feels right today.':
+    'ก้าวเล็ก ๆ นิสัยแข็งแรง เลือกจังหวะที่เหมาะกับวันนี้',
+  'Relax those shoulders, take a breath, and give yourself some credit.':
+    'ผ่อนไหล่ หายใจลึก ๆ แล้วให้เครดิตตัวเองหน่อย',
+  'Rest is part of getting stronger. A little water break sounds purr-fect.':
+    'พักคือส่วนหนึ่งของการแข็งแรงขึ้น ดื่มน้ำหน่อยไหมเมี้ยว',
+  'No perfect workouts required. Showing up is already a win.':
+    'ไม่ต้องฝึกสมบูรณ์แบบ แค่มาก็ชนะแล้ว',
+  'Mochi, your workout cat': 'Mochi แมวคู่ฝึกของคุณ',
+  'Dismiss Mochi’s message': 'ปิดข้อความจาก Mochi',
+  'Pet Mochi for workout encouragement': 'ลูบ Mochi เพื่อรับกำลังใจ',
+  Later: 'ไว้ทีหลัง',
+  'Next message': 'ข้อความถัดไป',
+};
 
 interface CatMessage {
   id: number;
@@ -73,6 +92,7 @@ export function CatCompanion({
   onEncourage,
   host,
 }: CatCompanionProps) {
+  const { t } = useI18n(TH);
   const { pathname } = useLocation();
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -164,14 +184,14 @@ export function CatCompanion({
     const next = ENCOURAGEMENTS[encouragementIndex.current % ENCOURAGEMENTS.length];
     encouragementIndex.current += 1;
     setPetted(true);
-    onEncourage(next);
+    onEncourage(t(next));
   };
 
   if (host && !message) return null;
 
   const content = (
     <aside
-      aria-label="Mochi, your workout cat"
+      aria-label={t('Mochi, your workout cat')}
       className={`gym-cat-companion${pathname === '/session' ? ' is-training' : ''}${host ? ' in-dialog' : ''}`}
       data-tone={tone}
       onFocusCapture={() => setFocused(true)}
@@ -190,7 +210,7 @@ export function CatCompanion({
             if (event.pointerType === 'mouse') setHovered(false);
           }}
         >
-            <button type="button" className="gym-cat-dismiss" aria-label="Dismiss Mochi’s message" onClick={dismiss} disabled={message?.action?.disabled}>
+            <button type="button" className="gym-cat-dismiss" aria-label={t('Dismiss Mochi’s message')} onClick={dismiss} disabled={message?.action?.disabled}>
               <X size={15} aria-hidden="true" />
             </button>
           <p role={tone === 'bad' ? 'alert' : 'status'} aria-atomic="true">
@@ -202,13 +222,13 @@ export function CatCompanion({
                 {message.action.label}
               </button>
               <button type="button" className="gym-cat-later" onClick={dismiss} disabled={message.action.disabled}>
-                Later
+                {t('Later')}
               </button>
             </div>
           )}
           {pending > 0 && (
             <button type="button" className="gym-cat-next" onClick={dismiss}>
-              Next message <span>{pending}</span> <ChevronRight size={14} aria-hidden="true" />
+              {t('Next message')} <span>{pending}</span> <ChevronRight size={14} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -218,7 +238,7 @@ export function CatCompanion({
         type="button"
         className={`gym-cat-button${happy ? ' is-happy' : ''}`}
         onClick={encourage}
-        aria-label="Pet Mochi for workout encouragement"
+        aria-label={t('Pet Mochi for workout encouragement')}
         aria-expanded={visible}
       >
         <span className="gym-cat-heart" aria-hidden="true"><Heart size={17} fill="currentColor" /></span>
