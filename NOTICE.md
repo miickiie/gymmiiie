@@ -6,16 +6,6 @@ Gymmiie is a web reimplementation of the ideas, exercise catalogue, food
 catalogue and training flows of **GymMane** by **InlitX**:
 
 - https://github.com/InlitX/GymMane
-- Copyright (C) 2026 InlitX
-- SPDX-License-Identifier: GPL-3.0-only
-
-In accordance with Section 7(b) of the GNU General Public License v3, works
-based on GymMane must retain the following attribution in their Appropriate
-Legal Notices:
-
-> **Based on GymMane by InlitX**
-
-That attribution appears in Gymmiie's About screen and in this repository.
 
 ## Licence
 

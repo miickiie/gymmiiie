@@ -240,7 +240,7 @@ export default function About() {
       <p className="mt-5 text-center text-[10px] font-bold text-mute">
         Crafted with 💜 by{' '}
         <a
-          href="https://instagram.com/miiickiie"
+          href="https://www.instagram.com/miiickiie"
           target="_blank"
           rel="noreferrer"
           className="text-[var(--accent)] underline"
