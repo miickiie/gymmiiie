@@ -134,8 +134,11 @@
 .gym-cat-face { display: block; width: 100%; overflow: visible; }
 .gym-cat-eyes { transform-origin: 8px 6px; animation: gym-cat-blink 5.5s infinite; }
 .gym-cat-eyes.is-happy { animation: none; }
-.gym-cat-button:hover .gym-cat-sprite { transform: rotate(-7deg) translateY(-3px); animation: none; }
-.gym-cat-button:active .gym-cat-sprite { transform: scale(0.92); }
+/* Only lift with a real mouse; touch taps leave :hover stuck and tilt the cat. */
+@media (hover: hover) and (pointer: fine) {
+  .gym-cat-button:hover:not(.is-happy) .gym-cat-sprite { transform: translateY(-3px); animation: none; }
+}
+.gym-cat-button:active:not(.is-happy) .gym-cat-sprite { transform: scale(0.92); }
 .gym-cat-button.is-happy .gym-cat-sprite { animation: gym-cat-hop 500ms ease-in-out 3; }
 
 .gym-cat-heart { position: absolute; top: -8px; color: #e59ca8; opacity: 0; }
@@ -187,5 +190,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .gym-cat-companion *, .gym-cat-companion *::after { animation: none !important; transition: none !important; }
-  .gym-cat-button:hover .gym-cat-sprite { transform: none; }
+  .gym-cat-button:hover:not(.is-happy) .gym-cat-sprite { transform: none; }
 }

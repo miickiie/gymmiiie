@@ -102,6 +102,25 @@ test('Mochi announces the end of a rest timer', async ({ page }) => {
   await expect(companion.getByRole('status')).toContainText('Rest time is up.');
 });
 
+test('the cat settles upright after being petted', async ({ page }) => {
+  const cat = page.getByRole('button', { name: 'Pet Mochi for workout encouragement' });
+  const sprite = page.locator('.gym-cat-sprite');
+  await cat.click();
+  await sprite.evaluate(async (element) => {
+    await Promise.all(
+      element
+        .getAnimations()
+        .filter((animation) => animation instanceof CSSAnimation && animation.animationName === 'gym-cat-hop')
+        .map((animation) => animation.finished.catch(() => {})),
+    );
+  });
+  const rotation = await sprite.evaluate((element) => {
+    const matrix = new DOMMatrixReadOnly(getComputedStyle(element).transform);
+    return Math.round((Math.atan2(matrix.b, matrix.a) * 180) / Math.PI);
+  });
+  expect(rotation).toBe(0);
+});
+
 test('the cat looks towards desktop pointers and mobile taps without speaking', async ({ page }, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const viewport = page.viewportSize();
