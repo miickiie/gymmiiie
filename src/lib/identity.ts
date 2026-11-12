@@ -22,7 +22,9 @@ function normalizeName(value: unknown): { name: string; normalizedName: string }
   if (typeof value !== 'string')
     throw new IdentityValidationError('name', 'Enter your name.');
   const name = value.normalize('NFKC').trim().replace(/\s+/gu, ' ');
-  if (!name || name.length > 100 || /[\p{Cc}\p{Cf}]/u.test(name))
+  if (!name)
+    throw new IdentityValidationError('name', 'Enter your name.');
+  if (name.length > 100 || /[\p{Cc}\p{Cf}]/u.test(name))
     throw new IdentityValidationError(
       'name',
       'Use a name between 1 and 100 characters.',

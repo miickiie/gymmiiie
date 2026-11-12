@@ -47,11 +47,11 @@ const TH: Record<string, string> = {
   'Could not share': 'แชร์ไม่สำเร็จ',
   'Workout deleted': 'ลบการฝึกแล้ว',
   'started {time}': 'เริ่ม {time}',
-  '{n} total sets': '{n} เซ็ตรวม',
-  'Working sets': 'เซ็ตทำงาน',
+  '{n} total sets': 'รวม {n} เซ็ต',
+  'Working sets': 'เซ็ตฝึกจริง',
   'excluding warm-ups': 'ไม่รวมวอร์มอัป',
-  '{n} new PR': '{n} PR ใหม่',
-  '{n} new PRs': '{n} PR ใหม่',
+  '{n} new PR': 'PR ใหม่ {n} รายการ',
+  '{n} new PRs': 'PR ใหม่ {n} รายการ',
   'no new PRs': 'ไม่มี PR ใหม่',
   'Repeat workout': 'ฝึกซ้ำ',
   'Copy / share': 'คัดลอก / แชร์',
@@ -61,11 +61,11 @@ const TH: Record<string, string> = {
   'SESSION RECAP': 'สรุปการฝึก',
   'You trained {muscles} for {dur} and moved {vol}.':
     'คุณฝึก {muscles} นาน {dur} และยกไป {vol}',
-  'No sets were recorded in this session.': 'ไม่มีเซ็ตที่บันทึกในเซสชันนี้',
+  'No sets were recorded in this session.': 'ไม่มีเซ็ตที่บันทึกไว้ในการฝึกครั้งนี้',
   '{name} routine': 'ตารางฝึก {name}',
   'Delete workout?': 'ลบการฝึกนี้?',
   'This permanently removes the session from history and all progress calculations.':
-    'จะลบเซสชันนี้ออกจากประวัติและการคำนวณความก้าวหน้าอย่างถาวร',
+    'การฝึกครั้งนี้จะถูกลบออกจากประวัติและการคำนวณความก้าวหน้าทั้งหมดอย่างถาวร',
   'Delete workout': 'ลบการฝึก',
   'Share workout': 'แชร์การฝึก',
   '{n} exercises · {sets} working sets · {vol} volume':
@@ -73,7 +73,7 @@ const TH: Record<string, string> = {
   Delete: 'ลบ',
   Duration: 'ระยะเวลา',
   Exercises: 'ท่าออกกำลัง',
-  Volume: 'ปริมาณรวม',
+  Volume: 'ปริมาณการฝึก',
   Workout: 'การฝึก',
 };
 

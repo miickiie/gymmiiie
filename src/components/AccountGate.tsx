@@ -19,14 +19,26 @@ import {
   type Account,
 } from '../lib/accounts';
 import { pinIdentityFieldErrors, PIN_LENGTH } from '../lib/identity';
-import { useI18n } from '../lib/i18n';
+import { setLanguage, useI18n, type Language } from '../lib/i18n';
 import { useStore } from '../lib/store';
-import { Btn, Card, Confirm, Field, Sheet, useToast } from './ui';
+import { Btn, Card, Confirm, Field, Segmented, Sheet, useToast } from './ui';
 
 const TH: Record<string, string> = {
+  'Sign in': 'เข้าสู่ระบบ',
+  'Enter your name.': 'กรอกชื่อบัญชี',
+  'Use a name between 1 and 100 characters.': 'ชื่อบัญชีต้องมีความยาว 1–100 ตัวอักษร',
+  'The registration passphrase is incorrect.': 'รหัสสำหรับสมัครบัญชีไม่ถูกต้อง',
+  'New account registration is not configured.': 'ขณะนี้ยังสมัครบัญชีใหม่ไม่ได้ กรุณาติดต่อผู้ดูแล',
+  'This account already exists. Sign in with its name and PIN.': 'มีบัญชีนี้อยู่แล้ว เข้าสู่ระบบด้วยชื่อบัญชีและ PIN เดิม',
+  'Too many attempts. Try again later.': 'ทำรายการหลายครั้งเกินไป กรุณารอแล้วลองใหม่',
+  'The account response is invalid. Your local log has been kept.': 'ข้อมูลบัญชีที่ได้รับไม่ถูกต้อง บันทึกในเครื่องยังอยู่',
+  'The cloud request timed out. Local changes have been kept; reconnect and retry.': 'เซิร์ฟเวอร์ตอบกลับไม่ทันเวลา ข้อมูลที่แก้ไขในเครื่องยังอยู่ กรุณาเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่',
+  'Your session expired. Sign in again.': 'หมดเวลาเข้าสู่ระบบ กรุณาเข้าสู่ระบบอีกครั้ง',
+  'Sign in to access this account.': 'เข้าสู่ระบบเพื่อเปิดบัญชีนี้',
+  'Account storage is unavailable. Try again without clearing local data.': 'ขณะนี้โหลดข้อมูลบัญชีไม่ได้ กรุณาลองใหม่โดยไม่ล้างข้อมูลในเครื่อง',
   'PIN (4 digits)': 'PIN 4 หลัก',
   'Enter your 4-digit PIN.': 'กรอก PIN 4 หลัก',
-  'Use exactly 4 digits for your PIN.': 'ใช้ตัวเลข 4 หลักสำหรับ PIN',
+  'Use exactly 4 digits for your PIN.': 'PIN ต้องเป็นตัวเลข 4 หลัก',
   'Enter the same name and 4-digit PIN to open your training log.':
     'กรอกชื่อและ PIN 4 หลักเดิมเพื่อเปิดบันทึกการฝึกของคุณ',
   'Your session has ended. Enter your name and PIN to continue. Unsynced changes are kept with this account on this device.':
@@ -77,18 +89,18 @@ const TH: Record<string, string> = {
   'Use another user': 'ใช้ผู้ใช้อื่น',
   'No saved account log could be exported.':
     'ไม่มีบันทึกบัญชีที่บันทึกไว้ให้ส่งออก',
-  'Enter the registration passphrase.': 'กรอกรหัสสำหรับสมัครสมาชิก',
+  'Enter the registration passphrase.': 'กรอกรหัสสำหรับสมัครบัญชี',
   'The request could not be completed. Retry when connected.':
     'ทำรายการไม่สำเร็จ ลองใหม่เมื่อเชื่อมต่อ',
-  'Create your user': 'สร้างผู้ใช้ของคุณ',
+  'Create an account': 'สร้างบัญชี',
   'Welcome to Gymmiie': 'ยินดีต้อนรับสู่ Gymmiie',
-  'No user was found with these details. A registration passphrase is required to create one.':
-    'ไม่พบผู้ใช้ที่ตรงกับข้อมูลนี้ ต้องใช้รหัสสมัครสมาชิกเพื่อสร้างใหม่',
-  Name: 'ชื่อ',
-  'Registration passphrase': 'รหัสสมัครสมาชิก',
-  'Creating user…': 'กำลังสร้างผู้ใช้…',
+  'No account matches these details. Enter the registration passphrase to create an account.':
+    'ไม่พบบัญชีที่ตรงกับข้อมูลนี้ กรอกรหัสสำหรับสมัครบัญชีเพื่อสร้างบัญชีใหม่',
+  Name: 'ชื่อบัญชี',
+  'Registration passphrase': 'รหัสสำหรับสมัครบัญชี',
+  'Creating account…': 'กำลังสร้างบัญชี…',
   'Opening your log…': 'กำลังเปิดบันทึกของคุณ…',
-  'Create user': 'สร้างผู้ใช้',
+  'Create account': 'สร้างบัญชี',
   'Back to sign in': 'กลับไปหน้าเข้าสู่ระบบ',
   'Retry connection': 'ลองเชื่อมต่ออีกครั้ง',
   'An older device log is kept separately':
@@ -180,6 +192,12 @@ function meaningfulLegacy(data: AppData) {
     data.bodyGoalKg != null
   );
 }
+type AccountNotice = {
+  key: string;
+  vars?: Record<string, string | number>;
+  suffix?: string;
+};
+
 function messageOf(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
@@ -192,7 +210,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Phase>('checking');
   const [account, setAccount] = useState<Account | null>(null);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [notice, setNotice] = useState<AccountNotice | null>(null);
   const [legacy, setLegacy] = useState<AppData | null>(null);
   const [legacyError, setLegacyError] = useState('');
   const [legacyHidden, setLegacyHidden] = useState(true);
@@ -233,14 +251,14 @@ export default function AccountGate({ children }: { children: ReactNode }) {
             setLegacyError(
               messageOf(
                 failure,
-                t('The older device log could not be opened. It has been kept.'),
+                'The older device log could not be opened. It has been kept.',
               ),
             );
         });
     } catch (failure) {
       if (token !== generation.current) return;
       setError(
-        messageOf(failure, t('The account log could not be loaded.')),
+        messageOf(failure, 'The account log could not be loaded.'),
       );
       setPhase(
         useStore.getState().cloudStatus === 'session-expired'
@@ -272,7 +290,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
       if (token !== generation.current) return;
       const remembered = getRememberedAccount();
       setAccount(remembered);
-      setError(messageOf(failure, t('Connect to check the account session.')));
+      setError(messageOf(failure, 'Connect to check the account session.'));
       setPhase(remembered && !isLocallySignedOut() ? 'offline' : 'signed-out');
     }
   };
@@ -288,9 +306,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
       setError(
         messageOf(
           failure,
-          t(
-            'The log could not be saved on this device. Export a recovery copy or retry before signing out.',
-          ),
+          'The log could not be saved on this device. Export a recovery copy or retry before signing out.',
         ),
       );
       setPhase('leave-error');
@@ -303,30 +319,25 @@ export default function AccountGate({ children }: { children: ReactNode }) {
       } catch (failure) {
         remoteError = messageOf(
           failure,
-          t('Reconnect to finish signing out of the server.'),
+          'Reconnect to finish signing out of the server.',
         );
       }
     }
     setAccount(null);
     setNotice(
       reason === 'expired'
-        ? t(
-            'Your session has ended. Enter your name and PIN to continue. Unsynced changes are kept with this account on this device.',
-          )
+        ? { key: 'Your session has ended. Enter your name and PIN to continue. Unsynced changes are kept with this account on this device.' }
         : unsynced
-          ? `${t(
-              'Signed out on this device. Unsynced changes for {name} are kept here. Sign in on this device and sync before opening the latest log on another device.',
-              { name: candidate.name },
-            )}${remoteError ? ` ${remoteError}` : ''}`
+          ? {
+              key: 'Signed out on this device. Unsynced changes for {name} are kept here. Sign in on this device and sync before opening the latest log on another device.',
+              vars: { name: candidate.name },
+              suffix: remoteError,
+            }
           : remoteError
-            ? `${t(
-                'Your tracking changes were synced. Signed out on this device.',
-              )} ${remoteError}`
+            ? { key: 'Your tracking changes were synced. Signed out on this device.', suffix: remoteError }
             : reason === 'switch'
-              ? t(
-                  'Your changes were synced. Enter the other user’s name and PIN.',
-                )
-              : t('Signed out. Your changes were synced to your account.'),
+              ? { key: 'Your changes were synced. Enter the other user’s name and PIN.' }
+              : { key: 'Signed out. Your changes were synced to your account.' },
     );
     setPhase('signed-out');
     navigate('/', { replace: true });
@@ -358,9 +369,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
         setError(
           messageOf(
             failure,
-            t(
-              'The latest changes could not be synced. They remain on this device.',
-            ),
+            'The latest changes could not be synced. They remain on this device.',
           ),
         );
         setPhase('leave-pending');
@@ -476,7 +485,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
             )}
           </p>
           <p role="alert" className="mt-3 text-sm text-[var(--bad)]">
-            {error}
+            {t(error)}
           </p>
           <Btn
             className="mt-4"
@@ -486,7 +495,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
                 .recoveryExport()
                 .catch((failure) =>
                   setError(
-                    messageOf(failure, t('Could not export the device copy.')),
+                    messageOf(failure, 'Could not export the device copy.'),
                   ),
                 )
             }
@@ -518,7 +527,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
           {t('Keep this log before signing out')}
         </h1>
         <p role="alert" className="mt-3 text-sm text-[var(--bad)]">
-          {error}
+          {t(error)}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Btn onClick={keepOpen}>{t('Keep open')}</Btn>
@@ -529,7 +538,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
                 .recoveryExport()
                 .catch((failure) =>
                   setError(
-                    messageOf(failure, t('Could not export this log.')),
+                    messageOf(failure, 'Could not export this log.'),
                   ),
                 )
             }
@@ -552,7 +561,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
           {t('Your account log is not open yet')}
         </h1>
         <p role="alert" className="mt-3 text-sm text-dim">
-          {error}
+          {t(error)}
         </p>
         <p className="mt-3 text-sm font-semibold">
           {account.name}
@@ -582,7 +591,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
                   setError(
                     messageOf(
                       failure,
-                      t('No saved account log could be exported.'),
+                      'No saved account log could be exported.',
                     ),
                   ),
                 )
@@ -606,10 +615,10 @@ export default function AccountGate({ children }: { children: ReactNode }) {
 }
 
 function PublicShell({ children }: { children: ReactNode }) {
-  const { t } = useI18n(TH);
+  const { language, t } = useI18n(TH);
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center px-5 py-10">
-      <div className="mb-7 flex items-center gap-3">
+      <div className="mb-7 flex flex-wrap items-center gap-3">
         <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--accent)] text-xl font-black text-[#1a0d07]">
           G
         </div>
@@ -618,6 +627,16 @@ function PublicShell({ children }: { children: ReactNode }) {
           <p className="text-xs font-bold text-mute">
             {t('Lift · log · grow')}
           </p>
+        </div>
+        <div role="group" aria-label={t('Language')} className="ml-auto">
+          <Segmented<Language>
+            value={language}
+            onChange={setLanguage}
+            options={[
+              { value: 'en', label: 'EN' },
+              { value: 'th', label: 'ไทย' },
+            ]}
+          />
         </div>
       </div>
       <Card className="p-5 sm:p-6">{children}</Card>
@@ -631,7 +650,7 @@ function AccountForm({
   onRetry,
 }: {
   initialError: string;
-  notice: string;
+  notice: AccountNotice | null;
   onAccount: (account: Account) => Promise<void>;
   onRetry: () => void;
 }) {
@@ -658,7 +677,7 @@ function AccountForm({
     setFields(invalid);
     if (Object.keys(invalid).length) return;
     if (register && !passphrase) {
-      setError(t('Enter the registration passphrase.'));
+      setError('Enter the registration passphrase.');
       return;
     }
     setBusy(true);
@@ -681,10 +700,10 @@ function AccountForm({
         setError('');
       } else
         setError(
-          t(messageOf(
+          messageOf(
             failure,
-            t('The request could not be completed. Retry when connected.'),
-          )),
+            'The request could not be completed. Retry when connected.',
+          ),
         );
     } finally {
       setBusy(false);
@@ -693,12 +712,12 @@ function AccountForm({
   return (
     <form onSubmit={(event) => void submit(event)}>
       <h1 className="text-2xl font-black">
-        {register ? t('Create your user') : t('Welcome to Gymmiie')}
+        {register ? t('Create an account') : t('Welcome to Gymmiie')}
       </h1>
       <p className="mt-2 text-sm font-semibold text-dim">
         {register
           ? t(
-              'No user was found with these details. A registration passphrase is required to create one.',
+              'No account matches these details. Enter the registration passphrase to create an account.',
             )
           : t(
               'Enter the same name and 4-digit PIN to open your training log.',
@@ -709,7 +728,8 @@ function AccountForm({
           role="status"
           className="mt-3 rounded-xl bg-[var(--accent-soft)] p-3 text-sm font-semibold"
         >
-          {notice}
+          {t(notice.key, notice.vars)}
+          {notice.suffix ? ` ${t(notice.suffix)}` : ''}
         </p>
       )}
       <div className="mt-5 space-y-4">
@@ -777,7 +797,7 @@ function AccountForm({
       </div>
       {error && (
         <p role="alert" className="mt-4 text-sm font-bold text-[var(--bad)]">
-          {error}
+          {t(error)}
         </p>
       )}
       <Btn
@@ -788,11 +808,11 @@ function AccountForm({
       >
         {busy
           ? register
-            ? t('Creating user…')
+            ? t('Creating account…')
             : t('Opening your log…')
           : register
-            ? t('Create user')
-            : t('Continue')}
+            ? t('Create account')
+            : t('Sign in')}
       </Btn>
       {register && (
         <Btn className="mt-2 w-full" disabled={busy} onClick={() => {
@@ -828,7 +848,7 @@ export function LegacyDeviceNotice() {
         {t('An older device log is kept separately')}
       </h2>
       <p className="mt-2 text-xs font-semibold text-dim">
-        {legacyError ||
+        {(legacyError && t(legacyError)) ||
           t(
             'Review it before choosing whether to import it into {name}’s account. Nothing has been assigned automatically.',
             { name: account.name },

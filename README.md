@@ -187,7 +187,7 @@ See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md).
 > **Based on GymMane by InlitX.**
 
 GymMane is © 2026 InlitX and is licensed GPL-3.0 with an additional Section 7(b)
-attribution term. Gymmiie keeps that attribution in its About screen and docs.
+attribution term. Gymmiie keeps that attribution in its documentation.
 
 Exercise animations are bundled under **CC BY-SA 4.0**, sourced from
 [Workout Guide](https://github.com/bryllim/workout-guide) by Bryl Lim,

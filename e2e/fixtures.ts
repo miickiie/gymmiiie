@@ -7,8 +7,30 @@ import type { Account } from '../src/lib/accounts';
 
 const accounts = new WeakMap<Page, Account>();
 
+export function numberPad(page: Page): Locator {
+  return page.getByRole('dialog').filter({
+    has: page.getByRole('group', { name: /^(Number pad|แป้นตัวเลข)$/ }),
+  });
+}
+
 export async function enterNumber(input: Locator, value: string): Promise<void> {
-  await input.fill(value);
+  if (await input.getAttribute('readonly') === null) {
+    await input.fill(value);
+    return;
+  }
+  if (!/^\d*\.?\d*$/.test(value))
+    throw new Error('The mobile number pad accepts nonnegative decimal values.');
+  await input.click();
+  const pad = numberPad(input.page());
+  await pad.getByRole('button', { name: /^(Clear number|ล้างตัวเลข)$/ }).click();
+  for (const digit of value) {
+    await pad.getByRole('button', {
+      name: digit === '.' ? /^(Decimal point|จุดทศนิยม)$/ : digit,
+      exact: true,
+    }).click();
+  }
+  await pad.getByRole('button', { name: /^(Use value|ใช้ค่านี้)$/ }).click();
+  await expect(pad).toHaveCount(0);
 }
 
 export async function seed(
@@ -39,7 +61,7 @@ export async function seed(
     await page
       .getByLabel('PIN (4 digits)', { exact: true })
       .fill(identity?.pin ?? '1234');
-    await page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   }
   await expect(content).toBeVisible();
   return body.account;

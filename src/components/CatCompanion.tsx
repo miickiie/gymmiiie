@@ -9,7 +9,7 @@ const TH: Record<string, string> = {
   'One rep at a time. Your effort counts, and this cat is cheering for you!':
     'ทีละครั้ง ความพยายามของคุณมีความหมาย เจ้าแมวน้อยเชียร์อยู่!',
   'Tiny steps, strong habits. Pick a pace that feels right today.':
-    'ก้าวเล็ก ๆ นิสัยแข็งแรง เลือกจังหวะที่เหมาะกับวันนี้',
+    'เริ่มทีละนิด ฝึกจนเป็นนิสัย เลือกจังหวะที่เหมาะกับตัวเองในวันนี้',
   'Relax those shoulders, take a breath, and give yourself some credit.':
     'ผ่อนไหล่ หายใจลึก ๆ แล้วให้เครดิตตัวเองหน่อย',
   'Rest is part of getting stronger. A little water break sounds purr-fect.':

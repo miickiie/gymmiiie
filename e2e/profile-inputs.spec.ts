@@ -1,9 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test, type Locator } from '@playwright/test';
 import { parseBackup } from '../src/lib/backup';
-import { enterNumber, seed, snapshot } from './fixtures';
+import { enterNumber, numberPad, seed, snapshot } from './fixtures';
 
 async function replaceNumber(input: Locator, value: string): Promise<void> {
+  if (await input.getAttribute('readonly') !== null) {
+    await enterNumber(input, value);
+    await expect(input).toHaveValue(value);
+    return;
+  }
   await input.fill('');
   await expect(input).toHaveValue('');
   for (const digit of value) {
@@ -23,11 +28,11 @@ test('onboarding profile numbers can be cleared and retyped without overlapping 
   await page.goto('/');
   await page.getByLabel('Name', { exact: true }).fill(`Profile ${randomUUID()}`);
   await page.getByLabel('PIN (4 digits)', { exact: true }).fill('0123');
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await page
     .getByLabel('Registration passphrase', { exact: true })
     .fill('test-invite');
-  await page.getByRole('button', { name: 'Create user', exact: true }).click();
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await page.getByRole('button', { name: 'Get started', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
 
@@ -54,11 +59,11 @@ test('onboarding profile numbers can be cleared and retyped without overlapping 
   }
 
   await enterNumber(height, '300');
-  await expect(height).toHaveValue('300');
+  if (await height.getAttribute('readonly') === null) await expect(height).toHaveValue('300');
   await height.press('Tab');
   await expect(height).toHaveValue('250');
   await enterNumber(height, '90');
-  await expect(height).toHaveValue('90');
+  if (await height.getAttribute('readonly') === null) await expect(height).toHaveValue('90');
   await height.press('Tab');
   await expect(height).toHaveValue('100');
   await replaceNumber(height, '178');
@@ -87,16 +92,28 @@ test('settings keeps valid profile numbers while a replacement is incomplete', a
   await seed(page);
   await page.goto('/settings');
   const age = page.getByRole('spinbutton', { name: /^Age\b/ });
-  const height = page.getByRole('spinbutton', { name: /^Height\b/ });
+  const height = page.getByRole('spinbutton', { name: /^Height\b/, includeHidden: true });
   const weight = page.getByRole('spinbutton', { name: /^Weight\b/ });
 
-  await height.fill('');
-  await expect(height).toHaveValue('');
-  await height.pressSequentially('1');
-  await expect(height).toHaveValue('1');
-  await expect.poll(async () => parseBackup(await snapshot(page)).profile.heightCm).toBe(175);
-  await height.pressSequentially('80');
-  await height.press('Tab');
+  if (await height.getAttribute('readonly') !== null) {
+    await height.click();
+    const pad = numberPad(page);
+    await pad.getByRole('button', { name: '1', exact: true }).click();
+    await expect(pad.getByRole('textbox', { name: 'Number to enter', exact: true })).toHaveValue('1');
+    await expect(height).toHaveValue('175');
+    await expect.poll(async () => parseBackup(await snapshot(page)).profile.heightCm).toBe(175);
+    await pad.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(height).toHaveValue('175');
+    await enterNumber(height, '180');
+  } else {
+    await height.fill('');
+    await expect(height).toHaveValue('');
+    await height.pressSequentially('1');
+    await expect(height).toHaveValue('1');
+    await expect.poll(async () => parseBackup(await snapshot(page)).profile.heightCm).toBe(175);
+    await height.pressSequentially('80');
+    await height.press('Tab');
+  }
   await expect(height).toHaveValue('180');
 
   await replaceNumber(age, '42');

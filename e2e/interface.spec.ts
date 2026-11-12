@@ -79,7 +79,8 @@ test('food shortcut selects its food and invalid portions cannot change nutritio
     exact: true,
   });
   await expect(portion).toBeVisible();
-  for (const invalid of ['-25', '0']) {
+  const invalidPortions = await portion.getAttribute('readonly') === null ? ['-25', '0'] : ['0'];
+  for (const invalid of invalidPortions) {
     await enterNumber(portion, invalid);
     await picker.getByRole('button', { name: 'Add', exact: true }).click();
     await expect(picker.getByRole('alert')).toContainText('greater than zero');
@@ -120,21 +121,21 @@ test('negative custom macros are rejected and correcting them permits a food ent
     .fill('Test recovery meal');
   await enterNumber(picker
     .getByRole('spinbutton', { name: 'kcal per 100 grams', exact: true }), '100');
-  await enterNumber(picker
-    .getByRole('spinbutton', { name: 'protein per 100 grams', exact: true }), '-4');
+  const protein = picker.getByRole('spinbutton', { name: 'protein per 100 grams', exact: true });
+  const native = await protein.getAttribute('readonly') === null;
+  await enterNumber(protein, native ? '-4' : '5');
   await enterNumber(picker
     .getByRole('spinbutton', { name: 'carbs per 100 grams', exact: true }), '12');
   await enterNumber(picker
     .getByRole('spinbutton', { name: 'fat per 100 grams', exact: true }), '3');
-  await picker
-    .getByRole('button', { name: 'Save custom food', exact: true })
-    .click();
-  await expect(picker.getByRole('alert')).toContainText('nonnegative');
-  expect(parseBackup(await snapshot(page)).nutrition.customFoods).toHaveLength(
-    0,
-  );
-  await enterNumber(picker
-    .getByRole('spinbutton', { name: 'protein per 100 grams', exact: true }), '5');
+  if (native) {
+    await picker
+      .getByRole('button', { name: 'Save custom food', exact: true })
+      .click();
+    await expect(picker.getByRole('alert')).toContainText('nonnegative');
+    expect(parseBackup(await snapshot(page)).nutrition.customFoods).toHaveLength(0);
+    await enterNumber(protein, '5');
+  }
   await picker
     .getByRole('button', { name: 'Save custom food', exact: true })
     .click();

@@ -61,21 +61,21 @@ const TH: Record<string, string> = {
   Progress: 'ความก้าวหน้า',
   'Your progress': 'ความก้าวหน้าของคุณ',
   '{n} workouts · {volume} lifted · {time} trained':
-    '{n} การฝึก · ยก {volume} · ฝึก {time}',
+    'ฝึก {n} ครั้ง · ยกน้ำหนักรวม {volume} · เวลาฝึก {time}',
   Overview: 'ภาพรวม',
   Records: 'สถิติ',
   Body: 'ร่างกาย',
   Awards: 'รางวัล',
-  Streak: 'สตรีค',
-  Sets: 'เซ็ต',
-  Hours: 'ชั่วโมง',
+  Streak: 'ฝึกต่อเนื่อง',
+  Sets: 'Sets',
+  Hours: 'Hours',
   'Training load': 'ภาระการฝึก',
   'Last 12 weeks': '12 สัปดาห์ล่าสุด',
-  volume: 'ปริมาณ',
-  sets: 'เซ็ต',
+  volume: 'ปริมาณการฝึก',
+  sets: 'sets',
   '{n} sets': '{n} เซ็ต',
   '{volume} across 12 weeks': '{volume} ใน 12 สัปดาห์',
-  '{n} working sets across 12 weeks': '{n} เซ็ตทำงานใน 12 สัปดาห์',
+  '{n} working sets across 12 weeks': '{n} เซ็ตฝึกจริงใน 12 สัปดาห์',
   'trending up': 'กำลังขึ้น',
   'keep going': 'สู้ต่อ',
   'Last 30 days': '30 วันล่าสุด',
@@ -89,8 +89,8 @@ const TH: Record<string, string> = {
   '{n} XP earned': 'ได้ {n} XP',
   '{n} XP to next level': 'อีก {n} XP ถึงเลเวลถัดไป',
   'Muscle balance': 'สมดุลกล้ามเนื้อ',
-  'Working sets · last 4 weeks': 'เซ็ตทำงาน · 4 สัปดาห์ล่าสุด',
-  'No sessions in the last four weeks.': 'ไม่มีเซสชันใน 4 สัปดาห์ที่ผ่านมา',
+  'Working sets · last 4 weeks': 'เซ็ตฝึกจริง · 4 สัปดาห์ล่าสุด',
+  'No sessions in the last four weeks.': 'ยังไม่มีการฝึกใน 4 สัปดาห์ที่ผ่านมา',
   Milestones: 'หมุดหมาย',
   '{earned} of {total} earned': 'ได้ {earned} จาก {total}',
   'Trophy cabinet': 'ตู้ถ้วยรางวัล',
@@ -101,7 +101,7 @@ const TH: Record<string, string> = {
   'No records yet': 'ยังไม่มีสถิติ',
   'Try a different search.': 'ลองค้นหาคำอื่น',
   'Every exercise you train gets a best set and estimated 1RM here.':
-    'ทุกท่าที่ฝึกจะได้เซ็ตที่ดีที่สุดและ 1RM โดยประมาณที่นี่',
+    'ดูเซ็ตที่ดีที่สุดและ 1RM โดยประมาณของแต่ละท่าที่ฝึกได้ที่นี่',
   'Start training': 'เริ่มฝึก',
   'Top e1RM': 'e1RM สูงสุด',
   'Heaviest set': 'เซ็ตหนักสุด',
@@ -109,19 +109,19 @@ const TH: Record<string, string> = {
   'Top weight': 'น้ำหนักสูงสุด',
   'Longest time': 'เวลานานสุด',
   'Farthest distance': 'ระยะไกลสุด',
-  'Most repetitions': 'ครั้งมากสุด',
+  'Most repetitions': 'จำนวน reps สูงสุด',
 
   // Awards
   'First rep': 'เรปแรก',
   'Finish your first workout': 'ฝึกให้จบครั้งแรก',
   Planner: 'นักวางแผน',
   'Create a routine': 'สร้างตารางฝึก',
-  'On a roll': 'กำลังมา',
+  'On a roll': 'ฝึกต่อเนื่อง',
   '3 day streak': 'สตรีค 3 วัน',
-  'Week strong': 'ครบสัปดาห์',
+  'Week strong': 'ต่อเนื่องครบสัปดาห์',
   '7 day streak': 'สตรีค 7 วัน',
   'Ten deep': 'สิบครั้ง',
-  '10 workouts': '10 การฝึก',
+  '10 workouts': 'ฝึกครบ 10 ครั้ง',
   Century: 'ร้อยเซ็ต',
   '100 working sets': '100 เซ็ตทำงาน',
   'One tonne': 'หนึ่งตัน',
@@ -129,7 +129,7 @@ const TH: Record<string, string> = {
   'Ten hours': 'สิบชั่วโมง',
   'Train for 10 hours': 'ฝึก 10 ชั่วโมง',
   Regular: 'สม่ำเสมอ',
-  '50 workouts': '50 การฝึก',
+  '50 workouts': 'ฝึกครบ 50 ครั้ง',
   'Ten tonnes': 'สิบตัน',
   'Lift 10,000 kg total': 'ยกน้ำหนักรวม 10,000 kg',
   Unbroken: 'ไม่ขาดตอน',
@@ -137,7 +137,7 @@ const TH: Record<string, string> = {
   'Thousand club': 'คลับพันเซ็ต',
   '1,000 working sets': '1,000 เซ็ตทำงาน',
   Centurion: 'ร้อยครั้ง',
-  '100 workouts': '100 การฝึก',
+  '100 workouts': 'ฝึกครบ 100 ครั้ง',
   'Hundred hours': 'ร้อยชั่วโมง',
   'Train for 100 hours': 'ฝึก 100 ชั่วโมง',
   Heavyweight: 'รุ่นหนัก',
@@ -151,19 +151,19 @@ const TH: Record<string, string> = {
   'Goal saved': 'บันทึกเป้าหมายแล้ว',
   'Goal cleared': 'ล้างเป้าหมายแล้ว',
   'Enter a positive, finite measurement': 'ใส่ค่าที่เป็นจำนวนบวก',
-  'Measurement saved': 'บันทึกขนาดแล้ว',
+  'Measurement saved': 'บันทึกสัดส่วนแล้ว',
   Bodyweight: 'น้ำหนักตัว',
   '{n} entries · {delta} {unit} since first':
     '{n} รายการ · {delta} {unit} จากค่าแรก',
-  'Log your first weigh-in': 'ชั่งน้ำหนักครั้งแรก',
+  'Log your first weigh-in': 'บันทึกน้ำหนักครั้งแรก',
   Weight: 'น้ำหนัก',
   Goal: 'เป้าหมาย',
   optional: 'ไม่บังคับ',
   Log: 'บันทึก',
   'Save goal': 'บันทึกเป้าหมาย',
   '{n} {unit} to goal · {goal}': 'เหลือ {n} {unit} ถึงเป้าหมาย · {goal}',
-  Measurements: 'ขนาดร่างกาย',
-  'Track the tape, not just the scale': 'วัดสายวัด ไม่ใช่แค่ตาชั่ง',
+  Measurements: 'สัดส่วนร่างกาย',
+  'Track the tape, not just the scale': 'ติดตามสัดส่วนควบคู่กับน้ำหนักตัว',
   Site: 'ตำแหน่ง',
   Value: 'ค่า',
   Date: 'วันที่',
@@ -176,7 +176,7 @@ const TH: Record<string, string> = {
   'The scale only tells part of the story. Waist, arm and thigh measurements show recomposition even when bodyweight is flat.':
     'ตาชั่งเล่าได้แค่บางส่วน เอว แขน และต้นขาแสดงการเปลี่ยนแปลงของสัดส่วนได้ แม้น้ำหนักตัวจะเท่าเดิม',
   'Measure at the same time of day, relaxed, with the tape snug but not compressing the skin.':
-    'วัดเวลาเดิมของทุกวัน ทำตัวสบาย สายวัดแนบแต่ไม่รัดจนกดผิว',
+    'วัดในช่วงเวลาเดียวกันทุกครั้ง ผ่อนคลายร่างกาย และให้สายวัดแนบผิวโดยไม่รัดแน่น',
   Neck: 'คอ',
   Shoulders: 'ไหล่',
   Chest: 'อก',
@@ -186,7 +186,7 @@ const TH: Record<string, string> = {
   Hips: 'สะโพก',
   Thigh: 'ต้นขา',
   Calf: 'น่อง',
-  'Body fat %': 'เปอร์เซ็นต์ไขมัน',
+  'Body fat %': 'ไขมันในร่างกาย %',
 };
 
 export default function Progress() {
@@ -748,6 +748,7 @@ function BodyTab() {
               <div className="relative">
                 <NumericInput
                   className="input pr-10 text-right num"
+                  unit={unit}
                   inputMode="decimal"
                   step="0.1"
                   value={weight}
@@ -763,6 +764,7 @@ function BodyTab() {
               <div className="relative">
                 <NumericInput
                   className="input pr-10 text-right num"
+                  unit={unit}
                   inputMode="decimal"
                   step="0.1"
                   placeholder={t('optional')}
@@ -864,6 +866,7 @@ function BodyTab() {
               <span className="label mb-1 block">{t('Value')}</span>
               <NumericInput
                 className="input num"
+                unit="cm"
                 inputMode="decimal"
                 step="0.1"
                 placeholder="cm"

@@ -48,13 +48,13 @@ type Range = 'all' | '30' | '90' | '365';
 const TH: Record<string, string> = {
   'Every rep counted': 'ทุกเรปมีความหมาย',
   '{n} workouts · {dur} under the bar · {vol} lifted':
-    '{n} การฝึก · {dur} อยู่ใต้บาร์ · ยกไป {vol}',
+    'ฝึก {n} ครั้ง · ใช้เวลา {dur} · ยกน้ำหนักรวม {vol}',
   'all time': 'ทั้งหมด',
-  'working only': 'เฉพาะเซ็ตทำงาน',
+  'working only': 'เฉพาะเซ็ตฝึกจริง',
   Time: 'เวลา',
   'in the gym': 'ในยิม',
   'total lifted': 'น้ำหนักรวมที่ยก',
-  'Training heatmap': 'ฮีตแมปการฝึก',
+  'Training heatmap': 'แผนภาพความสม่ำเสมอในการฝึก',
   'last 17 weeks': '17 สัปดาห์ล่าสุด',
   '{date} · level {n}': '{date} · ระดับ {n}',
   Less: 'น้อย',
@@ -72,14 +72,14 @@ const TH: Record<string, string> = {
   'Try a wider date range, another routine, or a different search.':
     'ลองช่วงวันที่กว้างขึ้น ตารางฝึกรูปแบบอื่น หรือคำค้นอื่น',
   'Finish your first session and it will appear here, set by set.':
-    'จบเซสชันแรกแล้วมันจะมาแสดงที่นี่ทีละเซ็ต',
+    'เมื่อบันทึกการฝึกครั้งแรกแล้ว รายละเอียดทุกเซ็ตจะแสดงที่นี่',
   'Showing {shown} of {total} workouts · {range}':
-    'แสดง {shown} จาก {total} การฝึก · {range}',
+    'แสดงการฝึก {shown} จาก {total} ครั้ง · {range}',
   All: 'ทั้งหมด',
   History: 'ประวัติ',
-  Sets: 'เซ็ต',
+  Sets: 'Sets',
   'Start training': 'เริ่มฝึก',
-  Volume: 'ปริมาณรวม',
+  Volume: 'ปริมาณการฝึก',
   Workout: 'การฝึก',
   Workouts: 'การฝึก',
 };

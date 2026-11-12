@@ -5,12 +5,17 @@ test.beforeEach(async ({ page }) => {
   await seed(page);
 });
 
-test('workout numbers are directly editable without a keypad or duplicate field label', async ({ page }) => {
+test('workout numeric entry remains available on mobile and desktop', async ({ page }, testInfo) => {
   await startWithPushup(page);
   const input = page.getByLabel('Set 1 repetitions', { exact: true });
-  await expect(input).toBeEditable();
-  await expect(input).toHaveAttribute('inputmode', 'decimal');
-  await input.fill('14');
+  if (testInfo.project.name === 'mobile') {
+    await expect(input).toHaveAttribute('readonly', '');
+    await expect(input).toHaveAttribute('inputmode', 'none');
+  } else {
+    await expect(input).toBeEditable();
+    await expect(input).toHaveAttribute('inputmode', 'decimal');
+  }
+  await enterNumber(input, '14');
   await expect(input).toHaveValue('14');
   await expect(page.getByRole('dialog', { name: 'Number pad', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Change sign', exact: true })).toHaveCount(0);
@@ -20,7 +25,7 @@ test('workout numbers are directly editable without a keypad or duplicate field 
   await expect(input).toHaveValue('14');
 });
 
-test('native fields accept decimal weights and food portions', async ({ page }) => {
+test('numeric fields accept decimal weights and food portions', async ({ page }) => {
   await page.goto('/settings');
   const weight = page.getByRole('spinbutton', { name: /^Weight\b/ });
   await enterNumber(weight, '82.5');

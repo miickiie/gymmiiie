@@ -43,13 +43,13 @@ const PassPage = lazy(() => import('./pages/Pass'));
 
 const TH = {
   'Loading your log': 'กำลังโหลดบันทึกของคุณ',
-  'Opening profile setup': 'กำลังเปิดตั้งค่าโปรไฟล์',
-  'Opening screen': 'กำลังเปิดหน้า',
+  'Opening profile setup': 'กำลังเปิดหน้าตั้งค่าโปรไฟล์',
+  'Opening screen': 'กำลังเปิดหน้าจอ',
   'Loading page': 'กำลังโหลดหน้า',
   'Page content': 'เนื้อหาหน้า',
   'Recovery failed. The current copy has been kept.':
     'กู้คืนไม่สำเร็จ ข้อมูลปัจจุบันยังอยู่',
-  'Your saved log could not be opened': 'เปิดบันทึกที่บันทึกไว้ไม่ได้',
+  'Your saved log could not be opened': 'เปิดข้อมูลที่บันทึกไว้ไม่ได้',
   'Another tab saved a newer log': 'แท็บอื่นบันทึกข้อมูลใหม่กว่า',
   'Changes have not been saved': 'ยังบันทึกการเปลี่ยนแปลงไม่สำเร็จ',
   'Your current copy is kept. Export a backup before reloading.':
@@ -60,7 +60,7 @@ const TH = {
     'หยุดแก้ไขชั่วคราวจนกว่าที่เก็บข้อมูลจะพร้อม ส่งออกข้อมูลชุดนี้ก่อนโหลดบันทึกล่าสุด',
   'Export stored backup': 'ส่งออกไฟล์สำรอง',
   'Export unsaved copy': 'ส่งออกข้อมูลที่ยังไม่บันทึก',
-  'Reload latest…': 'โหลดล่าสุด…',
+  'Reload latest…': 'โหลดข้อมูลล่าสุด…',
   'Load the latest saved log?': 'โหลดบันทึกล่าสุดที่บันทึกไว้?',
   'This replaces this tab’s unsaved changes with the latest stored copy. Export the unsaved copy first if those changes should be kept.':
     'การทำเช่นนี้จะแทนที่การแก้ไขที่ยังไม่บันทึกในแท็บนี้ด้วยข้อมูลล่าสุดที่เก็บไว้ ถ้าต้องการเก็บการแก้ไขไว้ ให้ส่งออกข้อมูลชุดนี้ก่อน',
@@ -116,7 +116,7 @@ function StorageRecovery({ blocking = false }: { blocking?: boolean }) {
       setError(
         err instanceof Error
           ? err.message
-          : t('Recovery failed. The current copy has been kept.'),
+          : 'Recovery failed. The current copy has been kept.',
       );
     } finally {
       setBusy(false);
@@ -136,7 +136,7 @@ function StorageRecovery({ blocking = false }: { blocking?: boolean }) {
               : t('Changes have not been saved')}
         </h1>
         <p className="mt-2 text-sm font-semibold text-dim">
-          {message ||
+          {(message && t(message)) ||
             t('Your current copy is kept. Export a backup before reloading.')}
         </p>
         <p className="mt-2 text-xs font-semibold text-dim">
@@ -163,17 +163,17 @@ function StorageRecovery({ blocking = false }: { blocking?: boolean }) {
                 void run(() => useStore.getState().retryPersistence())
               }
             >
-              {busy ? 'Working…' : 'Retry'}
+              {busy ? t('Working…') : t('Retry')}
             </Btn>
           )}
           {!blocking && (
             <Btn disabled={busy || committing} onClick={() => setReload(true)}>
-              Reload latest…
+              {t('Reload latest…')}
             </Btn>
           )}
         </div>
         {error && (
-          <p className="mt-3 text-sm font-bold text-[var(--bad)]">{error}</p>
+          <p className="mt-3 text-sm font-bold text-[var(--bad)]">{t(error)}</p>
         )}
       </section>
       <Confirm

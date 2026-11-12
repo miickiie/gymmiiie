@@ -26,6 +26,7 @@ import {
   emptyAccountSync,
 } from './db';
 import { defaultData } from './defaults';
+import { getLanguage } from './i18n';
 import {
   AccountApiError,
   AccountSynchronizer,
@@ -1224,6 +1225,7 @@ function allExercisesFor(data: AppData): Exercise[] {
 
 function accountDefaults(account: Account | null): AppData {
   const data = defaultData();
+  data.settings.language = getLanguage();
   if (account) data.profile.name = account.name;
   return data;
 }

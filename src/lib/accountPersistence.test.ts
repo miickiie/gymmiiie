@@ -232,7 +232,7 @@ describe('account-scoped tracking persistence', () => {
     await useStore.getState().deactivateAccount();
     api.available = false;
     await expect(useStore.getState().activateAccount(a)).rejects.toThrow(
-      'offline',
+      'Could not connect. Check your internet connection and try again.',
     );
     expect(useStore.getState().accountMode).toBe('locked');
     await useStore.getState().activateAccount(a, { offline: true });
@@ -319,7 +319,7 @@ describe('account-scoped tracking persistence', () => {
     useStore.getState().setProfile({ name: 'own committed update' });
     api.loseNextPutResponse = true;
     await expect(useStore.getState().flushAccountSync()).rejects.toThrow(
-      'response lost',
+      'Could not connect. Check your internet connection and try again.',
     );
     expect((await db.loadPersisted(a.id))?.sync?.pending).not.toBeNull();
     await useStore.getState().deactivateAccount();
@@ -344,7 +344,7 @@ describe('account-scoped tracking persistence', () => {
     useStore.getState().setProfile({ name: 'own first update' });
     api.loseNextPutResponse = true;
     await expect(useStore.getState().flushAccountSync()).rejects.toThrow(
-      'response lost',
+      'Could not connect. Check your internet connection and try again.',
     );
     useStore.getState().setProfile({ name: 'newer unsynced local update' });
     await useStore.getState().deactivateAccount();

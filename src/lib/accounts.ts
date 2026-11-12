@@ -148,6 +148,8 @@ async function request(path: string, init: RequestInit = {}): Promise<unknown> {
       throw new Error(
         'The cloud request timed out. Local changes have been kept; reconnect and retry.',
       );
+    if (error instanceof TypeError)
+      throw new Error('Could not connect. Check your internet connection and try again.');
     throw error;
   } finally {
     clearTimeout(timeout);

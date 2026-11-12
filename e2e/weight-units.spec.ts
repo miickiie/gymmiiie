@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { parseBackup } from '../src/lib/backup';
-import { seed, snapshot } from './fixtures';
+import { enterNumber, numberPad, seed, snapshot } from './fixtures';
 
 test('weight units stay with each machine and preserve the saved weight', async ({ page }, testInfo) => {
   await seed(page, (data) => {
@@ -26,7 +26,13 @@ test('weight units stay with each machine and preserve the saved weight', async 
   await expect(units.getByRole('button', { name: 'kg', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await units.getByRole('button', { name: 'lb', exact: true }).click();
   await expect(weight).toHaveValue('44.1');
-  await weight.fill('100');
+  if (await weight.getAttribute('readonly') !== null) {
+    await weight.click();
+    await numberPad(page).getByRole('button', { name: 'Use value', exact: true }).click();
+    await page.reload();
+    expect(parseBackup(await snapshot(page)).active?.exercises[0].sets[0].weight).toBe(20);
+  }
+  await enterNumber(weight, '100');
   await weight.blur();
   await units.getByRole('button', { name: 'kg', exact: true }).click();
   await expect(weight).toHaveValue('45.4');
@@ -78,12 +84,22 @@ test('timed loaded sets use the selected unit and reject negative weights', asyn
   });
   await page.goto('/session');
   const weight = page.getByLabel('Set 1 weight', { exact: true });
-  await weight.fill('-10');
-  await weight.blur();
+  if (await weight.getAttribute('readonly') !== null) {
+    await weight.click();
+    const pad = numberPad(page);
+    const draft = pad.getByRole('textbox', { name: 'Number to enter', exact: true });
+    await draft.press('-');
+    await expect(draft).toHaveValue('20');
+    await expect(pad.getByRole('button', { name: 'Change sign', exact: true })).toHaveCount(0);
+    await pad.getByRole('button', { name: 'Cancel', exact: true }).click();
+  } else {
+    await weight.fill('-10');
+    await weight.blur();
+  }
   await expect(weight).toHaveValue('20');
   await page.getByRole('group', { name: 'Weight unit', exact: true })
     .getByRole('button', { name: 'lb', exact: true }).click();
-  await weight.fill('55.5');
+  await enterNumber(weight, '55.5');
   await weight.blur();
   await expect(weight).toHaveValue('55.5');
   await expect(page.getByLabel('Set 1 seconds', { exact: true })).toHaveValue('30');

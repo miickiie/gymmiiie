@@ -10,12 +10,12 @@ const TH: Record<string, string> = {
     'บันทึกในเครื่องแล้ว · รอซิงก์บัญชี',
   'Saved on device · account sync waiting':
     'บันทึกในเครื่องแล้ว · รอการซิงก์บัญชี',
-  'Account copies need review': 'ต้องตรวจสอบข้อมูลบัญชี',
+  'Account copies need review': 'ข้อมูลในเครื่องกับบัญชีไม่ตรงกัน',
   'Sign in again to sync': 'เข้าสู่ระบบใหม่เพื่อซิงก์',
-  'Account sync up to date': 'ซิงก์บัญชีล่าสุดแล้ว',
+  'Account sync up to date': 'ข้อมูลบัญชีซิงก์ล่าสุดแล้ว',
   'Saving on this device…': 'กำลังบันทึกในเครื่องนี้…',
   'Account sync paused while this device copy needs recovery':
-    'หยุดซิงก์บัญชีชั่วคราวจนกว่าข้อมูลในเครื่องจะกู้คืน',
+    'พักการซิงก์บัญชีไว้จนกว่าจะกู้คืนข้อมูลในเครื่องเสร็จ',
   'The account could not be synchronized. The device copy has been kept.':
     'ซิงก์บัญชีไม่ได้ แต่ยังเก็บสำเนาในเครื่องไว้',
   'Your device log has been kept. Export it before choosing to replace it with the account copy. Nothing will be merged automatically.':
@@ -74,9 +74,7 @@ export function AccountSyncNotice() {
       setActionError(
         failure instanceof Error
           ? failure.message
-          : t(
-              'The account could not be synchronized. The device copy has been kept.',
-            ),
+          : 'The account could not be synchronized. The device copy has been kept.',
       );
     } finally {
       setBusy(false);
@@ -90,7 +88,7 @@ export function AccountSyncNotice() {
       <p role={conflict ? 'alert' : 'status'} className="text-sm font-black">
         {t(accountSyncLabel(status))}
       </p>
-      {error && <p className="mt-2 text-xs font-semibold text-dim">{error}</p>}
+      {error && <p className="mt-2 text-xs font-semibold text-dim">{t(error)}</p>}
       {conflict && (
         <p className="mt-2 text-xs text-dim">
           {t(
@@ -130,7 +128,7 @@ export function AccountSyncNotice() {
       )}
       {actionError && (
         <p role="alert" className="mt-3 text-xs font-bold text-[var(--bad)]">
-          {actionError}
+          {t(actionError)}
         </p>
       )}
       <Confirm
@@ -191,7 +189,7 @@ export function AccountSettingsCard() {
                 setError(
                   failure instanceof Error
                     ? failure.message
-                    : t('Account sync failed.'),
+                    : 'Account sync failed.',
                 ),
               )
               .finally(() => setBusy(false));
@@ -207,7 +205,7 @@ export function AccountSettingsCard() {
       </div>
       {(error || legacyError) && (
         <p role="alert" className="mt-3 text-xs font-bold text-[var(--bad)]">
-          {error || legacyError}
+          {t(error || legacyError)}
         </p>
       )}
     </Card>

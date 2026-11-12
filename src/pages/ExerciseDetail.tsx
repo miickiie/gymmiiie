@@ -56,7 +56,7 @@ const TH: Record<string, string> = {
   'Resolve the storage issue before changing this workout':
     'แก้ปัญหาที่เก็บข้อมูลก่อนแก้ไขการฝึกนี้',
   'Resume the workout before adding an exercise': 'ฝึกต่อก่อนเพิ่มท่า',
-  '{name} is already in this workout': '{name} อยู่ในตารางนี้แล้ว',
+  '{name} is already in this workout': 'มี {name} ในการฝึกครั้งนี้แล้ว',
   '{name} added to current workout': 'เพิ่ม {name} ในการฝึกนี้แล้ว',
   'Note saved': 'บันทึกโน้ตแล้ว',
   Back: 'ย้อนกลับ',
@@ -75,7 +75,7 @@ const TH: Record<string, string> = {
   'How to perform it': 'วิธีทำ',
   '{n} steps · {source}': '{n} ขั้นตอน · {source}',
   'Your instructions': 'คำแนะนำของคุณ',
-  'Form guide': 'คู่มือท่าทาง',
+  'Form guide': 'คำแนะนำการทำท่า',
   'Guide unavailable': 'ยังไม่มีคู่มือ',
   Tips: 'เคล็ดลับ',
   'Your exercise instructions': 'คำแนะนำท่านี้ของคุณ',
@@ -103,7 +103,7 @@ const TH: Record<string, string> = {
   'Top weight': 'น้ำหนักสูงสุด',
   'Longest time': 'เวลานานสุด',
   'Farthest distance': 'ระยะไกลสุด',
-  'Most repetitions': 'จำนวนครั้งมากสุด',
+  'Most repetitions': 'จำนวน reps สูงสุด',
   'Best set {load}': 'เซ็ตดีที่สุด {load}',
   'No records yet. Log a working set to start tracking.':
     'ยังไม่มีสถิติ บันทึกเซ็ตทำงานเพื่อเริ่มติดตาม',
@@ -117,7 +117,7 @@ const TH: Record<string, string> = {
   Cancel: 'ยกเลิก',
   'Save note': 'บันทึกโน้ต',
   'Cues that worked, pain to watch, setup notes…':
-    'คิวที่ได้ผล จุดที่เจ็บ โน้ตการตั้งท่า…',
+    'เทคนิคที่ได้ผล อาการเจ็บที่ต้องระวัง การจัดท่า…',
   'Attached to {name} and visible in your journal.':
     'แนบกับ {name} และแสดงในบันทึกของคุณ',
   'Exercise deleted': 'ลบท่าแล้ว',

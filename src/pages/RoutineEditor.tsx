@@ -47,7 +47,7 @@ const TH: Record<string, string> = {
   'Push day, Legs, Upper…': 'วันดัน ขา บน…',
   'Group (optional)': 'กลุ่ม (ไม่บังคับ)',
   'e.g. PPL, Arnold, Rehab': 'เช่น PPL, Arnold, Rehab',
-  'Split name': 'ชื่อสปลิต',
+  'Split name': 'ชื่อกลุ่มตารางฝึก',
   '{n} exercises': '{n} ท่า',
   '{n} sets': '{n} เซ็ต',
   Start: 'เริ่ม',
@@ -56,23 +56,23 @@ const TH: Record<string, string> = {
   'Sets and rest are saved as you edit': 'เซ็ตและเวลาพักบันทึกอัตโนมัติขณะแก้ไข',
   'Add movements from the library': 'เพิ่มท่าจากคลัง',
   Add: 'เพิ่ม',
-  Sets: 'เซ็ต',
+  Sets: 'Sets',
   Rest: 'พัก',
   'No exercises yet': 'ยังไม่มีท่า',
   'Add the movements you want this routine to include.':
     'เพิ่มท่าที่ต้องการให้ตารางนี้มี',
   'Add exercise': 'เพิ่มท่า',
-  Schedule: 'ตารางวัน',
+  Schedule: 'วันที่ฝึก',
   'Tap days to plan this routine': 'แตะวันที่ต้องการวางตารางนี้',
   'Scheduled days show on Today and Train. Only one routine per weekday.':
-    'วันที่ตั้งไว้จะแสดงในหน้าวันนี้และฝึก โดยหนึ่งวันมีได้หนึ่งตาราง',
+    'วันที่กำหนดจะแสดงในหน้าวันนี้และหน้าฝึก แต่ละวันในสัปดาห์กำหนดได้หนึ่งตารางฝึก',
   'Routine tips': 'เคล็ดลับตารางฝึก',
   'Order matters: big compound lifts first, isolation and finishers later.':
-    'ลำดับสำคัญ: ท่าหลักยกหนักก่อน แล้วค่อยท่าแยกและท่าปิดท้าย',
+    'เรียงท่าที่ใช้หลายข้อต่อไว้ก่อน ตามด้วยท่าที่เน้นกล้ามเนื้อเฉพาะส่วนและท่าปิดท้าย',
   'Everything autosaves to this device. Use export in Settings for a backup.':
     'ทุกอย่างบันทึกอัตโนมัติในเครื่องนี้ ส่งออกในหน้าตั้งค่าเพื่อสำรองข้อมูล',
   'Starting the routine pre-fills sets from your last workout and adds warm-ups.':
-    'เริ่มตารางจะเติมเซ็ตจากการฝึกครั้งล่าสุดและเพิ่มวอร์มอัปให้',
+    'เมื่อเริ่มฝึกตามตาราง ระบบจะเติมข้อมูลเซ็ตจากครั้งล่าสุดและเพิ่มเซ็ตวอร์มอัปให้',
   'Session preview': 'ตัวอย่างการฝึก',
   'Add to routine': 'เพิ่มในตาราง',
   'Delete routine?': 'ลบตาราง?',

@@ -169,7 +169,7 @@ describe('account sessions and automatic uploads', () => {
     });
     vi.stubGlobal('fetch', fetcher);
     const { sync, status } = coordinator(a.id);
-    await expect(sync.flush()).rejects.toThrow('response lost');
+    await expect(sync.flush()).rejects.toThrow('Could not connect. Check your internet connection and try again.');
     expect(status).toHaveBeenLastCalledWith('offline', expect.any(String));
     const pending = (await loadPersisted(a.id))!.sync!.pending!;
     const newer = {

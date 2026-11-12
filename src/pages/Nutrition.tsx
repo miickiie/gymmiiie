@@ -62,8 +62,8 @@ const MEALS: { id: Meal; label: string; icon: React.ReactNode }[] = [
 const TH: Record<string, string> = {
   Nutrition: 'อาหาร',
   'Fuel the work': 'เติมพลังให้การฝึก',
-  '{foods} foods · {dishes} dishes · macros stay on your device':
-    '{foods} อาหาร · {dishes} เมนู · ข้อมูลสารอาหารอยู่ในเครื่องคุณ',
+  '{foods} foods · {dishes} dishes · saved on this device and synced to your account when connected':
+    'อาหาร {foods} รายการ · {dishes} เมนู · บันทึกในเครื่องนี้และซิงก์กับบัญชีเมื่อเชื่อมต่ออินเทอร์เน็ต',
   Goals: 'เป้าหมาย',
   Today: 'วันนี้',
   'of {n}': 'จาก {n}',
@@ -71,9 +71,9 @@ const TH: Record<string, string> = {
   '{n} kcal over': 'เกิน {n} kcal',
   '{n} items logged · {p}g protein': 'บันทึก {n} รายการ · โปรตีน {p}g',
   Protein: 'โปรตีน',
-  Carbs: 'คาร์บ',
+  Carbs: 'คาร์โบไฮเดรต',
   Fat: 'ไขมัน',
-  Fiber: 'ไฟเบอร์',
+  Fiber: 'ใยอาหาร',
   Sugar: 'น้ำตาล',
   'of {n}g': 'จาก {n}g',
   Water: 'น้ำ',
@@ -86,30 +86,30 @@ const TH: Record<string, string> = {
   Edit: 'แก้ไข',
   Calories: 'แคลอรี',
   'These are starter targets. Set your own to make them meaningful.':
-    'นี่คือค่าเริ่มต้น ตั้งเป้าหมายของคุณเองเพื่อให้มีความหมาย',
-  'Today’s plate': 'จานวันนี้',
+    'ค่าเหล่านี้เป็นเพียงเป้าหมายเริ่มต้น ปรับให้เหมาะกับคุณได้',
+  'Today’s plate': 'อาหารวันนี้',
   'Macro split': 'สัดส่วนสารอาหาร',
-  'Quick add': 'เพิ่มเร็ว',
+  'Quick add': 'เพิ่มอาหารอย่างรวดเร็ว',
   'Food library': 'คลังอาหาร',
   'Add {name}': 'เพิ่ม {name}',
   'Browse all {n} foods': 'ดูอาหารทั้งหมด {n} รายการ',
   'Nutrition data is approximate and sourced from common food databases. It is a guide, not medical advice.':
     'ข้อมูลโภชนาการเป็นค่าประมาณจากฐานข้อมูลอาหารทั่วไป ใช้เป็นแนวทางเท่านั้น ไม่ใช่คำแนะนำทางการแพทย์',
   '{name} added': 'เพิ่ม {name} แล้ว',
-  Breakfast: 'เช้า',
-  Lunch: 'กลางวัน',
-  Dinner: 'เย็น',
+  Breakfast: 'มื้อเช้า',
+  Lunch: 'มื้อกลางวัน',
+  Dinner: 'มื้อเย็น',
   Snacks: 'ของว่าง',
-  'Add to {meal}': 'เพิ่มในมื้อ{meal}',
+  'Add to {meal}': 'เพิ่มอาหาร: {meal}',
   'Portion in grams': 'ปริมาณเป็นกรัม',
   'Pick a food, dish or custom entry to continue.':
     'เลือกอาหาร เมนู หรือรายการที่สร้างเองเพื่อไปต่อ',
   'Enter a portion greater than zero grams.': 'ใส่ปริมาณมากกว่า 0 กรัม',
   'Nutrition amounts must be finite and cannot be negative.':
-    'ค่าสารอาหารต้องเป็นจำนวนจริงและไม่ติดลบ',
+    'กรอกค่าสารอาหารเป็นตัวเลขที่ถูกต้องและไม่ติดลบ',
   'Name your food.': 'ตั้งชื่ออาหาร',
   'Enter nonnegative, finite nutrition amounts per 100 g.':
-    'ใส่ค่าสารอาหารต่อ 100 g ที่ไม่ติดลบ',
+    'กรอกค่าสารอาหารต่อ 100 g เป็นตัวเลขที่ถูกต้องและไม่ติดลบ',
   'Custom food saved': 'บันทึกอาหารที่สร้างเองแล้ว',
   Foods: 'อาหาร',
   Dishes: 'เมนู',
@@ -119,7 +119,7 @@ const TH: Record<string, string> = {
   '{macro} per 100 grams': '{macro} ต่อ 100 g',
   kcal: 'kcal',
   protein: 'โปรตีน',
-  carbs: 'คาร์บ',
+  carbs: 'คาร์โบไฮเดรต',
   fat: 'ไขมัน',
   'Values per 100 g.': 'ค่าต่อ 100 g',
   'Save custom food': 'บันทึกอาหารที่สร้างเอง',
@@ -127,12 +127,12 @@ const TH: Record<string, string> = {
   All: 'ทั้งหมด',
   Fruit: 'ผลไม้',
   Vegetables: 'ผัก',
-  Legumes: 'ถั่วเมล็ด',
-  Nuts: 'ถั่ว',
+  Legumes: 'ถั่วและผลิตภัณฑ์จากถั่ว',
+  Nuts: 'ถั่วและเมล็ดพืช',
   Meat: 'เนื้อ',
   Fish: 'ปลา',
   Eggs: 'ไข่',
-  Dairy: 'นม',
+  Dairy: 'นมและผลิตภัณฑ์นม',
   Grains: 'ธัญพืช',
   Bakery: 'เบเกอรี',
   Oils: 'น้ำมัน',
@@ -143,16 +143,16 @@ const TH: Record<string, string> = {
   food: 'อาหาร',
   'No foods match.': 'ไม่พบอาหารที่ตรงกัน',
   'No dishes match.': 'ไม่พบเมนูที่ตรงกัน',
-  '{n} ingredients · {g} g': '{n} วัตถุดิบ · {g} g',
+  '{n} ingredients · {g} g': 'วัตถุดิบ {n} อย่าง · {g} g',
   'P{p} C{c} F{f} per 100g': 'P{p} C{c} F{f} ต่อ 100g',
   'No custom foods': 'ไม่มีอาหารที่สร้างเอง',
   'Create one with the New food button above.':
     'สร้างได้จากปุ่มสร้างอาหารด้านบน',
   'Selected: {name}': 'เลือก: {name}',
   'Daily goals': 'เป้าหมายต่อวัน',
-  'Glass size': 'ขนาดแก้ว',
+  'Glass size': 'ปริมาตรต่อแก้ว',
   'Use finite, nonnegative goals and a glass size greater than zero.':
-    'ใส่เป้าหมายที่ไม่ติดลบ และขนาดแก้วมากกว่า 0',
+    'กรอกเป้าหมายเป็นตัวเลขที่ถูกต้องและไม่ติดลบ และกำหนดปริมาตรต่อแก้วให้มากกว่า 0',
   'Save goals': 'บันทึกเป้าหมาย',
   'Goals saved': 'บันทึกเป้าหมายแล้ว',
   'Targets are personal. Adjust them with a coach or dietitian if you have specific health goals.':
@@ -205,7 +205,7 @@ export default function Nutrition() {
         eyebrow={t('Nutrition')}
         title={t('Fuel the work')}
         subtitle={t(
-          '{foods} foods · {dishes} dishes · macros stay on your device',
+          '{foods} foods · {dishes} dishes · saved on this device and synced to your account when connected',
           { foods: FOODS.length, dishes: DISHES.length },
         )}
         action={
@@ -950,6 +950,7 @@ function AddFoodSheet({
             <div className="relative w-24">
               <NumericInput
                 className="input py-2 pr-8 text-right text-xs"
+                unit="g"
                 aria-label={t('Portion in grams')}
                 min="0.1"
                 step="any"
@@ -1014,6 +1015,7 @@ function AddFoodSheet({
               <label key={k} className="relative">
                 <NumericInput
                   className="input py-2 pr-7 text-right text-xs"
+                  unit={k === 'kcal' ? 'kcal' : 'g'}
                   aria-label={t('{macro} per 100 grams', { macro: t(k) })}
                   min="0"
                   step="any"
@@ -1275,6 +1277,7 @@ function GoalsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
             <div className="relative">
               <NumericInput
                 className="input num pr-10 text-right"
+                unit={f.unit}
                 value={g[f.key]}
                 onValueChange={(raw) =>
                   setG({ ...g, [f.key]: Math.max(0, Number(raw)) })

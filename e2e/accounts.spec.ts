@@ -15,7 +15,7 @@ async function signIn(
   await page.goto('/');
   await page.getByLabel('Name', { exact: true }).fill(user.name);
   await page.getByLabel('PIN (4 digits)', { exact: true }).fill(user.pin);
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
 }
 
 async function signOut(page: Page): Promise<void> {
@@ -45,18 +45,18 @@ test('new users require the server registration phrase; returning users do not',
   const user = identity('New athlete');
   await signIn(page, user);
   await expect(
-    page.getByRole('heading', { name: 'Create your user', exact: true }),
+    page.getByRole('heading', { name: 'Create an account', exact: true }),
   ).toBeVisible();
   await page
     .getByLabel('Registration passphrase', { exact: true })
     .fill('incorrect-test-phrase');
-  await page.getByRole('button', { name: 'Create user', exact: true }).click();
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.getByRole('alert')).toBeVisible();
   expect((await page.request.get('/api/session')).status()).toBe(401);
   await page
     .getByLabel('Registration passphrase', { exact: true })
     .fill('test-invite');
-  await page.getByRole('button', { name: 'Create user', exact: true }).click();
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await page.getByRole('button', { name: 'Set up later', exact: true }).click();
   await expect(
     page.getByRole('region', { name: 'Page content' }),
@@ -283,7 +283,7 @@ test('a service failure is not treated as a missing account', async ({
   await signIn(page, identity('Retry athlete'));
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: 'Create your user', exact: true }),
+    page.getByRole('heading', { name: 'Create an account', exact: true }),
   ).toHaveCount(0);
   await expect(
     page.getByLabel('Registration passphrase', { exact: true }),
@@ -364,10 +364,10 @@ test('sign in requires exactly four PIN digits', async ({
   await expect(pin).toHaveAttribute('inputmode', 'numeric');
   await pin.fill('1a23');
   await expect(pin).toHaveValue('123');
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: 'Create your user', exact: true }),
+    page.getByRole('heading', { name: 'Create an account', exact: true }),
   ).toHaveCount(0);
   await expect(
     page.getByLabel('Registration passphrase', { exact: true }),

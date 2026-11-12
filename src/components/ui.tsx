@@ -12,10 +12,12 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { CatCompanion } from './CatCompanion';
+import { NumberPad } from './NumberPad';
 import { useI18n } from '../lib/i18n';
 import { useAppUpdate } from '../lib/useAppUpdate';
 
 const TH: Record<string, string> = {
+  'Enter a number': 'กรอกตัวเลข',
   'Psst! A newer Gymmiie is ready. Want to refresh and check it out? Mochi will keep your saved workout safe.':
     'แจ้งเตือน! Gymmiie เวอร์ชันใหม่พร้อมแล้ว อยากรีเฟรชลองดูไหม? Mochi จะเก็บข้อมูลฝึกของคุณไว้ให้',
   'Refresh app': 'รีเฟรชแอป',
@@ -72,7 +74,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const encourage = useCallback((msg: string) => push(msg, 'good'), [push]);
   const updateNotice: ToastItem | undefined = update.version ? {
     id: -1,
-    msg: update.error || t('Psst! A newer Gymmiie is ready. Want to refresh and check it out? Mochi will keep your saved workout safe.'),
+    msg: update.error ? t(update.error) : t('Psst! A newer Gymmiie is ready. Want to refresh and check it out? Mochi will keep your saved workout safe.'),
     tone: update.error ? 'bad' : 'default',
     persistent: true,
     action: {
@@ -357,25 +359,89 @@ export function NumericInput({
   value,
   onValueChange,
   onValueCommit,
+  unit,
   onBlur,
+  onClick,
+  onPointerDown,
+  onKeyDown,
+  readOnly,
+  disabled,
   ...props
 }: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'onChange'> & {
   value: string | number;
   onValueChange: (value: string) => void;
   onValueCommit?: (value: string) => void;
+  unit?: string;
 }) {
+  const { t } = useI18n(TH);
+  const input = useRef<HTMLInputElement>(null);
+  const [mobile, setMobile] = useState(() => window.matchMedia('(pointer: coarse)').matches);
+  const [open, setOpen] = useState(false);
+  const [label, setLabel] = useState('');
+  useEffect(() => {
+    const query = window.matchMedia('(pointer: coarse)');
+    const update = () => {
+      setMobile(query.matches);
+      if (!query.matches) setOpen(false);
+    };
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+  const openPad = () => {
+    const field = input.current;
+    if (!mobile || readOnly || disabled || !field || field.matches(':disabled')) return;
+    setLabel(field.getAttribute('aria-label') || field.labels?.[0]?.querySelector('.label')?.textContent?.trim() || field.placeholder || t('Enter a number'));
+    field.focus({ preventScroll: true });
+    setOpen(true);
+  };
   return (
-    <input
-      {...props}
-      type="number"
-      value={value}
-      inputMode={props.inputMode ?? 'decimal'}
-      onChange={(event) => onValueChange(event.target.value)}
-      onBlur={(event) => {
-        onValueCommit?.(event.target.value);
-        onBlur?.(event);
-      }}
-    />
+    <>
+      <input
+        {...props}
+        ref={input}
+        type="number"
+        value={value}
+        disabled={disabled}
+        readOnly={readOnly || mobile}
+        inputMode={mobile ? 'none' : props.inputMode ?? 'decimal'}
+        aria-haspopup={mobile && !readOnly && !disabled ? 'dialog' : undefined}
+        aria-expanded={mobile && !readOnly && !disabled ? open : undefined}
+        onChange={(event) => onValueChange(event.target.value)}
+        onBlur={(event) => {
+          if (!mobile) {
+            onValueCommit?.(event.target.value);
+            onBlur?.(event);
+          }
+        }}
+        onPointerDown={(event) => {
+          onPointerDown?.(event);
+          if (mobile && !readOnly && !disabled) event.preventDefault();
+        }}
+        onClick={(event) => {
+          onClick?.(event);
+          if (!event.defaultPrevented) openPad();
+        }}
+        onKeyDown={(event) => {
+          onKeyDown?.(event);
+          if (!event.defaultPrevented && mobile && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            openPad();
+          }
+        }}
+      />
+      <Sheet open={open} onClose={() => setOpen(false)} title={label} placement="bottom">
+        <NumberPad
+          value={value}
+          unit={unit}
+          onCancel={() => setOpen(false)}
+          onApply={(raw) => {
+            if (raw !== String(value)) onValueChange(raw);
+            onValueCommit?.(raw);
+            setOpen(false);
+          }}
+        />
+      </Sheet>
+    </>
   );
 }
 
@@ -403,6 +469,7 @@ export function NumField({
   return (
     <div className={clsx('relative', className)}>
       <NumericInput
+        unit={unit}
         inputMode="decimal"
         className="input !pr-12 text-right num"
         value={draft ?? value}
@@ -565,7 +632,7 @@ export function Sheet({
     openSheets.push(entry);
     syncSheets();
     const focusFirst = () =>
-      (focusableIn(entry.panel)[0] ?? entry.panel).focus();
+      (focusableIn(entry.panel)[0] ?? entry.panel).focus({ preventScroll: true });
     if (!entry.panel.contains(document.activeElement)) focusFirst();
     const onKey = (event: KeyboardEvent) => {
       if (openSheets.at(-1)?.id !== id) return;
@@ -620,8 +687,8 @@ export function Sheet({
         entry.trigger?.isConnected &&
         (!parent || parent.panel.contains(entry.trigger))
       )
-        entry.trigger.focus();
-      else if (parent) (focusableIn(parent.panel)[0] ?? parent.panel).focus();
+        entry.trigger.focus({ preventScroll: true });
+      else if (parent) (focusableIn(parent.panel)[0] ?? parent.panel).focus({ preventScroll: true });
     };
   }, [open, id]);
 
@@ -716,7 +783,7 @@ export function Confirm({
       setError(
         err instanceof Error
           ? err.message
-          : t('Could not complete this action. Try again.'),
+          : 'Could not complete this action. Try again.',
       );
     } finally {
       setBusy(false);
@@ -747,7 +814,7 @@ export function Confirm({
       <p className="text-sm font-semibold text-dim">{body}</p>
       {error && (
         <p role="alert" className="mt-3 text-sm font-bold text-[var(--bad)]">
-          {error}
+          {t(error)}
         </p>
       )}
     </Sheet>

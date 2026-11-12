@@ -35,7 +35,7 @@ const TH: Record<string, string> = {
   Routines: 'ตารางฝึก',
   'Your weekly plan': 'แผนรายสัปดาห์ของคุณ',
   '{n} routines · tap a day to plan it · start any routine in one tap':
-    '{n} ตาราง · แตะวันเพื่อวางแผน · เริ่มตารางได้ในแตะเดียว',
+    '{n} ตารางฝึก · แตะวันเพื่อกำหนดตาราง · เริ่มฝึกได้ด้วยการแตะครั้งเดียว',
   'New routine': 'ตารางใหม่',
   'This week': 'สัปดาห์นี้',
   'Assign routines to weekdays. Rest days are part of the plan.':
@@ -44,10 +44,10 @@ const TH: Record<string, string> = {
   'Today: {name}': 'วันนี้: {name}',
   'Start now': 'เริ่มเลย',
   Templates: 'เทมเพลต',
-  'Add a proven split instantly': 'เพิ่มสปลิตที่พิสูจน์แล้วได้ทันที',
+  'Add a ready-made training split': 'เพิ่มรูปแบบตารางฝึกสำเร็จรูปได้ทันที',
   Add: 'เพิ่ม',
   'Templates replace the weekday plan for their training days. You can edit every exercise afterwards.':
-    'เทมเพลตจะแทนแผนของวันที่ต้องฝึก และแก้ไขท่าได้ทีหลัง',
+    'เทมเพลตจะแทนที่ตารางเดิมในวันที่กำหนดไว้ คุณแก้ไขทุกท่าได้ภายหลัง',
   'All routines': 'ตารางทั้งหมด',
   '{n} saved': 'บันทึกไว้ {n}',
   '{n} exercises · {n2} sets': '{n} ท่า · {n2} เซ็ต',
@@ -62,7 +62,7 @@ const TH: Record<string, string> = {
   'Create routine': 'สร้างตาราง',
   'Add PPL': 'เพิ่ม PPL',
   'Set default rest per exercise inside the routine editor. Automatic rest still follows Settings.':
-    'ตั้งเวลาพักเริ่มต้นของแต่ละท่าในหน้าแก้ไขตาราง ส่วนพักอัตโนมัติยังใช้ค่าจากการตั้งค่า',
+    'กำหนดเวลาพักของแต่ละท่าได้ในหน้าแก้ไขตาราง ส่วนการเริ่มจับเวลาพักอัตโนมัติใช้ตัวเลือกในหน้าตั้งค่า',
   'Rest settings': 'ตั้งค่าการพัก',
   'Delete routine?': 'ลบตาราง?',
   '“{name}” will be removed and any scheduled days cleared. Workout history is untouched.':
@@ -71,10 +71,10 @@ const TH: Record<string, string> = {
   'Routine deleted': 'ลบตารางแล้ว',
   '{name} added · {n} routines': 'เพิ่ม {name} แล้ว · {n} ตาราง',
   'Could not match template exercises': 'จับคู่ท่าในเทมเพลตไม่ได้',
-  'Full Body': 'ทั้งตัว',
-  'Push Pull Legs': 'ดัน ดึง ขา',
-  'Upper Lower': 'บน ล่าง',
-  'Arnold Split': 'ตาราง Arnold',
+  'Full Body': 'Full Body',
+  'Push Pull Legs': 'Push Pull Legs',
+  'Upper Lower': 'Upper Lower',
+  'Arnold Split': 'Arnold Split',
   '3 days · squat, press, pull': '3 วัน · สควอต เพรส ดึง',
   '3 days · classic split': '3 วัน · สปลิตคลาสสิก',
   '4 days · balanced': '4 วัน · สมดุล',
@@ -229,7 +229,7 @@ export default function Routines() {
         <div>
           <SectionHeader
             title={t('Templates')}
-            subtitle={t('Add a proven split instantly')}
+            subtitle={t('Add a ready-made training split')}
           />
           <div className="space-y-2">
             {PROGRAM_TEMPLATES.map((tpl) => (

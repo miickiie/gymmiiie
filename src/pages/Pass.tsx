@@ -37,13 +37,13 @@ const TH: Record<string, string> = {
   'Add your gym membership, pool card or door code so it’s always in your pocket.':
     'เพิ่มบัตรยิม บัตรสระ หรือรหัสประตู ให้พกติดตัวได้เสมอ',
   'Add your first pass': 'เพิ่มบัตรใบแรก',
-  'Local by default': 'เก็บในเครื่องเป็นค่าเริ่มต้น',
-  'Passes are stored in the same encrypted-on-upload snapshot as the rest of your log. Treat your sync code like a key to your gym bag.':
-    'บัตรถูกเก็บในสแนปช็อตเดียวกับข้อมูลอื่น และเข้ารหัสตอนอัปโหลด เก็บรหัสซิงก์ให้ดีเหมือนกุญแจกระเป๋ายิม',
+  'Saved on this device · synced to your account': 'บันทึกในเครื่องนี้ · ซิงก์กับบัญชีของคุณ',
+  'Passes save on this device and sync to your account when connected. Optional encrypted manual backups are separate from account sync.':
+    'ข้อมูลบัตรบันทึกในเครื่องนี้และซิงก์กับบัญชีเมื่อเชื่อมต่ออินเทอร์เน็ต คุณเลือกสำรองข้อมูลแบบเข้ารหัสด้วยตนเองได้ โดยแยกจากการซิงก์บัญชี',
   'Add gym pass': 'เพิ่มบัตรยิม',
   'Save pass': 'บันทึกบัตร',
   'Pass name': 'ชื่อบัตร',
-  'e.g. City Gym, Pool, Studio': 'เช่น ฟิตเนสในเมือง สระว่ายน้ำ สตูดิโอ',
+  'e.g. City Gym, Pool, Studio': 'เช่น City Gym, Pool, Studio',
   'Member name (optional)': 'ชื่อสมาชิก (ไม่บังคับ)',
   'Name on the card': 'ชื่อบนบัตร',
   'Code / number': 'รหัส / หมายเลข',
@@ -56,8 +56,8 @@ const TH: Record<string, string> = {
     'แสดงรหัสสมาชิกให้พนักงานยิมดู',
   'Pass deleted': 'ลบบัตรแล้ว',
   'Delete pass?': 'ลบบัตร?',
-  '“{name}” will be removed from this device and your synced snapshot.':
-    '“{name}” จะถูกลบออกจากเครื่องนี้และข้อมูลที่ซิงก์ไว้',
+  '“{name}” will be removed from this device. The deletion will sync to your account when connected.':
+    '“{name}” จะถูกลบออกจากเครื่องนี้ และการลบจะซิงก์กับบัญชีเมื่อเชื่อมต่ออินเทอร์เน็ต',
   'Delete pass': 'ลบบัตร',
   'Show {name} pass': 'แสดงบัตร {name}',
   'Member pass': 'บัตรสมาชิก',
@@ -184,10 +184,10 @@ export default function PassPage() {
       <Card className="mt-6 flex items-start gap-3 p-4">
         <Sparkles size={17} className="mt-0.5 shrink-0 text-[var(--accent)]" />
         <div>
-          <p className="text-sm font-black">{t('Local by default')}</p>
+          <p className="text-sm font-black">{t('Saved on this device · synced to your account')}</p>
           <p className="mt-0.5 text-[11px] font-semibold leading-relaxed text-mute">
             {t(
-              'Passes are stored in the same encrypted-on-upload snapshot as the rest of your log. Treat your sync code like a key to your gym bag.',
+              'Passes save on this device and sync to your account when connected. Optional encrypted manual backups are separate from account sync.',
             )}
           </p>
         </div>
@@ -311,7 +311,7 @@ export default function PassPage() {
           }
         }}
         title={t('Delete pass?')}
-        body={t('“{name}” will be removed from this device and your synced snapshot.', {
+        body={t('“{name}” will be removed from this device. The deletion will sync to your account when connected.', {
           name: confirm?.name ?? '',
         })}
         confirmLabel={t('Delete pass')}

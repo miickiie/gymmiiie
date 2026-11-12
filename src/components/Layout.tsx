@@ -16,7 +16,6 @@ import {
   Salad,
   Settings,
   Timer,
-  Trophy,
   Wrench,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -49,8 +48,6 @@ const MOBILE_NAV = [NAV[0], NAV[1], NAV[5], NAV[4]];
 const TH: Record<string, string> = {
   '{n} day streak': 'ต่อเนื่อง {n} วัน',
   '{n} workouts logged · keep it going.': 'บันทึกแล้ว {n} การฝึก · สู้ต่อ',
-  'Based on GymMane by InlitX · GPL-3.0':
-    'สร้างจาก GymMane โดย InlitX · GPL-3.0',
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -356,9 +353,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {t('Install Gymmiie')}
           </Btn>
         )}
-        <div className="mt-4 flex items-center justify-center gap-2 text-[11px] font-bold text-mute">
-          <Trophy size={13} /> {t('Based on GymMane by InlitX · GPL-3.0')}
-        </div>
         <div className="mt-4 flex items-center justify-center gap-2 text-[11px] font-bold text-mute">
           <CloudSun size={13} /> {t('Offline logging · account sync when connected')}
         </div>

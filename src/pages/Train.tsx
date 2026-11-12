@@ -34,12 +34,12 @@ import { allExercises, useStore } from '../lib/store';
 import type { Exercise } from '../types';
 
 const TH: Record<string, string> = {
-  'Review your workout': 'ตรวจท่าก่อนเริ่ม',
+  'Review your workout': 'ตรวจดูแผนฝึกก่อนเริ่ม',
   'Start your workout': 'เริ่มฝึก',
   'Arrange exercises, check your focus, then begin logging.':
     'จัดลำดับท่า เช็กกล้ามเนื้อเป้าหมาย แล้วเริ่มบันทึก',
   'Follow a routine or build as you go. Muscle suggestions are optional.':
-    'ทำตามตารางฝึกหรือสร้างไปเรื่อย ๆ คำแนะนำกล้ามเนื้อเป็นตัวเลือกเสริม',
+    'ฝึกตามตารางหรือเพิ่มท่าระหว่างฝึกก็ได้ จะใช้คำแนะนำตามกล้ามเนื้อหรือไม่ก็ได้',
   'Freestyle session': 'ฝึกแบบอิสระ',
   '{n} exercises': '{n} ท่า',
   'Use a routine': 'ใช้ตารางฝึก',
@@ -56,9 +56,9 @@ const TH: Record<string, string> = {
   'Browse routines': 'ดูตารางฝึก',
   'Suggest by muscle': 'แนะนำตามกล้ามเนื้อ',
   'Optional · choose a focus and review suggested movements':
-    'ไม่บังคับ · เลือกเป้าหมายแล้วตรวจท่าที่แนะนำ',
+    'เลือกใช้ได้ · เลือกกล้ามเนื้อเป้าหมายแล้วดูท่าที่แนะนำ',
   'Select muscles on the map. Review every suggestion before starting.':
-    'เลือกกล้ามเนื้อบนแผนที่ ตรวจทุกท่าก่อนเริ่ม',
+    'เลือกกล้ามเนื้อบนภาพร่างกาย แล้วตรวจดูท่าที่แนะนำก่อนเริ่ม',
   'Review suggestions': 'ตรวจท่าที่แนะนำ',
   'Warm-up session': 'เซสชันวอร์มอัป',
   'Cardio session': 'เซสชันคาร์ดิโอ',
@@ -67,7 +67,7 @@ const TH: Record<string, string> = {
   'No primary movement for {muscles}. Add an exercise or change the focus.':
     'ยังไม่มีท่าหลักของ {muscles} เพิ่มท่าหรือเปลี่ยนเป้าหมาย',
   'Add exercise': 'เพิ่มท่า',
-  'Warm-up / mobility': 'วอร์มอัป / ความคล่องตัว',
+  'Warm-up / mobility': 'วอร์มอัป / เพิ่มช่วงการเคลื่อนไหว',
   'Move {name} up': 'เลื่อน {name} ขึ้น',
   'Move {name} down': 'เลื่อน {name} ลง',
   Replace: 'เปลี่ยนท่า',

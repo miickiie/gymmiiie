@@ -2,10 +2,7 @@ import {
   Activity,
   BookOpen,
   Cloud,
-  Code2,
   Dumbbell,
-  Github,
-  Heart,
   Lock,
   Salad,
   Shield,
@@ -56,17 +53,6 @@ const TH: Record<string, string> = {
   notes: 'โน้ต',
   'Gymmiie keeps each user’s training log under their account. Return with the same name and 4-digit PIN. Changes save on this device and sync to the account when connected; manual encrypted backups are available separately.':
     'Gymmiie เก็บบันทึกการฝึกของแต่ละบัญชีไว้ กลับมาใช้ชื่อและ PIN 4 หลักเดิม การเปลี่ยนแปลงบันทึกในเครื่องและซิงก์เมื่อออนไลน์ สำรองแบบเข้ารหัสแยกได้',
-  'Based on GymMane': 'สร้างจาก GymMane',
-  'Gymmiie is a web reimplementation inspired by':
-    'Gymmiie คือเว็บที่สร้างใหม่โดยได้แรงบันดาลใจจาก',
-  'by': 'โดย',
-  'The exercise catalog, food database and core training concepts were reverse-engineered from the open-source Android app.':
-    'แคตตาล็อกท่า ฐานข้อมูลอาหาร และแนวคิดการฝึกหลัก ถอดแบบมาจากแอป Android โอเพนซอร์ส',
-  'Gymmiie is distributed under the GNU General Public License v3.0, matching the upstream project. Exercise animations are bundled under CC BY-SA 4.0 from':
-    'Gymmiie เผยแพร่ภายใต้ GNU General Public License v3.0 ตรงกับโปรเจกต์ต้นทาง แอนิเมชันท่าออกกำลังรวมอยู่ภายใต้ CC BY-SA 4.0 จาก',
-  'by Bryl Lim,': 'โดย Bryl Lim,',
-  "(incl. the step-by-step instructions) and GymMane's derived pose data. Only reviewed movement mappings appear in the app; other exercises use an icon until their guide is verified. These remain the property of their creators under their respective licences.":
-    '(รวมคำแนะนำทีละขั้น) และข้อมูลท่าที่แปลงมาจาก GymMane เฉพาะท่าที่ตรวจสอบแล้วเท่านั้นที่แสดงในแอป ท่าอื่นใช้ไอคอนจนกว่าคู่มือจะผ่านการตรวจ ข้อมูลทั้งหมดยังเป็นทรัพย์สินของผู้สร้างภายใต้สัญญาอนุญาตของแต่ละราย',
   Privacy: 'ความเป็นส่วนตัว',
   'All workouts, notes, nutrition and passes are cached separately for each account on this device.':
     'การฝึก โน้ต อาหาร และบัตรทั้งหมดถูกแยกเก็บตามบัญชีในเครื่องนี้',
@@ -76,29 +62,12 @@ const TH: Record<string, string> = {
     'ไม่มีระบบวิเคราะห์ ตัวติดตาม หรือพิกเซลจากบุคคลที่สาม แอปใช้งานออฟไลน์ได้หลังเปิดบัญชีและแคชไว้ในเครื่อง',
   'Export a JSON backup any time from Settings. You own the data.':
     'ส่งออกไฟล์สำรอง JSON ได้ทุกเมื่อจากตั้งค่า ข้อมูลเป็นของคุณ',
-  'Under the hood': 'เบื้องหลัง',
-  'The frontend is a single-page PWA. A Cloudflare Worker serves the static build, account sessions and per-account data backed by D1.':
-    'ฟรอนต์เอนด์เป็น PWA หน้าเดียว Cloudflare Worker ให้บริการไฟล์ static เซสชันบัญชี และข้อมูลแยกตามบัญชีที่เก็บใน D1',
-  'Credits & data': 'เครดิตและข้อมูล',
-  'by InlitX — original app, exercise catalog, foods and program concepts.':
-    'โดย InlitX — แอปต้นฉบับ แคตตาล็อกท่า อาหาร และแนวคิดโปรแกรม',
-  ' — open-source icon set used for exercise and UI icons.':
-    ' — ชุดไอคอนโอเพนซอร์สที่ใช้กับท่าและ UI',
-  ' — typeface by Rasmus Andersson, via Google Fonts.':
-    ' — ฟอนต์โดย Rasmus Andersson ผ่าน Google Fonts',
-  ' — Thai typeface by Cadson Demak, via Google Fonts.':
-    ' — ฟอนต์ไทยโดย Cadson Demak ผ่าน Google Fonts',
-  ' — DOTS scoring coefficients.': ' — ค่าสัมประสิทธิ์คะแนน DOTS',
-  'Nutrition values are approximate and compiled from common food databases. Not medical advice.':
-    'ค่าอาหารเป็นเพียงค่าประมาณ รวบรวมจากฐานข้อมูลอาหารทั่วไป ไม่ใช่คำแนะนำทางการแพทย์',
   'Train hard. Log honestly. Recover well.':
     'ฝึกหนัก บันทึกตามจริง พักให้เต็มที่',
   'If Gymmiie helps you, share it with a training partner.':
     'ถ้า Gymmiie ช่วยคุณได้ แบ่งปันให้เพื่อนที่ฝึกด้วยกัน',
   'Start a workout': 'เริ่มฝึก',
   Settings: 'ตั้งค่า',
-  'Based on GymMane by InlitX · Not affiliated with InlitX':
-    'สร้างจาก GymMane โดย InlitX · ไม่ได้เกี่ยวข้องกับ InlitX',
 };
 
 const FEATURES = [
@@ -212,64 +181,7 @@ export default function About() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <Card className="p-5">
-          <div className="flex items-center gap-2">
-            <Heart size={18} className="text-[var(--accent)]" />
-            <h3 className="text-base font-black">{t('Based on GymMane')}</h3>
-          </div>
-          <p className="mt-2 text-sm font-semibold leading-relaxed text-dim">
-            {t('Gymmiie is a web reimplementation inspired by')}{' '}
-            <strong>GymMane</strong> {t('by')} <strong>InlitX</strong>.{' '}
-            {t(
-              'The exercise catalog, food database and core training concepts were reverse-engineered from the open-source Android app.',
-            )}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <a
-              href="https://github.com/InlitX/GymMane"
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-soft px-3 py-2 text-xs"
-            >
-              <Github size={14} /> InlitX/GymMane
-            </a>
-            <span className="rounded-full border border-line px-3 py-2 text-xs font-black text-mute">
-              GPL-3.0
-            </span>
-          </div>
-          <p className="mt-3 text-[11px] font-semibold leading-relaxed text-mute">
-            {t(
-              'Gymmiie is distributed under the GNU General Public License v3.0, matching the upstream project. Exercise animations are bundled under CC BY-SA 4.0 from',
-            )}{' '}
-            <strong>Workout Guide</strong> {t('by Bryl Lim,')}{' '}
-            <strong>Everkinetic</strong>{' '}
-            {t(
-              "(incl. the step-by-step instructions) and GymMane's derived pose data. Only reviewed movement mappings appear in the app; other exercises use an icon until their guide is verified. These remain the property of their creators under their respective licences.",
-            )}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <a
-              href="https://github.com/bryllim/workout-guide"
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-soft px-3 py-2 text-xs"
-            >
-              bryllim/workout-guide
-            </a>
-            <a
-              href="https://github.com/everkinetic/data"
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-soft px-3 py-2 text-xs"
-            >
-              everkinetic/data
-            </a>
-            <span className="rounded-full border border-line px-3 py-2 text-xs font-black text-mute">
-              CC BY-SA 4.0
-            </span>
-          </div>
-        </Card>
+      <div className="mt-6">
 
         <Card className="p-5">
           <div className="flex items-center gap-2">
@@ -305,74 +217,6 @@ export default function About() {
         </Card>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <Card className="p-5">
-          <div className="flex items-center gap-2">
-            <Code2 size={18} className="text-[var(--accent)]" />
-            <h3 className="text-base font-black">{t('Under the hood')}</h3>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] font-bold text-dim">
-            {[
-              'React 18',
-              'TypeScript',
-              'Vite',
-              'Tailwind CSS',
-              'Zustand + Immer',
-              'IndexedDB',
-              'Cloudflare Workers',
-              'Cloudflare D1',
-            ].map((tech) => (
-              <span
-                key={tech}
-                className="rounded-lg bg-[var(--surface-2)] px-2.5 py-1.5"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-          <p className="mt-3 text-[11px] font-semibold leading-relaxed text-mute">
-            {t(
-              'The frontend is a single-page PWA. A Cloudflare Worker serves the static build, account sessions and per-account data backed by D1.',
-            )}
-          </p>
-        </Card>
-
-        <Card className="p-5">
-          <div className="flex items-center gap-2">
-            <BookOpen size={18} className="text-[var(--accent)]" />
-            <h3 className="text-base font-black">{t('Credits & data')}</h3>
-          </div>
-          <div className="mt-3 space-y-2 text-xs font-semibold leading-relaxed text-dim">
-            <p>
-              <strong>GymMane</strong>{' '}
-              {t(
-                'by InlitX — original app, exercise catalog, foods and program concepts.',
-              )}
-            </p>
-            <p>
-              <strong>Lucide</strong>
-              {t(' — open-source icon set used for exercise and UI icons.')}
-            </p>
-            <p>
-              <strong>Inter</strong>
-              {t(' — typeface by Rasmus Andersson, via Google Fonts.')}
-            </p>
-            <p>
-              <strong>Anuphan</strong>
-              {t(' — Thai typeface by Cadson Demak, via Google Fonts.')}
-            </p>
-            <p>
-              <strong>OpenPowerlifting</strong>
-              {t(' — DOTS scoring coefficients.')}
-            </p>
-            <p className="text-mute">
-              {t(
-                'Nutrition values are approximate and compiled from common food databases. Not medical advice.',
-              )}
-            </p>
-          </div>
-        </Card>
-      </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-[var(--surface)] px-4 py-4">
         <div>
@@ -394,8 +238,16 @@ export default function About() {
       </div>
 
       <p className="mt-5 text-center text-[10px] font-bold text-mute">
-        Gymmiie · GPL-3.0 ·{' '}
-        {t('Based on GymMane by InlitX · Not affiliated with InlitX')}
+        Crafted with 💜 by{' '}
+        <a
+          href="https://instagram.com/miiickiie"
+          target="_blank"
+          rel="noreferrer"
+          className="text-[var(--accent)] underline"
+        >
+          Miickiie
+        </a>
+        .
       </p>
     </div>
   );

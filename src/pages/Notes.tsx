@@ -80,7 +80,7 @@ const TH: Record<string, string> = {
   Note: 'โน้ต',
   Plan: 'แผน',
   Done: 'เสร็จ',
-  Pain: 'เจ็บ',
+  Pain: 'อาการเจ็บ',
   '{kind}s': '{kind}',
   'Search notes, folders, exercises…': 'ค้นหาโน้ต โฟลเดอร์ ท่า…',
   All: 'ทั้งหมด',
@@ -93,7 +93,7 @@ const TH: Record<string, string> = {
   'Your journal is empty': 'บันทึกของคุณยังว่าง',
   'Try another search or filter.': 'ลองค้นหาหรือกรองแบบอื่น',
   'Write cues that worked, plan next week, or flag a niggle before it becomes an injury.':
-    'เขียนเทคนิคที่ได้ผล วางแผนสัปดาห์หน้า หรือจดอาการเล็ก ๆ ก่อนจะกลายเป็นบาดเจ็บ',
+    'จดเทคนิคที่ได้ผล วางแผนสัปดาห์หน้า หรือบันทึกอาการเจ็บเล็กน้อยก่อนลุกลาม',
   'Write a note': 'เขียนโน้ต',
   'Edit note': 'แก้ไขโน้ต',
   Cancel: 'ยกเลิก',
@@ -115,7 +115,7 @@ const TH: Record<string, string> = {
   'This journal entry will be permanently removed.':
     'รายการในบันทึกนี้จะถูกลบถาวร',
   'Delete note': 'ลบโน้ต',
-  'Write something first': 'เขียนอะไรก่อน',
+  'Write something first': 'กรุณาเขียนข้อความก่อนบันทึก',
   'Note updated': 'อัปเดตโน้ตแล้ว',
   'Note saved': 'บันทึกโน้ตแล้ว',
   'Note deleted': 'ลบโน้ตแล้ว',

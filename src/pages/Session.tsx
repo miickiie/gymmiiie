@@ -82,10 +82,10 @@ const KIND_SHORT: Record<string, string> = {
 const TH: Record<string, string> = {
   'Weight unit': 'หน่วยน้ำหนัก',
   'Rest time is up. Start your next set when you’re ready.':
-    'หมดเวลาพักแล้ว เริ่มเซ็ตต่อไปได้เลย',
+    'หมดเวลาพักแล้ว เริ่มเซ็ตต่อไปเมื่อพร้อม',
   'No workout in progress': 'ไม่มีการฝึกที่กำลังทำอยู่',
   'Follow a routine or start an empty workout.':
-    'ทำตามตารางฝึก หรือเริ่มฝึกแบบว่าง',
+    'ฝึกตามตาราง หรือเริ่มโดยยังไม่เลือกท่า',
   'Start workout': 'เริ่มฝึก',
   'Freestyle session': 'ฝึกอิสระ',
   '{done}/{total} sets': '{done}/{total} เซ็ต',
@@ -103,30 +103,30 @@ const TH: Record<string, string> = {
   'All sets completed. Finish when the workout is ready to save.':
     'ทำครบทุกเซ็ตแล้ว กดจบเมื่อพร้อมบันทึก',
   ' · assistance load': ' · แรงช่วย',
-  ' · added load': ' · โหลดเพิ่ม',
+  ' · added load': ' · น้ำหนักที่เพิ่ม',
   'Top weight': 'น้ำหนักสูงสุด',
   'Longest time': 'นานที่สุด',
   'Farthest distance': 'ไกลที่สุด',
-  'Most repetitions': 'เรปมากที่สุด',
+  'Most repetitions': 'จำนวน reps สูงสุด',
   ' · e1RM {n} {unit}': ' · e1RM {n} {unit}',
-  'Form guide': 'คู่มือท่า',
+  'Form guide': 'คำแนะนำการทำท่า',
   'Last time': 'ครั้งก่อน',
   'Log sets for {name}': 'บันทึกเซ็ตสำหรับ {name}',
-  Set: 'เซ็ต',
+  Set: 'Set',
   Distance: 'ระยะทาง',
-  Seconds: 'วินาที',
+  Seconds: 'Seconds',
   Assistance: 'แรงช่วย',
-  Load: 'โหลด',
-  Reps: 'ครั้ง',
+  Load: 'น้ำหนักที่ใช้',
+  Reps: 'Reps',
   Complete: 'เสร็จ',
   'Set {n} details': 'รายละเอียดเซ็ต {n}',
   'Set {n} distance': 'ระยะทางเซ็ต {n}',
-  'Set {n} seconds': 'วินาทีเซ็ต {n}',
+  'Set {n} seconds': 'เวลาเซ็ต {n} (s)',
   'Set {n} weight': 'น้ำหนักเซ็ต {n}',
-  'Set {n} repetitions': 'เรปเซ็ต {n}',
-  'No load': 'ไม่มีโหลด',
+  'Set {n} repetitions': 'จำนวน reps ในเซ็ต {n}',
+  'No load': 'ไม่ใช้น้ำหนัก',
   'Mark set {n} incomplete': 'ทำเครื่องหมายเซ็ต {n} ว่ายังไม่เสร็จ',
-  'Complete set {n}': 'ทำเซ็ต {n} ให้เสร็จ',
+  'Complete set {n}': 'บันทึกว่าเซ็ต {n} เสร็จแล้ว',
   'Set details': 'รายละเอียดเซ็ต',
   ' · note': ' · โน้ต',
   'Add set': 'เพิ่มเซ็ต',
@@ -134,7 +134,7 @@ const TH: Record<string, string> = {
   'Swap exercise': 'เปลี่ยนท่า',
   'Remove exercise': 'ลบท่า',
   Rest: 'พัก',
-  'Default {n}s': 'ค่าเริ่มต้น {n} วิ',
+  'Default {n}s': 'ค่าเริ่มต้น {n} s',
   'No exercises yet': 'ยังไม่มีท่า',
   'Add a movement to begin logging.': 'เพิ่มท่าก่อนเริ่มบันทึก',
   'Add exercise': 'เพิ่มท่า',
@@ -150,27 +150,27 @@ const TH: Record<string, string> = {
     'ไม่มีคู่มือท่าสำหรับท่าที่บันทึกไว้นี้',
   Done: 'เสร็จ',
   'Set type': 'ประเภทเซ็ต',
-  'Reps in reserve (RIR)': 'เรปที่เหลือ (RIR)',
+  'Reps in reserve (RIR)': 'จำนวน reps ที่ยังทำต่อได้ (RIR)',
   'Rate of perceived exertion (RPE)': 'ระดับความเหนื่อยที่รับรู้ (RPE)',
   'Not recorded': 'ยังไม่บันทึก',
   'Effort tracking is off. Enable RPE or RIR in Settings.':
-    'ปิดการวัดความเหนื่อยอยู่ เปิด RPE หรือ RIR ได้ในตั้งค่า',
+    'ยังไม่ได้เปิดบันทึกระดับความหนัก เปิด RPE หรือ RIR ได้ในหน้าตั้งค่า',
   'Set note': 'โน้ตเซ็ต',
   'Setup, cues, or how the set felt':
-    'การจัดท่า สิ่งที่ต้องจำ หรือความรู้สึกตอนเซ็ต',
+    'การจัดท่า จุดที่ต้องใส่ใจ หรือความรู้สึกระหว่างทำเซ็ต',
   'Finish workout?': 'จบการฝึก?',
   'Keep going': 'ฝึกต่อ',
   'Saving…': 'กำลังบันทึก…',
   'Save workout': 'บันทึกการฝึก',
-  'Discard empty workout': 'ทิ้งการฝึกว่าง',
+  'Discard empty workout': 'ยกเลิกโดยไม่บันทึก',
   Duration: 'ระยะเวลา',
   'Completed sets': 'เซ็ตที่ทำแล้ว',
-  Volume: 'ปริมาณรวม',
+  Volume: 'ปริมาณการฝึก',
   Exercises: 'ท่าออกกำลัง',
   'Only completed sets are saved. Unchecked sets and empty exercises are dropped.':
     'บันทึกเฉพาะเซ็ตที่ทำเสร็จ เซ็ตที่ยังไม่ติ๊กและท่าว่างจะถูกตัดออก',
   'No sets have been completed. This empty workout will be discarded.':
-    'ยังไม่มีเซ็ตที่ทำเสร็จ การฝึกว่างนี้จะถูกทิ้ง',
+    'ยังไม่มีเซ็ตที่ทำเสร็จ การฝึกครั้งนี้จะถูกยกเลิก',
   'Discard workout?': 'ทิ้งการฝึก?',
   'Completed and unfinished sets in this workout will be lost.':
     'เซ็ตที่ทำแล้วและยังไม่เสร็จในการฝึกนี้จะหายไป',
@@ -190,7 +190,7 @@ const TH: Record<string, string> = {
   'Workout saved': 'บันทึกการฝึกแล้ว',
   'No completed sets — session discarded': 'ไม่มีเซ็ตที่ทำเสร็จ — ทิ้งการฝึกแล้ว',
   'Could not save this workout. The session is kept.':
-    'บันทึกการฝึกไม่ได้ การฝึกยังถูกเก็บไว้',
+    'บันทึกการฝึกไม่สำเร็จ ข้อมูลการฝึกครั้งนี้ยังอยู่',
   'Enter a duration before completing this set':
     'ใส่ระยะเวลาก่อนทำเซ็ตนี้ให้เสร็จ',
   'Enter a duration or distance before completing this set':
@@ -515,7 +515,7 @@ export default function Session() {
               <div
                 role="group"
                 aria-label={t('Weight unit')}
-                className="mb-3 flex justify-end"
+                className="mb-2 flex justify-end"
               >
                 <Segmented<Unit>
                   value={weightUnit}
@@ -523,7 +523,7 @@ export default function Session() {
                     { value: 'kg', label: 'kg' },
                     { value: 'lb', label: 'lb' },
                   ]}
-                  className="w-32"
+                  className="w-24 !p-0.5"
                   onChange={(nextUnit) => {
                     actions.update((draft) => {
                       const exercise = draft.active?.exercises.find(
@@ -1256,6 +1256,7 @@ function SetInput({
     <div className="relative">
       <NumericInput
         aria-label={label}
+        unit={suffix}
         inputMode="decimal"
         min={0}
         step={step}
