@@ -97,6 +97,7 @@ export interface SessionExercise {
   primary: string;
   mode?: ExerciseMode;
   loadKind?: LoadKind;
+  weightUnit?: Unit;
   sets: SessionSet[];
   linkedNext?: boolean;
   swappedFrom?: string;

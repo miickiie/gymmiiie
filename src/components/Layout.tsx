@@ -369,9 +369,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         title={t('Your account')}
       >
         <p className="text-base font-black">{account.name}</p>
-        <p className="mt-1 text-sm font-semibold text-dim">
-          {account.telephone}
-        </p>
         <div className="mt-5 grid gap-2">
           <Btn
             onClick={() => {

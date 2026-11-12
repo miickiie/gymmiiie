@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import type { AppData } from '../types';
 import {
   AccountApiError,
+  enrollAccountPin,
   getRememberedAccount,
   getSession,
   isLocallySignedOut,
@@ -18,12 +19,31 @@ import {
   registerAccount,
   type Account,
 } from '../lib/accounts';
-import { identityFieldErrors } from '../lib/identity';
+import { identityFieldErrors, pinIdentityFieldErrors, PIN_LENGTH } from '../lib/identity';
 import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import { Btn, Card, Confirm, Field, Sheet, useToast } from './ui';
 
 const TH: Record<string, string> = {
+  'PIN (4 digits)': 'PIN 4 หลัก',
+  'Enter your 4-digit PIN.': 'กรอก PIN 4 หลัก',
+  'Use exactly 4 digits for your PIN.': 'ใช้ตัวเลข 4 หลักสำหรับ PIN',
+  'Set your 4-digit PIN': 'ตั้ง PIN 4 หลัก',
+  'Setting your PIN…': 'กำลังตั้ง PIN…',
+  'Set PIN and sign in': 'ตั้ง PIN และเข้าสู่ระบบ',
+  'Set PIN for existing account': 'ตั้ง PIN สำหรับบัญชีเดิม',
+  'Verify your existing name and telephone once. Your workout history stays with this account.':
+    'ยืนยันชื่อและเบอร์โทรเดิมครั้งเดียว ประวัติการฝึกจะอยู่กับบัญชีเดิม',
+  'Enter the same name and 4-digit PIN to open your training log.':
+    'กรอกชื่อและ PIN 4 หลักเดิมเพื่อเปิดบันทึกการฝึกของคุณ',
+  'Your session has ended. Enter your name and PIN to continue. Unsynced changes are kept with this account on this device.':
+    'เซสชันสิ้นสุดแล้ว กรอกชื่อและ PIN เพื่อไปต่อ การเปลี่ยนแปลงที่ยังไม่ซิงก์ยังเก็บไว้กับบัญชีนี้ในเครื่อง',
+  'Your changes were synced. Enter the other user’s name and PIN.':
+    'ซิงก์ข้อมูลแล้ว กรอกชื่อและ PIN ของผู้ใช้คนอื่น',
+  'Account: {name}': 'บัญชี: {name}',
+  'No account matches this name and PIN.': 'ไม่พบบัญชีที่ตรงกับชื่อและ PIN นี้',
+  'This name and PIN are already in use. Choose another PIN.':
+    'มีผู้ใช้ชื่อและ PIN นี้แล้ว กรุณาเลือก PIN อื่น',
   'The older device log could not be opened. It has been kept.':
     'เปิดบันทึกเดิมในเครื่องไม่ได้ แต่ยังเก็บไว้อยู่',
   'The account log could not be loaded.': 'โหลดบันทึกของบัญชีไม่ได้',
@@ -33,14 +53,10 @@ const TH: Record<string, string> = {
     'บันทึกข้อมูลลงเครื่องนี้ไม่ได้ ส่งออกสำเนาสำรองหรือลองใหม่ก่อนออกจากระบบ',
   'Reconnect to finish signing out of the server.':
     'เชื่อมต่อใหม่เพื่อออกจากระบบเซิร์ฟเวอร์ให้เสร็จ',
-  'Your session has ended. Enter your name and telephone to continue. Unsynced changes are kept with this account on this device.':
-    'เซสชันสิ้นสุดแล้ว กรอกชื่อและเบอร์โทรเพื่อไปต่อ การเปลี่ยนแปลงที่ยังไม่ซิงก์ยังเก็บไว้กับบัญชีนี้ในเครื่อง',
   'Signed out on this device. Unsynced changes for {name} are kept here. Sign in on this device and sync before opening the latest log on another device.':
     'ออกจากระบบในเครื่องนี้แล้ว การเปลี่ยนแปลงของ {name} ที่ยังไม่ซิงก์ยังอยู่ที่นี่ เข้าสู่ระบบในเครื่องนี้และซิงก์ก่อนเปิดข้อมูลล่าสุดบนเครื่องอื่น',
   'Your tracking changes were synced. Signed out on this device.':
     'ซิงก์ข้อมูลการฝึกแล้ว ออกจากระบบในเครื่องนี้เรียบร้อย',
-  'Your changes were synced. Enter the other user’s name and telephone.':
-    'ซิงก์ข้อมูลแล้ว กรอกชื่อและเบอร์โทรของผู้ใช้คนอื่น',
   'Signed out. Your changes were synced to your account.':
     'ออกจากระบบแล้ว ข้อมูลของคุณซิงก์กับบัญชีเรียบร้อย',
   'The latest changes could not be synced. They remain on this device.':
@@ -77,8 +93,6 @@ const TH: Record<string, string> = {
   'Welcome to Gymmiie': 'ยินดีต้อนรับสู่ Gymmiie',
   'No user was found with these details. A registration passphrase is required to create one.':
     'ไม่พบผู้ใช้ที่ตรงกับข้อมูลนี้ ต้องใช้รหัสสมัครสมาชิกเพื่อสร้างใหม่',
-  'Enter the same name and telephone to open your training log.':
-    'กรอกชื่อและเบอร์โทรเดิมเพื่อเปิดบันทึกการฝึกของคุณ',
   Name: 'ชื่อ',
   Telephone: 'เบอร์โทร',
   'Include + and the international country calling code.':
@@ -97,7 +111,6 @@ const TH: Record<string, string> = {
   'Keep separate': 'แยกเก็บไว้',
   'Review older device log': 'ตรวจดูบันทึกเดิมในเครื่อง',
   'Import into this account…': 'นำเข้าบัญชีนี้…',
-  'Account: {name} · {telephone}': 'บัญชี: {name} · {telephone}',
   'Current account log': 'บันทึกบัญชีปัจจุบัน',
   'Older device log': 'บันทึกเดิมในเครื่อง',
   'No older device log is available.': 'ไม่มีบันทึกเดิมในเครื่อง',
@@ -310,7 +323,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
     setNotice(
       reason === 'expired'
         ? t(
-            'Your session has ended. Enter your name and telephone to continue. Unsynced changes are kept with this account on this device.',
+            'Your session has ended. Enter your name and PIN to continue. Unsynced changes are kept with this account on this device.',
           )
         : unsynced
           ? `${t(
@@ -323,7 +336,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
               )} ${remoteError}`
             : reason === 'switch'
               ? t(
-                  'Your changes were synced. Enter the other user’s name and telephone.',
+                  'Your changes were synced. Enter the other user’s name and PIN.',
                 )
               : t('Signed out. Your changes were synced to your account.'),
     );
@@ -554,7 +567,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
           {error}
         </p>
         <p className="mt-3 text-sm font-semibold">
-          {account.name} · {account.telephone}
+          {account.name}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Btn
@@ -637,12 +650,14 @@ function AccountForm({
   const { t } = useI18n(TH);
   const [name, setName] = useState('');
   const [telephone, setTelephone] = useState('');
+  const [pin, setPin] = useState('');
   const [passphrase, setPassphrase] = useState('');
   const [register, setRegister] = useState(false);
+  const [upgrade, setUpgrade] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(initialError);
   const [fields, setFields] = useState<
-    Partial<Record<'name' | 'telephone', string>>
+    Partial<Record<'name' | 'telephone' | 'pin', string>>
   >({});
   const resetIdentity = () => {
     setRegister(false);
@@ -653,7 +668,10 @@ function AccountForm({
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (busy) return;
-    const invalid = identityFieldErrors(name, telephone);
+    const invalid = {
+      ...pinIdentityFieldErrors(name, pin),
+      ...(upgrade ? identityFieldErrors(name, telephone) : {}),
+    };
     setFields(invalid);
     if (Object.keys(invalid).length) return;
     if (register && !passphrase) {
@@ -663,14 +681,19 @@ function AccountForm({
     setBusy(true);
     setError('');
     try {
-      const candidate = register
-        ? await registerAccount(name, telephone, passphrase)
-        : await loginAccount(name, telephone);
+      const candidate = upgrade
+        ? await enrollAccountPin(name, telephone, pin)
+        : register
+          ? await registerAccount(name, pin, passphrase)
+          : await loginAccount(name, pin);
       setPassphrase('');
+      setPin('');
+      setTelephone('');
       await onAccount(candidate);
     } catch (failure) {
       if (
         !register &&
+        !upgrade &&
         failure instanceof AccountApiError &&
         failure.status === 404 &&
         failure.code === 'account_not_found'
@@ -679,10 +702,10 @@ function AccountForm({
         setError('');
       } else
         setError(
-          messageOf(
+          t(messageOf(
             failure,
             t('The request could not be completed. Retry when connected.'),
-          ),
+          )),
         );
     } finally {
       setBusy(false);
@@ -691,15 +714,17 @@ function AccountForm({
   return (
     <form onSubmit={(event) => void submit(event)}>
       <h1 className="text-2xl font-black">
-        {register ? t('Create your user') : t('Welcome to Gymmiie')}
+        {upgrade ? t('Set your 4-digit PIN') : register ? t('Create your user') : t('Welcome to Gymmiie')}
       </h1>
       <p className="mt-2 text-sm font-semibold text-dim">
-        {register
+        {upgrade
+          ? t('Verify your existing name and telephone once. Your workout history stays with this account.')
+          : register
           ? t(
               'No user was found with these details. A registration passphrase is required to create one.',
             )
           : t(
-              'Enter the same name and telephone to open your training log.',
+              'Enter the same name and 4-digit PIN to open your training log.',
             )}
       </p>
       {notice && (
@@ -732,10 +757,10 @@ function AccountForm({
             id="account-name-error"
             className="text-xs font-bold text-[var(--bad)]"
           >
-            {fields.name}
+            {t(fields.name)}
           </p>
         )}
-        <Field
+        {upgrade && <Field
           label={t('Telephone')}
           hint={t('Include + and the international country calling code.')}
         >
@@ -757,14 +782,38 @@ function AccountForm({
               resetIdentity();
             }}
           />
-        </Field>
+        </Field>}
         {fields.telephone && (
           <p
             role="alert"
             id="account-telephone-error"
             className="text-xs font-bold text-[var(--bad)]"
           >
-            {fields.telephone}
+            {t(fields.telephone)}
+          </p>
+        )}
+        <Field label={t('PIN (4 digits)')}>
+          <input
+            aria-label={t('PIN (4 digits)')}
+            name="pin"
+            type="password"
+            inputMode="numeric"
+            maxLength={PIN_LENGTH}
+            autoComplete={register || upgrade ? 'new-password' : 'current-password'}
+            className="input tracking-widest"
+            value={pin}
+            disabled={busy}
+            aria-invalid={!!fields.pin}
+            aria-describedby={fields.pin ? 'account-pin-error' : undefined}
+            onChange={(event) => {
+              setPin(event.target.value.replace(/[^0-9]/g, '').slice(0, PIN_LENGTH));
+              resetIdentity();
+            }}
+          />
+        </Field>
+        {fields.pin && (
+          <p role="alert" id="account-pin-error" className="text-xs font-bold text-[var(--bad)]">
+            {t(fields.pin)}
           </p>
         )}
         {register && (
@@ -793,16 +842,34 @@ function AccountForm({
         disabled={busy}
       >
         {busy
-          ? register
+          ? upgrade
+            ? t('Setting your PIN…')
+            : register
             ? t('Creating user…')
             : t('Opening your log…')
-          : register
+          : upgrade
+            ? t('Set PIN and sign in')
+            : register
             ? t('Create user')
             : t('Continue')}
       </Btn>
-      {register && (
-        <Btn className="mt-2 w-full" disabled={busy} onClick={resetIdentity}>
+      {(register || upgrade) && (
+        <Btn className="mt-2 w-full" disabled={busy} onClick={() => {
+          setUpgrade(false);
+          setPin('');
+          setTelephone('');
+          resetIdentity();
+        }}>
           {t('Back to sign in')}
+        </Btn>
+      )}
+      {!register && !upgrade && (
+        <Btn className="mt-2 w-full" disabled={busy} onClick={() => {
+          resetIdentity();
+          setPin('');
+          setUpgrade(true);
+        }}>
+          {t('Set PIN for existing account')}
         </Btn>
       )}
       {initialError && !register && (
@@ -896,9 +963,8 @@ function LegacyImportDialog({
         }
       >
         <p className="text-sm font-semibold">
-          {t('Account: {name} · {telephone}', {
+          {t('Account: {name}', {
             name: account.name,
-            telephone: account.telephone,
           })}
         </p>
         <h3 className="label mt-4">{t('Current account log')}</h3>

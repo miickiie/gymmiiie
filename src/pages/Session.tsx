@@ -30,6 +30,7 @@ import {
   EmptyState,
   Field,
   NumericInput,
+  Segmented,
   Sheet,
   useNow,
   useToast,
@@ -58,6 +59,7 @@ import type {
   LoggedSet,
   SessionExercise,
   SessionSet,
+  Unit,
 } from '../types';
 
 const KINDS = [
@@ -78,6 +80,7 @@ const KIND_SHORT: Record<string, string> = {
 };
 
 const TH: Record<string, string> = {
+  'Weight unit': 'หน่วยน้ำหนัก',
   'Rest time is up. Start your next set when you’re ready.':
     'หมดเวลาพักแล้ว เริ่มเซ็ตต่อไปได้เลย',
   'No workout in progress': 'ไม่มีการฝึกที่กำลังทำอยู่',
@@ -261,6 +264,7 @@ export default function Session() {
       />
     );
   const unit = data.settings.unit;
+  const weightUnit = current?.weightUnit ?? unit;
   const paused = !!active.pausedAt;
   const readOnly = isCommitting || status === 'error' || status === 'conflict';
   const blocked = paused || readOnly;
@@ -474,11 +478,11 @@ export default function Session() {
               </p>
               {record && (
                 <p className="mt-1 text-[10px] font-bold text-[var(--warn)]">
-                  {t(recordLabel(record.kind))} {recordValue(record, unit)}
+                  {t(recordLabel(record.kind))} {recordValue(record, weightUnit)}
                   {record.kind === 'weight' && record.oneRm > 0
                     ? t(' · e1RM {n} {unit}', {
-                        n: toDisplayWeight(record.oneRm, unit).toFixed(1),
-                        unit,
+                        n: toDisplayWeight(record.oneRm, weightUnit).toFixed(1),
+                        unit: weightUnit,
                       })
                     : ''}
                 </p>
@@ -498,7 +502,7 @@ export default function Session() {
               <p className="mt-1 text-xs font-semibold text-dim">
                 {previousSets
                   .slice(0, 5)
-                  .map((set) => formatSet(set, current, unit))
+                  .map((set) => formatSet(set, current, weightUnit))
                   .join(' · ')}
               </p>
             </div>
@@ -507,6 +511,30 @@ export default function Session() {
             <legend className="sr-only">
               {t('Log sets for {name}', { name: current.name })}
             </legend>
+            {mode !== 'cardio' && load !== 'none' && (
+              <div
+                role="group"
+                aria-label={t('Weight unit')}
+                className="mb-3 flex justify-end"
+              >
+                <Segmented<Unit>
+                  value={weightUnit}
+                  options={[
+                    { value: 'kg', label: 'kg' },
+                    { value: 'lb', label: 'lb' },
+                  ]}
+                  className="w-32"
+                  onChange={(nextUnit) => {
+                    actions.update((draft) => {
+                      const exercise = draft.active?.exercises.find(
+                        (item) => item.uid === current.uid,
+                      );
+                      if (exercise) exercise.weightUnit = nextUnit;
+                    });
+                  }}
+                />
+              </div>
+            )}
             <div className="mb-2 grid grid-cols-[40px_1fr_1fr_44px] items-center gap-2 text-[10px] font-black uppercase text-mute">
               <span>{t('Set')}</span>
               <span>
@@ -518,7 +546,7 @@ export default function Session() {
                       ? t('Assistance')
                       : load === 'none'
                         ? t('Load')
-                        : unit}
+                        : weightUnit}
               </span>
               <span>
                 {mode === 'cardio'
@@ -591,14 +619,15 @@ export default function Session() {
                         ) : (
                           <SetInput
                             label={t('Set {n} weight', { n: index + 1 })}
-                            value={toDisplayWeight(set.weight, unit)}
+                            key={`${current.uid}-${weightUnit}`}
+                            value={toDisplayWeight(set.weight, weightUnit)}
                             onChange={(weight) =>
                               actions.updateSet(current.uid, index, {
-                                weight: fromDisplayWeight(weight, unit),
+                                weight: fromDisplayWeight(weight, weightUnit),
                               })
                             }
-                            step={weightStep(unit)}
-                            suffix={unit}
+                            step={weightStep(weightUnit)}
+                            suffix={weightUnit}
                           />
                         )}
                       </>
@@ -611,14 +640,15 @@ export default function Session() {
                         ) : (
                           <SetInput
                             label={t('Set {n} weight', { n: index + 1 })}
-                            value={toDisplayWeight(set.weight, unit)}
+                            key={`${current.uid}-${weightUnit}`}
+                            value={toDisplayWeight(set.weight, weightUnit)}
                             onChange={(weight) =>
                               actions.updateSet(current.uid, index, {
-                                weight: fromDisplayWeight(weight, unit),
+                                weight: fromDisplayWeight(weight, weightUnit),
                               })
                             }
-                            step={weightStep(unit)}
-                            suffix={unit}
+                            step={weightStep(weightUnit)}
+                            suffix={weightUnit}
                           />
                         )}
                         <SetInput
@@ -1226,7 +1256,6 @@ function SetInput({
     <div className="relative">
       <NumericInput
         aria-label={label}
-        unit={suffix}
         inputMode="decimal"
         min={0}
         step={step}

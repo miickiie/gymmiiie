@@ -748,7 +748,6 @@ function BodyTab() {
               <div className="relative">
                 <NumericInput
                   className="input pr-10 text-right num"
-                  unit={unit}
                   inputMode="decimal"
                   step="0.1"
                   value={weight}
@@ -764,7 +763,6 @@ function BodyTab() {
               <div className="relative">
                 <NumericInput
                   className="input pr-10 text-right num"
-                  unit={unit}
                   inputMode="decimal"
                   step="0.1"
                   placeholder={t('optional')}
@@ -866,7 +864,6 @@ function BodyTab() {
               <span className="label mb-1 block">{t('Value')}</span>
               <NumericInput
                 className="input num"
-                unit="cm"
                 inputMode="decimal"
                 step="0.1"
                 placeholder="cm"

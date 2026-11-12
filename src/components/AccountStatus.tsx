@@ -29,9 +29,8 @@ const TH: Record<string, string> = {
     'การโหลดจะใช้ข้อมูลจากบัญชีและแทนที่ข้อมูลที่ยังไม่ซิงก์ในเครื่อง รวมถึงการฝึกที่ยังไม่จบ ส่งออกสำเนาในเครื่องก่อนถ้าต้องการเก็บทั้งสองชุด',
   'Load account copy': 'โหลดข้อมูลจากบัญชี',
   'Account name': 'ชื่อบัญชี',
-  Telephone: 'เบอร์โทร',
-  'Use this account name and telephone when returning. Your training display name can be edited separately below.':
-    'ใช้ชื่อบัญชีและเบอร์โทรนี้เมื่อกลับมา ชื่อที่แสดงตอนฝึกแก้ไขแยกได้ด้านล่าง',
+  'Use this account name and PIN when returning. Your training display name can be edited separately below.':
+    'ใช้ชื่อบัญชีและ PIN เมื่อกลับมา ชื่อที่แสดงตอนฝึกแก้ไขแยกได้ด้านล่าง',
   'Sync account now': 'ซิงก์บัญชีตอนนี้',
   'Syncing…': 'กำลังซิงก์…',
   'Account sync failed.': 'ซิงก์บัญชีไม่สำเร็จ',
@@ -163,17 +162,13 @@ export function AccountSettingsCard() {
           <dt className="label">{t('Account name')}</dt>
           <dd className="mt-1 text-sm font-bold">{account.name}</dd>
         </div>
-        <div>
-          <dt className="label">{t('Telephone')}</dt>
-          <dd className="mt-1 text-sm font-bold">{account.telephone}</dd>
-        </div>
       </dl>
       <p role="status" className="mt-3 text-xs font-semibold text-dim">
         {t(accountSyncLabel(status))}
       </p>
       <p className="mt-2 text-xs text-mute">
         {t(
-          'Use this account name and telephone when returning. Your training display name can be edited separately below.',
+          'Use this account name and PIN when returning. Your training display name can be edited separately below.',
         )}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">

@@ -12,7 +12,6 @@ import {
 export interface Account {
   id: string;
   name: string;
-  telephone: string;
 }
 export interface RemoteAccountData {
   data: AppData | null;
@@ -42,14 +41,14 @@ function validAccount(value: unknown): Account {
   const account = value as Account | null;
   if (
     !account ||
-    ![account.id, account.name, account.telephone].every(
+    ![account.id, account.name].every(
       (v) => typeof v === 'string' && v.length > 0,
     )
   )
     throw new Error(
       'The account response is invalid. Your local log has been kept.',
     );
-  return { id: account.id, name: account.name, telephone: account.telephone };
+  return { id: account.id, name: account.name };
 }
 export function isLocallySignedOut(): boolean {
   try {
@@ -173,11 +172,11 @@ export async function getSession(
 }
 export async function loginAccount(
   name: string,
-  telephone: string,
+  pin: string,
 ): Promise<Account> {
   const result = (await request('/api/session', {
     method: 'POST',
-    body: JSON.stringify({ name, telephone }),
+    body: JSON.stringify({ name, pin }),
   })) as { account: unknown };
   const account = validAccount(result.account);
   rememberAccount(account);
@@ -186,12 +185,27 @@ export async function loginAccount(
 }
 export async function registerAccount(
   name: string,
-  telephone: string,
+  pin: string,
   passphrase: string,
 ): Promise<Account> {
   const result = (await request('/api/accounts/register', {
     method: 'POST',
-    body: JSON.stringify({ name, telephone, passphrase }),
+    body: JSON.stringify({ name, pin, passphrase }),
+  })) as { account: unknown };
+  const account = validAccount(result.account);
+  rememberAccount(account);
+  announceSession(account.id);
+  return account;
+}
+
+export async function enrollAccountPin(
+  name: string,
+  telephone: string,
+  pin: string,
+): Promise<Account> {
+  const result = (await request('/api/accounts/pin', {
+    method: 'POST',
+    body: JSON.stringify({ name, telephone, pin }),
   })) as { account: unknown };
   const account = validAccount(result.account);
   rememberAccount(account);

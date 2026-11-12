@@ -4,7 +4,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { createWorkerTestRuntime } from './worker-test-runtime.mjs';
 
-const port = 4173;
+const port = Number(process.env.GYMMIIE_TEST_PORT ?? 4173);
 const origin = `http://127.0.0.1:${port}`;
 const directory = resolve('dist');
 const testInvite = 'test-invite';
@@ -73,14 +73,23 @@ async function sendWorkerResponse(response, outgoing) {
 // These fixture routes exist only in this local test server, never in the deployed Worker.
 async function seedAccount(request, outgoing) {
   const input = JSON.parse((await bodyOf(request)).toString('utf8'));
+  if (typeof input.legacyTelephone === 'string') {
+    const account = { id: randomUUID(), name: input.name };
+    await runtime.db.batch([
+      runtime.db.prepare('INSERT INTO accounts (id, name, normalized_name, telephone, created_at) VALUES (?1, ?2, ?3, ?4, ?5)')
+        .bind(account.id, account.name, account.name.toLowerCase(), input.legacyTelephone, Date.now()),
+      runtime.db.prepare('INSERT INTO account_snapshots (account_id, payload, revision) VALUES (?1, ?2, 1)')
+        .bind(account.id, JSON.stringify(input.data)),
+    ]);
+    outgoing.writeHead(201, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+    outgoing.end(JSON.stringify({ account }));
+    return;
+  }
   const suffix = randomUUID().replaceAll('-', '');
-  const telephone =
-    input.telephone ||
-    `+1202${BigInt(`0x${suffix.slice(0, 12)}`)
-      .toString()
-      .slice(-7)
-      .padStart(7, '0')}`;
-  const identity = { name: input.name || `Browser test ${suffix}`, telephone };
+  const identity = {
+    name: input.name || `Browser test ${suffix}`,
+    pin: input.pin ?? '1234',
+  };
   const headers = {
     'content-type': 'application/json',
     Origin: origin,

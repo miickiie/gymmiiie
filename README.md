@@ -2,7 +2,7 @@
 
 **Lift. Log it. Grow.** An offline-first gym log for the web — a Cloudflare-hosted reimplementation of the ideas, catalogue and training flows in [GymMane](https://github.com/InlitX/GymMane) by InlitX.
 
-Gymmiie keeps each user’s training log under an account identified by name and international telephone number. Logs are cached separately on each device and synchronized to the server when connected. There are no ads or trackers. An optional code-protected encrypted backup remains separate from account sync.
+Gymmiie keeps each user’s training log under an account identified by name and a 4-digit PIN. Logs are cached separately on each device and synchronized to the server when connected. There are no ads or trackers. An optional code-protected encrypted backup remains separate from account sync.
 
 ![Gymmiie](public/logo.svg)
 
@@ -17,7 +17,7 @@ Gymmiie keeps each user’s training log under an account identified by name and
 - **Tools & journal** — 1RM, BMI, TDEE/macros, body fat, FFMI, plate maths, warm-up ramps, RPE load, DOTS and Wilks, plus a tagged training journal.
 - **Gym pass cards** — store membership numbers and entry codes locally.
 - **Offline PWA** — installable, dark/light, versioned precache of the app shell and route chunks; installed screens remain available offline.
-- **User accounts** — return with the same name and international telephone; a server-checked registration passphrase is required only when creating a new user.
+- **User accounts** — return with the same name and 4-digit PIN; a server-checked registration passphrase is required only when creating a new user.
 - **Manual encrypted backup** — optional AES-GCM snapshots with a separate code-derived key, alongside automatic account tracking sync.
 
 Guide coverage and outstanding catalogue review are tracked in
@@ -25,8 +25,9 @@ Guide coverage and outstanding catalogue review are tracked in
 
 ## Accounts and user flow
 
-- The signed-out home asks for **Name** and **Telephone**. Returning access uses these identifiers only; this version has no personal PIN, password or telephone verification step.
-- Telephone numbers require an explicit `+` country calling code. Name normalization and telephone formatting rules are shared with the server.
+- The signed-out home asks for **Name** and a masked **4-digit PIN**. Leading zeros are preserved and the same validation runs in the browser and server.
+- Existing accounts choose **Set PIN for existing account**, confirm their original name and international telephone once, and choose a PIN. Their account ID and tracking data stay intact. Telephone access is disabled after successful enrollment.
+- PINs are stored as PBKDF2-SHA-256 hashes with random salts per normalized name. Both IP and normalized-name attempt limits apply. Different users can share a name if their PINs differ.
 - **Continue** opens an existing user. Only a confirmed account-not-found response offers **Create user**, which additionally requires the registration passphrase. Connection/server failures offer retry and never create a replacement user automatically.
 - Account identity is separate from the editable training display name in Settings.
 - **Account menu → Switch user / Sign out** saves pending local changes, keeps active workouts with their original account and hides private screens. Another account never inherits that tracking data.

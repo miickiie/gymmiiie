@@ -1,20 +1,21 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { parseBackup } from '../src/lib/backup';
+import { defaultData } from '../src/lib/defaults';
 import { enterNumber, seed, snapshot, startWithPushup } from './fixtures';
 
-const origin = 'http://127.0.0.1:4173';
-function identity(label: string): { name: string; telephone: string } {
-  return { name: `${label} ${randomUUID()}`, telephone: '+12025550121' };
+const origin = `http://127.0.0.1:${process.env.GYMMIIE_TEST_PORT ?? 4173}`;
+function identity(label: string): { name: string; pin: string } {
+  return { name: `${label} ${randomUUID()}`, pin: '0123' };
 }
 
 async function signIn(
   page: Page,
-  user: { name: string; telephone: string },
+  user: { name: string; pin: string },
 ): Promise<void> {
   await page.goto('/');
   await page.getByLabel('Name', { exact: true }).fill(user.name);
-  await page.getByLabel('Telephone', { exact: true }).fill(user.telephone);
+  await page.getByLabel('PIN (4 digits)', { exact: true }).fill(user.pin);
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
 }
 
@@ -62,9 +63,11 @@ test('new users require the server registration phrase; returning users do not',
     page.getByRole('region', { name: 'Page content' }),
   ).toBeVisible();
   const response = await page.request.get('/api/session');
-  const result: { account: { id: string; name: string; telephone: string } } =
+  const result: { account: { id: string; name: string } } =
     await response.json();
-  expect(result.account).toMatchObject(user);
+  expect(result.account.name).toBe(user.name);
+  expect(result.account).not.toHaveProperty('pin');
+  expect(result.account).not.toHaveProperty('telephone');
   await expect
     .poll(async () => {
       const data = await accountCopy(page, result.account.id);
@@ -79,7 +82,7 @@ test('new users require the server registration phrase; returning users do not',
   });
   await signIn(page, {
     name: `  ${user.name.toUpperCase()}  `,
-    telephone: '+1 (202) 555-0121',
+    pin: user.pin,
   });
   await expect(
     page.getByRole('region', { name: 'Page content' }),
@@ -297,7 +300,7 @@ test('older device tracking stays separate until its import is explicitly confir
   await expect
     .poll(
       async () =>
-        parseBackup(await snapshot(page)).active?.exercises[0].sets[0].reps,
+        parseBackup(await snapshot(page)).active?.exercises[0]?.sets[0]?.reps,
     )
     .toBe(15);
   const older = parseBackup(await snapshot(page));
@@ -350,12 +353,55 @@ test('older device tracking stays separate until its import is explicitly confir
   ).toBe(15);
 });
 
-test('telephone validation requires an explicit country code', async ({
+test('a legacy account enrolls a PIN and keeps its active workout', async ({ page }) => {
+  await page.context().setExtraHTTPHeaders({ 'X-Gymmiie-Test-Client': randomUUID() });
+  const user = { name: `Legacy athlete ${randomUUID()}`, pin: '0042' };
+  const data = defaultData();
+  data.onboarded = true;
+  data.active = {
+    id: 'legacy-workout', startedAt: Date.now(), pausedTotalSec: 0, currentIndex: 0,
+    exercises: [{ uid: 'legacy-machine', id: 'legacy-machine', name: 'Original machine',
+      primary: 'chest', mode: '', loadKind: 'external',
+      sets: [{ reps: 12, weight: 25, done: false, kind: 'normal' }],
+    }],
+  };
+  const seeded = await page.request.post('/__test/seed', {
+    data: { data, name: user.name, legacyTelephone: '+12025550121' },
+  });
+  expect(seeded.status()).toBe(201);
+  const { account } = await seeded.json();
+  await page.goto('/');
+  await expect(page.getByLabel('Telephone', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Set PIN for existing account', exact: true }).click();
+  await page.getByLabel('Name', { exact: true }).fill(user.name);
+  await page.getByLabel('Telephone', { exact: true }).fill('+12025550122');
+  await page.getByLabel('PIN (4 digits)', { exact: true }).fill(user.pin);
+  await page.getByRole('button', { name: 'Set PIN and sign in', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Set your 4-digit PIN', exact: true })).toBeVisible();
+  await page.getByLabel('Telephone', { exact: true }).fill('+12025550121');
+  await page.getByRole('button', { name: 'Set PIN and sign in', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Page content' })).toBeVisible();
+  expect(parseBackup(await snapshot(page, account.id)).active).toEqual(data.active);
+  await signOut(page);
+  await signIn(page, user);
+  await expect(page.getByRole('region', { name: 'Page content' })).toBeVisible();
+  const session = await page.request.get('/api/session');
+  expect((await session.json()).account.id).toBe(account.id);
+  expect(parseBackup(await snapshot(page, account.id)).active).toEqual(data.active);
+});
+
+test('sign in requires exactly four PIN digits', async ({
   page,
 }) => {
   await page.goto('/');
   await page.getByLabel('Name', { exact: true }).fill('Validation athlete');
-  await page.getByLabel('Telephone', { exact: true }).fill('0812345678');
+  await expect(page.getByLabel('Telephone', { exact: true })).toHaveCount(0);
+  const pin = page.getByLabel('PIN (4 digits)', { exact: true });
+  await expect(pin).toHaveAttribute('type', 'password');
+  await expect(pin).toHaveAttribute('inputmode', 'numeric');
+  await pin.fill('1a23');
+  await expect(pin).toHaveValue('123');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(

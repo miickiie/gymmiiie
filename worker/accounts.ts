@@ -1,5 +1,6 @@
 import {
   normalizeIdentity,
+  normalizePinIdentity,
   IdentityValidationError,
 } from '../src/lib/identity';
 import { parseBackup, SnapshotValidationError } from '../src/lib/backup';
@@ -15,6 +16,10 @@ import {
 const SESSION_SECONDS = 30 * 24 * 60 * 60;
 const WINDOW_MS = 15 * 60 * 1000;
 const AUTH_BODY_BYTES = 4096;
+const PIN_ITERATIONS = 100_000;
+const PIN_SALT_BYTES = 16;
+const PIN_HASH_BITS = 256;
+const PIN_ATTEMPTS_PER_WINDOW = 5;
 const SNAPSHOT_BODY_BYTES = 2_000_000;
 // D1's maximum string/row size is 2,000,000 decimal bytes, including metadata.
 export const MAX_ACCOUNT_PAYLOAD_BYTES = 1_900_000;
@@ -22,10 +27,10 @@ export const MAX_ACCOUNT_PAYLOAD_BYTES = 1_900_000;
 export interface Account {
   id: string;
   name: string;
-  telephone: string;
 }
 interface AccountRow extends Account {
   normalized_name: string;
+  telephone: string;
 }
 interface CommitReceipt {
   request_hash: string;
@@ -55,7 +60,7 @@ function sessionCookie(
   return `${cookieName(request)}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${isLocalHttp(new URL(request.url)) ? '' : '; Secure'}`;
 }
 function publicAccount(row: Account): Account {
-  return { id: row.id, name: row.name, telephone: row.telephone };
+  return { id: row.id, name: row.name };
 }
 
 async function rateLimit(
@@ -63,12 +68,25 @@ async function rateLimit(
   env: Env,
   action: 'register' | 'login',
 ): Promise<void> {
-  const now = Date.now(),
-    windowStart = Math.floor(now / WINDOW_MS) * WINDOW_MS;
   // CF overwrites this edge header. Missing headers share a conservative bucket;
   // X-Forwarded-For and client-chosen identity strings never bypass the limit.
   const ip = request.headers.get('CF-Connecting-IP') ?? 'missing-edge-ip';
   const key = `${action}:${await sha256(`gymmiie-rate-v1:${ip}`)}`;
+  await limitAttempts(env, key, action === 'register' ? 5 : 20);
+  const now = Date.now();
+  await env.DB.batch([
+    env.DB.prepare(
+      'DELETE FROM account_rate_limits WHERE key IN (SELECT key FROM account_rate_limits WHERE expires_at <= ?1 LIMIT 100)',
+    ).bind(now),
+    env.DB.prepare(
+      'DELETE FROM account_sessions WHERE token_hash IN (SELECT token_hash FROM account_sessions WHERE expires_at <= ?1 LIMIT 100)',
+    ).bind(now),
+  ]);
+}
+
+async function limitAttempts(env: Env, key: string, maximum: number): Promise<void> {
+  const now = Date.now(),
+    windowStart = Math.floor(now / WINDOW_MS) * WINDOW_MS;
   const row = await env.DB.prepare(
     `
     INSERT INTO account_rate_limits (key, window_start, attempts, expires_at)
@@ -81,15 +99,7 @@ async function rateLimit(
   )
     .bind(key, windowStart, windowStart + 2 * WINDOW_MS)
     .first<{ attempts: number }>();
-  await env.DB.batch([
-    env.DB.prepare(
-      'DELETE FROM account_rate_limits WHERE key IN (SELECT key FROM account_rate_limits WHERE expires_at <= ?1 LIMIT 100)',
-    ).bind(now),
-    env.DB.prepare(
-      'DELETE FROM account_sessions WHERE token_hash IN (SELECT token_hash FROM account_sessions WHERE expires_at <= ?1 LIMIT 100)',
-    ).bind(now),
-  ]);
-  if (!row || row.attempts > (action === 'register' ? 5 : 20))
+  if (!row || row.attempts > maximum)
     throw new ApiError(
       'rate_limited',
       429,
@@ -100,6 +110,64 @@ async function rateLimit(
         ),
       },
     );
+}
+
+async function limitPinAttempts(env: Env, normalizedName: string): Promise<void> {
+  await limitAttempts(
+    env,
+    `pin:${await sha256(`gymmiie-pin-rate-v1:${normalizedName}`)}`,
+    PIN_ATTEMPTS_PER_WINDOW,
+  );
+}
+
+function hex(bytes: ArrayBuffer): string {
+  return [...new Uint8Array(bytes)]
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+async function hashPin(
+  env: Env,
+  normalized: ReturnType<typeof normalizePinIdentity>,
+  createSalt = false,
+): Promise<string> {
+  if (createSalt)
+    await env.DB.prepare(
+      'INSERT INTO account_pin_salts (normalized_name, salt) VALUES (?1, ?2) ON CONFLICT(normalized_name) DO NOTHING',
+    )
+      .bind(
+        normalized.normalizedName,
+        hex(crypto.getRandomValues(new Uint8Array(PIN_SALT_BYTES)).buffer),
+      )
+      .run();
+  const row = await env.DB.prepare(
+    'SELECT salt FROM account_pin_salts WHERE normalized_name = ?1',
+  )
+    .bind(normalized.normalizedName)
+    .first<{ salt: string }>();
+  const salt = row?.salt ?? '0'.repeat(PIN_SALT_BYTES * 2);
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', encoder.encode(normalized.pin), 'PBKDF2', false, ['deriveBits'],
+  );
+  return hex(await crypto.subtle.deriveBits({
+    name: 'PBKDF2',
+    hash: 'SHA-256',
+    salt: encoder.encode(`gymmiie-pin-v1:${normalized.normalizedName}:${salt}`),
+    iterations: PIN_ITERATIONS,
+  }, key, PIN_HASH_BITS));
+}
+
+async function findPinAccount(
+  env: Env,
+  normalizedName: string,
+  pinHash: string,
+): Promise<Account | null> {
+  return env.DB.prepare(
+    `SELECT a.id, a.name FROM account_pins p
+     JOIN accounts a ON a.id = p.account_id
+     WHERE p.normalized_name = ?1 AND p.pin_hash = ?2`,
+  ).bind(normalizedName, pinHash).first<Account>();
 }
 
 async function findAccount(
@@ -151,7 +219,7 @@ async function requireSession(request: Request, env: Env): Promise<Account> {
       'Sign in to access this account.',
     );
   const account = await env.DB.prepare(
-    `SELECT a.id, a.name, a.telephone FROM account_sessions s
+    `SELECT a.id, a.name FROM account_sessions s
     JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ?1 AND s.expires_at > ?2`,
   )
     .bind(await sha256(token), Date.now())
@@ -175,10 +243,20 @@ function identity(body: Record<string, unknown>) {
   }
 }
 
+function pinIdentity(body: Record<string, unknown>) {
+  try {
+    return normalizePinIdentity({ name: body.name, pin: body.pin });
+  } catch (error) {
+    if (error instanceof IdentityValidationError)
+      throw new ApiError('invalid_identity', 400, error.message);
+    throw error;
+  }
+}
+
 async function register(request: Request, env: Env): Promise<Response> {
   await rateLimit(request, env, 'register');
   const body = await readJson(request, AUTH_BODY_BYTES);
-  const normalized = identity(body);
+  const normalized = pinIdentity(body);
   if (
     typeof env.REGISTRATION_PASSPHRASE !== 'string' ||
     !env.REGISTRATION_PASSPHRASE.length
@@ -208,56 +286,95 @@ async function register(request: Request, env: Env): Promise<Response> {
       403,
       'The registration passphrase is incorrect.',
     );
-  if (await findAccount(env, normalized.normalizedName, normalized.telephone))
+  await limitPinAttempts(env, normalized.normalizedName);
+  const pinHash = await hashPin(env, normalized, true);
+  if (await findPinAccount(env, normalized.normalizedName, pinHash))
     throw new ApiError(
       'account_exists',
       409,
-      'This account already exists. Sign in with its name and telephone.',
+      'This account already exists. Sign in with its name and PIN.',
     );
   const id = crypto.randomUUID();
   // One transaction: concurrent creates cannot replace another account or reset data.
   await env.DB.batch([
     env.DB.prepare(
-      'INSERT INTO accounts (id, name, normalized_name, telephone, created_at) VALUES (?1, ?2, ?3, ?4, ?5) ON CONFLICT(normalized_name, telephone) DO NOTHING',
+      `INSERT INTO accounts (id, name, normalized_name, telephone, created_at)
+       SELECT ?1, ?2, ?3, ?4, ?5 WHERE NOT EXISTS (
+         SELECT 1 FROM account_pins WHERE normalized_name = ?3 AND pin_hash = ?6
+       )`,
     ).bind(
       id,
       normalized.name,
       normalized.normalizedName,
-      normalized.telephone,
+      `pin:${id}`,
       Date.now(),
+      pinHash,
     ),
+    env.DB.prepare(
+      `INSERT INTO account_pins (account_id, normalized_name, pin_hash)
+       SELECT id, normalized_name, ?2 FROM accounts WHERE id = ?1`,
+    ).bind(id, pinHash),
     env.DB.prepare(
       'INSERT INTO account_snapshots (account_id) SELECT id FROM accounts WHERE id = ?1',
     ).bind(id),
   ]);
-  const account = await findAccount(
+  const account = await findPinAccount(
     env,
     normalized.normalizedName,
-    normalized.telephone,
+    pinHash,
   );
   if (!account || account.id !== id)
     throw new ApiError(
       'account_exists',
       409,
-      'This account already exists. Sign in with its name and telephone.',
+      'This account already exists. Sign in with its name and PIN.',
     );
   return issueSession(request, env, account, 201);
+}
+
+async function enrollPin(request: Request, env: Env): Promise<Response> {
+  await rateLimit(request, env, 'login');
+  const body = await readJson(request, AUTH_BODY_BYTES);
+  const legacy = identity(body);
+  const normalized = pinIdentity(body);
+  await limitPinAttempts(env, normalized.normalizedName);
+  const account = await findAccount(env, legacy.normalizedName, legacy.telephone);
+  if (!account)
+    throw new ApiError('account_not_found', 404, 'No account matches this name and telephone.');
+  const pinHash = await hashPin(env, normalized, true);
+  await env.DB.batch([
+    env.DB.prepare(
+      `INSERT INTO account_pins (account_id, normalized_name, pin_hash)
+       SELECT id, normalized_name, ?2 FROM accounts WHERE id = ?1 AND telephone = ?3
+       ON CONFLICT DO NOTHING`,
+    ).bind(account.id, pinHash, legacy.telephone),
+    env.DB.prepare(
+      `UPDATE accounts SET telephone = ?2 WHERE id = ?1 AND EXISTS (
+         SELECT 1 FROM account_pins WHERE account_id = ?1 AND pin_hash = ?3
+       )`,
+    ).bind(account.id, `pin:${account.id}`, pinHash),
+  ]);
+  const enrolled = await findPinAccount(env, normalized.normalizedName, pinHash);
+  if (enrolled?.id !== account.id)
+    throw new ApiError('pin_unavailable', 409, 'This name and PIN are already in use. Choose another PIN.');
+  return issueSession(request, env, enrolled);
 }
 
 async function session(request: Request, env: Env): Promise<Response> {
   if (request.method === 'POST') {
     await rateLimit(request, env, 'login');
-    const normalized = identity(await readJson(request, AUTH_BODY_BYTES));
-    const account = await findAccount(
+    const normalized = pinIdentity(await readJson(request, AUTH_BODY_BYTES));
+    await limitPinAttempts(env, normalized.normalizedName);
+    const account = await findPinAccount(
       env,
       normalized.normalizedName,
-      normalized.telephone,
+      await hashPin(env, normalized),
     );
     if (!account)
       throw new ApiError(
         'account_not_found',
         404,
-        'No account matches this name and telephone.',
+        'No account matches this name and PIN.',
       );
     return issueSession(request, env, account);
   }
@@ -400,9 +517,14 @@ export async function handleAccounts(
 ): Promise<Response | null> {
   const path = new URL(request.url).pathname;
   const match = /^\/api\/accounts\/([^/]+)\/data$/.exec(path);
-  if (path !== '/api/accounts/register' && path !== '/api/session' && !match)
+  if (path !== '/api/accounts/register' && path !== '/api/accounts/pin' && path !== '/api/session' && !match)
     return null;
   requireSameOrigin(request);
+  if (path === '/api/accounts/pin') {
+    if (request.method !== 'POST')
+      throw new ApiError('method_not_allowed', 405, 'Method not allowed.');
+    return enrollPin(request, env);
+  }
   if (path === '/api/accounts/register') {
     if (request.method !== 'POST')
       throw new ApiError('method_not_allowed', 405, 'Method not allowed.');

@@ -4,11 +4,6 @@ import { parseBackup } from '../src/lib/backup';
 import { enterNumber, seed, snapshot } from './fixtures';
 
 async function replaceNumber(input: Locator, value: string): Promise<void> {
-  if (await input.getAttribute('readonly') !== null) {
-    await enterNumber(input, value);
-    await expect(input).toHaveValue(value);
-    return;
-  }
   await input.fill('');
   await expect(input).toHaveValue('');
   for (const digit of value) {
@@ -27,7 +22,7 @@ test('onboarding profile numbers can be cleared and retyped without overlapping 
     .setExtraHTTPHeaders({ 'X-Gymmiie-Test-Client': randomUUID() });
   await page.goto('/');
   await page.getByLabel('Name', { exact: true }).fill(`Profile ${randomUUID()}`);
-  await page.getByLabel('Telephone', { exact: true }).fill('+12025550121');
+  await page.getByLabel('PIN (4 digits)', { exact: true }).fill('0123');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page
     .getByLabel('Registration passphrase', { exact: true })
@@ -59,11 +54,11 @@ test('onboarding profile numbers can be cleared and retyped without overlapping 
   }
 
   await enterNumber(height, '300');
-  if (await height.getAttribute('readonly') === null) await expect(height).toHaveValue('300');
+  await expect(height).toHaveValue('300');
   await height.press('Tab');
   await expect(height).toHaveValue('250');
   await enterNumber(height, '90');
-  if (await height.getAttribute('readonly') === null) await expect(height).toHaveValue('90');
+  await expect(height).toHaveValue('90');
   await height.press('Tab');
   await expect(height).toHaveValue('100');
   await replaceNumber(height, '178');
@@ -95,22 +90,13 @@ test('settings keeps valid profile numbers while a replacement is incomplete', a
   const height = page.getByRole('spinbutton', { name: /^Height\b/ });
   const weight = page.getByRole('spinbutton', { name: /^Weight\b/ });
 
-  if (await height.getAttribute('readonly') !== null) {
-    await height.click();
-    const pad = page.getByRole('dialog', { name: 'Number pad', exact: true });
-    await pad.getByRole('button', { name: '1', exact: true }).click();
-    await expect.poll(async () => parseBackup(await snapshot(page)).profile.heightCm).toBe(175);
-    await pad.getByRole('button', { name: 'Cancel', exact: true }).click();
-    await enterNumber(height, '180');
-  } else {
-    await height.fill('');
-    await expect(height).toHaveValue('');
-    await height.pressSequentially('1');
-    await expect(height).toHaveValue('1');
-    await expect.poll(async () => parseBackup(await snapshot(page)).profile.heightCm).toBe(175);
-    await height.pressSequentially('80');
-    await height.press('Tab');
-  }
+  await height.fill('');
+  await expect(height).toHaveValue('');
+  await height.pressSequentially('1');
+  await expect(height).toHaveValue('1');
+  await expect.poll(async () => parseBackup(await snapshot(page)).profile.heightCm).toBe(175);
+  await height.pressSequentially('80');
+  await height.press('Tab');
   await expect(height).toHaveValue('180');
 
   await replaceNumber(age, '42');

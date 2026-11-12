@@ -3,7 +3,7 @@ import { defaultData } from '../src/lib/defaults';
 import { createWorkerTestRuntime } from '../scripts/worker-test-runtime.mjs';
 
 const origin = 'https://gymmiie.test';
-const identity = { name: 'Mickey Test', telephone: '+66812345678' };
+const identity = { name: 'Mickey Test', pin: '0123' };
 let runtime: Awaited<ReturnType<typeof createWorkerTestRuntime>>;
 let sequence = 0;
 
@@ -19,7 +19,9 @@ beforeEach(async () => {
       'account_sessions',
       'account_commits',
       'account_snapshots',
+      'account_pins',
       'accounts',
+      'account_pin_salts',
       'account_rate_limits',
       'sync_snapshots',
     ].map((table) => runtime.db.prepare(`DELETE FROM ${table}`)),
@@ -56,10 +58,10 @@ async function request(
   });
 }
 
-async function register(name = identity.name, telephone = identity.telephone) {
+async function register(name = identity.name, pin = identity.pin) {
   const response = await request('POST', '/api/accounts/register', {
     name,
-    telephone,
+    pin,
     passphrase: 'test-invite',
   });
   expect(response.status).toBe(201);
@@ -88,7 +90,9 @@ describe('native D1 account registration and sessions', () => {
         .n,
     ).toBe(0);
     const { account, cookie, response } = await register();
-    expect(account).toMatchObject(identity);
+    expect(account.name).toBe(identity.name);
+    expect(account).not.toHaveProperty('pin');
+    expect(account).not.toHaveProperty('telephone');
     expect(account.id).toMatch(/^[a-f0-9-]{36}$/);
     expect(response.headers.get('set-cookie')).toMatch(
       /__Host-gymmiie_session=.*; Path=\/; HttpOnly; SameSite=Lax; Max-Age=2592000; Secure/,
@@ -127,14 +131,14 @@ describe('native D1 account registration and sessions', () => {
     }
   });
 
-  it('signs in using name + telephone only, with the same shared normalization', async () => {
+  it('signs in using a normalized name and 4-digit PIN, preserving leading zeros', async () => {
     const { account } = await register(
       '  ＭＩＣＫＥＹ   Test ',
-      '+66 (81) 234-5678',
+      '0123',
     );
     const login = await request('POST', '/api/session', {
       name: 'mickey test',
-      telephone: '+66812345678',
+      pin: '0123',
     });
     expect(login.status).toBe(200);
     expect((await login.json()).account).toEqual(account);
@@ -152,10 +156,72 @@ describe('native D1 account registration and sessions', () => {
       (
         await request('POST', '/api/session', {
           name: 'Other',
-          telephone: '0812345678',
+          pin: '123',
         })
       ).status,
     ).toBe(400);
+  });
+
+  it('keeps the original account and snapshot when enrolling a legacy telephone account', async () => {
+    const id = crypto.randomUUID();
+    const original = snapshot('Original training log');
+    const payload = JSON.stringify(original);
+    const telephone = '+66812345678';
+    await runtime.db.batch([
+      runtime.db.prepare('INSERT INTO accounts (id, name, normalized_name, telephone, created_at) VALUES (?1, ?2, ?3, ?4, ?5)')
+        .bind(id, identity.name, identity.name.toLowerCase(), telephone, Date.now()),
+      runtime.db.prepare('INSERT INTO account_snapshots (account_id, payload, revision) VALUES (?1, ?2, 7)')
+        .bind(id, payload),
+    ]);
+    const wrongTelephone = await request('POST', '/api/accounts/pin', {
+      ...identity, telephone: '+66812345679',
+    });
+    expect(wrongTelephone.status).toBe(404);
+    const enrolled = await request('POST', '/api/accounts/pin', { ...identity, telephone });
+    expect(enrolled.status).toBe(200);
+    expect((await enrolled.json()).account).toEqual({ id, name: identity.name });
+    const cookie = enrolled.headers.get('set-cookie')!.split(';')[0];
+    const saved = await request('GET', `/api/accounts/${id}/data`, undefined, { cookie });
+    expect((await saved.json()).data).toEqual(original);
+    const row = await runtime.db.prepare('SELECT payload, revision FROM account_snapshots WHERE account_id = ?1').bind(id).first();
+    expect(row).toEqual({ payload, revision: 7 });
+    const pinRow = await runtime.db.prepare('SELECT pin_hash FROM account_pins WHERE account_id = ?1').bind(id).first();
+    expect(pinRow.pin_hash).toMatch(/^[a-f0-9]{64}$/);
+    expect(pinRow.pin_hash).not.toBe(identity.pin);
+    expect((await request('POST', '/api/session', identity)).status).toBe(200);
+    expect((await request('POST', '/api/session', { name: identity.name, telephone })).status).toBe(400);
+    expect((await request('POST', '/api/accounts/pin', { ...identity, telephone })).status).toBe(404);
+  });
+
+  it('keeps a legacy account accessible when its selected name and PIN are already taken', async () => {
+    const existing = await register();
+    const id = crypto.randomUUID();
+    const telephone = '+66899999999';
+    await runtime.db.batch([
+      runtime.db.prepare('INSERT INTO accounts (id, name, normalized_name, telephone, created_at) VALUES (?1, ?2, ?3, ?4, ?5)')
+        .bind(id, identity.name, identity.name.toLowerCase(), telephone, Date.now()),
+      runtime.db.prepare('INSERT INTO account_snapshots (account_id) VALUES (?1)').bind(id),
+    ]);
+    expect((await request('POST', '/api/accounts/pin', { ...identity, telephone })).status).toBe(409);
+    const legacy = await runtime.db.prepare('SELECT telephone FROM accounts WHERE id = ?1').bind(id).first();
+    expect(legacy.telephone).toBe(telephone);
+    const enrolled = await request('POST', '/api/accounts/pin', { ...identity, telephone, pin: '5678' });
+    expect(enrolled.status).toBe(200);
+    expect((await enrolled.json()).account.id).toBe(id);
+    expect((await (await request('POST', '/api/session', identity)).json()).account.id).toBe(existing.account.id);
+  });
+
+  it('limits PIN attempts by normalized name across different IPs', async () => {
+    const attempts = await Promise.all(Array.from({ length: 8 }, (_, index) =>
+      request('POST', '/api/session', {
+        name: index % 2 ? '  SHARED   Name ' : 'shared name', pin: '1234',
+      }),
+    ));
+    expect(attempts.filter((response) => response.status === 404)).toHaveLength(5);
+    expect(attempts.filter((response) => response.status === 429)).toHaveLength(3);
+    const row = await runtime.db.prepare("SELECT key, attempts FROM account_rate_limits WHERE key LIKE 'pin:%'").first();
+    expect(row.attempts).toBe(8);
+    expect(row.key).not.toContain('shared');
   });
 
   it('creates exactly one account during a concurrent registration race', async () => {
@@ -270,8 +336,8 @@ describe('native D1 account registration and sessions', () => {
 
   it('enforces durable hashed-IP login limits, including concurrent requests', async () => {
     const attempts = await Promise.all(
-      Array.from({ length: 22 }, () =>
-        request('POST', '/api/session', identity, { ip: '198.18.200.1' }),
+      Array.from({ length: 22 }, (_, index) =>
+        request('POST', '/api/session', { ...identity, name: `Attempt ${index}` }, { ip: '198.18.200.1' }),
       ),
     );
     expect(attempts.filter((response) => response.status === 404)).toHaveLength(
@@ -281,7 +347,7 @@ describe('native D1 account registration and sessions', () => {
     expect(limited).toHaveLength(2);
     expect(Number(limited[0].headers.get('retry-after'))).toBeGreaterThan(0);
     const row = await runtime.db
-      .prepare('SELECT key, attempts FROM account_rate_limits')
+      .prepare("SELECT key, attempts FROM account_rate_limits WHERE key LIKE 'login:%'")
       .first();
     expect(row.key).not.toContain('198.18.200.1');
     expect(row.attempts).toBe(22);

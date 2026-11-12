@@ -8,26 +8,13 @@ import type { Account } from '../src/lib/accounts';
 const accounts = new WeakMap<Page, Account>();
 
 export async function enterNumber(input: Locator, value: string): Promise<void> {
-  const readonly = await input.evaluate((element) => element instanceof HTMLInputElement && element.readOnly);
-  if (!readonly) {
-    await input.fill(value);
-    return;
-  }
-  await input.click();
-  const pad = input.page().getByRole('dialog', { name: 'Number pad', exact: true });
-  await pad.getByRole('button', { name: 'Clear number', exact: true }).click();
-  for (const digit of value.replace(/^-/, '')) {
-    await pad.getByRole('button', { name: digit === '.' ? 'Decimal point' : digit, exact: true }).click();
-  }
-  if (value.startsWith('-')) await pad.getByRole('button', { name: 'Change sign', exact: true }).click();
-  await pad.getByRole('button', { name: 'Apply number', exact: true }).click();
-  await expect(pad).toHaveCount(0);
+  await input.fill(value);
 }
 
 export async function seed(
   page: Page,
   customize?: (fixture: AppData) => void,
-  identity?: { name: string; telephone: string },
+  identity?: { name: string; pin: string },
 ): Promise<Account> {
   const fixture = defaultData();
   fixture.onboarded = true;
@@ -50,8 +37,8 @@ export async function seed(
   if (await name.isVisible()) {
     await name.fill(body.account.name);
     await page
-      .getByLabel('Telephone', { exact: true })
-      .fill(body.account.telephone);
+      .getByLabel('PIN (4 digits)', { exact: true })
+      .fill(identity?.pin ?? '1234');
     await page.getByRole('button', { name: 'Continue', exact: true }).click();
   }
   await expect(content).toBeVisible();

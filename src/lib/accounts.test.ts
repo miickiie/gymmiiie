@@ -18,12 +18,10 @@ import { defaultData } from './defaults';
 const a: Account = {
   id: 'account-a',
   name: 'Test A',
-  telephone: '+10000000001',
 };
 const b: Account = {
   id: 'account-b',
   name: 'Test B',
-  telephone: '+10000000002',
 };
 const synchronizers: AccountSynchronizer[] = [];
 function storage() {
@@ -69,12 +67,12 @@ describe('account sessions and automatic uploads', () => {
       'fetch',
       vi.fn().mockResolvedValue(fail(404, 'account_not_found')),
     );
-    await expect(loginAccount(a.name, a.telephone)).rejects.toMatchObject({
+    await expect(loginAccount(a.name, '1234')).rejects.toMatchObject({
       status: 404,
       code: 'account_not_found',
     });
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('offline')));
-    await expect(loginAccount(a.name, a.telephone)).rejects.not.toBeInstanceOf(
+    await expect(loginAccount(a.name, '1234')).rejects.not.toBeInstanceOf(
       AccountApiError,
     );
   });

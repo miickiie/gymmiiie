@@ -12,7 +12,6 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { CatCompanion } from './CatCompanion';
-import { NumberPad } from './NumberPad';
 import { useI18n } from '../lib/i18n';
 import { useAppUpdate } from '../lib/useAppUpdate';
 
@@ -21,8 +20,6 @@ const TH: Record<string, string> = {
     'แจ้งเตือน! Gymmiie เวอร์ชันใหม่พร้อมแล้ว อยากรีเฟรชลองดูไหม? Mochi จะเก็บข้อมูลฝึกของคุณไว้ให้',
   'Refresh app': 'รีเฟรชแอป',
   'Refreshing…': 'กำลังรีเฟรช…',
-  'Enter a number': 'กรอกตัวเลข',
-  'Number pad': 'แป้นตัวเลข',
   Dialog: 'หน้าต่าง',
   'Close dialog': 'ปิดหน้าต่าง',
   'Could not complete this action. Try again.':
@@ -360,84 +357,25 @@ export function NumericInput({
   value,
   onValueChange,
   onValueCommit,
-  unit,
   onBlur,
-  onClick,
-  onPointerDown,
-  onKeyDown,
-  readOnly,
-  disabled,
   ...props
 }: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'onChange'> & {
   value: string | number;
   onValueChange: (value: string) => void;
   onValueCommit?: (value: string) => void;
-  unit?: string;
 }) {
-  const { t } = useI18n(TH);
-  const input = useRef<HTMLInputElement>(null);
-  const [mobile, setMobile] = useState(() => window.matchMedia('(pointer: coarse)').matches);
-  const [open, setOpen] = useState(false);
-  const [label, setLabel] = useState('Enter a number');
-  useEffect(() => {
-    const query = window.matchMedia('(pointer: coarse)');
-    const update = () => setMobile(query.matches);
-    query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
-  }, []);
-  const openPad = () => {
-    if (!mobile || readOnly || disabled || !input.current) return;
-    const field = input.current;
-    setLabel(field.getAttribute('aria-label') || field.labels?.[0]?.querySelector('.label')?.textContent?.trim() || field.placeholder || 'Enter a number');
-    field.focus({ preventScroll: true });
-    setOpen(true);
-  };
   return (
-    <>
-      <input
-        {...props}
-        ref={input}
-        type="number"
-        value={value}
-        disabled={disabled}
-        readOnly={readOnly || mobile}
-        inputMode={mobile ? 'none' : props.inputMode ?? 'decimal'}
-        aria-haspopup={mobile ? 'dialog' : undefined}
-        aria-expanded={mobile ? open : undefined}
-        onChange={(event) => onValueChange(event.target.value)}
-        onBlur={(event) => {
-          if (!mobile) {
-            onValueCommit?.(event.target.value);
-            onBlur?.(event);
-          }
-        }}
-        onPointerDown={(event) => {
-          onPointerDown?.(event);
-          if (mobile && !readOnly && !disabled) event.preventDefault();
-        }}
-        onClick={(event) => { onClick?.(event); openPad(); }}
-        onKeyDown={(event) => {
-          onKeyDown?.(event);
-          if (mobile && (event.key === 'Enter' || event.key === ' ')) {
-            event.preventDefault();
-            openPad();
-          }
-        }}
-      />
-      <Sheet open={open} onClose={() => setOpen(false)} title={t('Number pad')} placement="bottom">
-        <NumberPad
-          value={value}
-          label={t(label)}
-          unit={unit}
-          onCancel={() => setOpen(false)}
-          onApply={(raw) => {
-            onValueChange(raw);
-            onValueCommit?.(raw);
-            setOpen(false);
-          }}
-        />
-      </Sheet>
-    </>
+    <input
+      {...props}
+      type="number"
+      value={value}
+      inputMode={props.inputMode ?? 'decimal'}
+      onChange={(event) => onValueChange(event.target.value)}
+      onBlur={(event) => {
+        onValueCommit?.(event.target.value);
+        onBlur?.(event);
+      }}
+    />
   );
 }
 
@@ -465,7 +403,6 @@ export function NumField({
   return (
     <div className={clsx('relative', className)}>
       <NumericInput
-        unit={unit}
         inputMode="decimal"
         className="input !pr-12 text-right num"
         value={draft ?? value}

@@ -1,7 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { identityFieldErrors, normalizeIdentity } from './identity';
+import { identityFieldErrors, normalizeIdentity, normalizePinIdentity, pinIdentityFieldErrors } from './identity';
 
 describe('account identity normalization', () => {
+  it('normalizes names and preserves leading zeros in four-digit PINs', () => {
+    expect(normalizePinIdentity({ name: '  ＭＩＣＫＥＹ   Test ', pin: '0123' }))
+      .toEqual({ name: 'MICKEY Test', normalizedName: 'mickey test', pin: '0123' });
+    expect(pinIdentityFieldErrors('Mickey', '0000')).toEqual({});
+  });
+  it.each(['', '123', '12345', '-123', '12a3', '1.23'])('rejects invalid PIN %j', (pin) => {
+    expect(pinIdentityFieldErrors('Mickey', pin).pin).toBeTruthy();
+  });
+  it('reports name and PIN errors together and rejects numeric PIN values', () => {
+    expect(Object.keys(pinIdentityFieldErrors(' ', '12'))).toEqual(['name', 'pin']);
+    expect(() => normalizePinIdentity({ name: 'Mickey', pin: 1234 })).toThrow();
+  });
   it('shares NFKC, whitespace and case normalization across client and Worker', () => {
     expect(
       normalizeIdentity({

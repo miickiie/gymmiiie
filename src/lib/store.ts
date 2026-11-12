@@ -692,6 +692,7 @@ export const useStore = create<Store>((set, get) => ({
       const snapshot = makeSessionExercise(ex, data.sessions, d.settings.unit);
       target.mode = snapshot.mode;
       target.loadKind = snapshot.loadKind;
+      delete target.weightUnit;
       target.sets = openingSets(ex, data.sessions, d.settings.unit);
     });
   },

@@ -54,8 +54,8 @@ const TH: Record<string, string> = {
   workouts: 'การฝึก',
   routines: 'ตารางฝึก',
   notes: 'โน้ต',
-  'Gymmiie keeps each user’s training log under their account. Return with the same name and international telephone number. Changes save on this device and sync to the account when connected; manual encrypted backups are available separately.':
-    'Gymmiie เก็บบันทึกการฝึกของแต่ละบัญชีไว้ กลับมาใช้ชื่อและเบอร์โทรระหว่างประเทศเดิม การเปลี่ยนแปลงบันทึกในเครื่องและซิงก์เมื่อออนไลน์ สำรองแบบเข้ารหัสแยกได้',
+  'Gymmiie keeps each user’s training log under their account. Return with the same name and 4-digit PIN. Changes save on this device and sync to the account when connected; manual encrypted backups are available separately.':
+    'Gymmiie เก็บบันทึกการฝึกของแต่ละบัญชีไว้ กลับมาใช้ชื่อและ PIN 4 หลักเดิม การเปลี่ยนแปลงบันทึกในเครื่องและซิงก์เมื่อออนไลน์ สำรองแบบเข้ารหัสแยกได้',
   'Based on GymMane': 'สร้างจาก GymMane',
   'Gymmiie is a web reimplementation inspired by':
     'Gymmiie คือเว็บที่สร้างใหม่โดยได้แรงบันดาลใจจาก',
@@ -193,7 +193,7 @@ export default function About() {
         </div>
         <p className="mt-4 max-w-2xl text-sm font-semibold leading-relaxed text-dim">
           {t(
-            'Gymmiie keeps each user’s training log under their account. Return with the same name and international telephone number. Changes save on this device and sync to the account when connected; manual encrypted backups are available separately.',
+            'Gymmiie keeps each user’s training log under their account. Return with the same name and 4-digit PIN. Changes save on this device and sync to the account when connected; manual encrypted backups are available separately.',
           )}
         </p>
       </Card>

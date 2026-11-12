@@ -156,7 +156,7 @@ async function seed(page, origin, data, authenticated) {
         headers: { Origin: origin },
         data: {
           name: 'Benchmark',
-          telephone: '+12025550123',
+          pin: '1234',
           passphrase: benchmarkInvite,
         },
       });

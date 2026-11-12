@@ -16,12 +16,10 @@ import type { AppData } from '../types';
 const a: Account = {
   id: 'account-a',
   name: 'Test Account A',
-  telephone: '+10000000001',
 };
 const b: Account = {
   id: 'account-b',
   name: 'Test Account B',
-  telephone: '+10000000002',
 };
 const profile = (name: string) => ({
   ...defaultData(),

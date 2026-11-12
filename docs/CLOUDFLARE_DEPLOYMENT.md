@@ -71,20 +71,20 @@ Click **Deploy**, or retry the latest build if the Git connection already exists
 
 ## 5. Verify the deployed app
 
-1. Open the Worker's HTTPS URL. Close existing Gymmiie tabs/PWA windows and reopen if the old offline app is still showing, so its waiting update can activate. The home page should show Name and Telephone.
-2. Enter a name and telephone with an explicit country code, such as `+66…`.
+1. Open the Worker's HTTPS URL. Close existing Gymmiie tabs/PWA windows and reopen if the old offline app is still showing, so its waiting update can activate. The home page should show Name and PIN (4 digits).
+2. Enter a name and a 4-digit PIN. For an older telephone account, choose **Set PIN for existing account** and confirm the original name and international telephone once to enroll a PIN while retaining the tracking data.
 3. A new identity offers account creation and requires the registration phrase. An existing identity opens its tracking without requiring that phrase again.
 4. Add a workout and wait for the account sync status to show that it is current.
-5. Open a different browser/device, enter the same name and telephone, and verify the tracking loads.
+5. Open a different browser/device, enter the same name and PIN, and verify the tracking loads.
 6. Switch users and confirm the second account does not show the first account's tracking.
 
 Existing device-only logs are preserved separately and can be reviewed/imported explicitly after sign-in. Previous encrypted snapshots remain available through the manual backup tools.
 
 ## Account access policy
 
-The combined normalized name and international telephone is unique. Display-name edits do not change the login identity. Names use Unicode normalization, collapsed whitespace and lowercase matching; telephone formatting separators are removed.
+The combined normalized name and PIN is unique. Display-name edits do not change the login identity. Names use Unicode normalization, collapsed whitespace and lowercase matching. Migration `0003_account_pins.sql` adds PIN credentials without replacing account IDs or tracking data. Original telephone details are accepted only for initial PIN enrollment and replaced with an internal marker after successful enrollment.
 
-As requested, returning access uses name and telephone only. These are identifiers rather than proof of phone ownership. The shared registration phrase gates creation, and the server rate-limits creation and lookup attempts. Account tracking is server-readable D1 data; the optional manual encrypted snapshots remain a separate feature.
+Returning access uses name and a 4-digit PIN. PINs have 10,000 possible values and are stored as PBKDF2-SHA-256 hashes with random salts per normalized name. The shared registration phrase gates creation, and the server limits requests by IP and PIN attempts by normalized name. Account tracking is server-readable D1 data; the optional manual encrypted snapshots remain a separate feature.
 
 ## Official references
 

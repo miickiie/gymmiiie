@@ -1,10 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const origin = `http://127.0.0.1:${process.env.GYMMIIE_TEST_PORT ?? 4173}`;
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: origin,
     trace: 'retain-on-failure',
     serviceWorkers: 'allow',
   },
@@ -17,7 +19,7 @@ export default defineConfig({
   ],
   webServer: {
     command: 'node scripts/test-server.mjs',
-    url: 'http://127.0.0.1:4173',
+    url: origin,
     reuseExistingServer: false,
   },
 });

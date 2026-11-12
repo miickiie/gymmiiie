@@ -118,6 +118,7 @@ function exerciseRow(value: unknown, path: string, active: boolean): Obj {
     text(row.uid, `${path}.uid`, false);
     optional(row, 'linkedNext', path, boolean);
     optional(row, 'swappedFrom', path, text);
+    optional(row, 'weightUnit', path, (v, p) => enumeration(v, ['kg', 'lb'], p));
   }
   snapshotMetadata(row, path);
   row.sets = array(row.sets, `${path}.sets`).map((v, i) =>

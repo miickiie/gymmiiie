@@ -950,7 +950,6 @@ function AddFoodSheet({
             <div className="relative w-24">
               <NumericInput
                 className="input py-2 pr-8 text-right text-xs"
-                unit="g"
                 aria-label={t('Portion in grams')}
                 min="0.1"
                 step="any"
@@ -1015,7 +1014,6 @@ function AddFoodSheet({
               <label key={k} className="relative">
                 <NumericInput
                   className="input py-2 pr-7 text-right text-xs"
-                  unit={k === 'kcal' ? 'cal' : 'g'}
                   aria-label={t('{macro} per 100 grams', { macro: t(k) })}
                   min="0"
                   step="any"
@@ -1277,7 +1275,6 @@ function GoalsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
             <div className="relative">
               <NumericInput
                 className="input num pr-10 text-right"
-                unit={f.unit}
                 value={g[f.key]}
                 onValueChange={(raw) =>
                   setG({ ...g, [f.key]: Math.max(0, Number(raw)) })
