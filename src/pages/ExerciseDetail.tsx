@@ -34,6 +34,7 @@ import {
   useToast,
 } from '../components/ui';
 import { instructionsOf, stepsFor, tipsFor } from '../lib/art';
+import { useGuideLanguage } from '../lib/guide';
 import { dateKey, relativeDay } from '../lib/date';
 import { modeFor } from '../lib/exercises';
 import {
@@ -148,6 +149,8 @@ export default function ExerciseDetail() {
   const navigate = useNavigate();
   const toast = useToast();
   const data = useStore((s) => s.data);
+  // Loads the Thai form-guide copy on demand and re-renders when it arrives.
+  useGuideLanguage();
   const toggleFavorite = useStore((s) => s.toggleFavorite);
   const toggleArchived = useStore((s) => s.toggleArchived);
   const deleteCustomExercise = useStore((s) => s.deleteCustomExercise);

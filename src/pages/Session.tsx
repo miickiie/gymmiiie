@@ -31,9 +31,11 @@ import {
   Field,
   NumericInput,
   Sheet,
+  useNow,
   useToast,
 } from '../components/ui';
 import { instructionsOf, stepsFor, tipsFor } from '../lib/art';
+import { useGuideLanguage } from '../lib/guide';
 import { beep, unlockAudio, vibrate } from '../lib/audio';
 import { fmtClock, fmtDuration } from '../lib/date';
 import { isCompletableSet, loadKindFor, modeFor } from '../lib/exercises';
@@ -51,7 +53,12 @@ import {
   weightStep,
 } from '../lib/stats';
 import { allExercises, useStore } from '../lib/store';
-import type { LoggedSet, SessionExercise, SessionSet } from '../types';
+import type {
+  ActiveSession,
+  LoggedSet,
+  SessionExercise,
+  SessionSet,
+} from '../types';
 
 const KINDS = [
   'normal',
@@ -197,9 +204,10 @@ export default function Session() {
   const data = useStore((s) => s.data);
   const status = useStore((s) => s.persistenceStatus);
   const isCommitting = useStore((s) => s.isCommitting);
+  // Loads the Thai form-guide copy on demand and re-renders when it arrives.
+  useGuideLanguage();
   const actions = useStore.getState();
   const active = data.active;
-  const [now, setNow] = useState(Date.now());
   const [picker, setPicker] = useState(false);
   const [swapUid, setSwapUid] = useState<string | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
@@ -214,41 +222,6 @@ export default function Session() {
   const [detail, setDetail] = useState<{ uid: string; index: number } | null>(
     null,
   );
-  const previousRest = useRef(0);
-  useEffect(() => {
-    if (!active) return;
-    const interval = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(interval);
-  }, [active?.id]);
-  const restLeft =
-    active?.restFrozen != null
-      ? Math.max(0, Math.ceil(active.restFrozen))
-      : active?.restEndsAt
-        ? Math.max(0, Math.ceil((active.restEndsAt - now) / 1000))
-        : 0;
-  useEffect(() => {
-    if (
-      previousRest.current > 0 &&
-      restLeft === 0 &&
-      active?.restEndsAt &&
-      now >= active.restEndsAt
-    ) {
-      if (data.settings.sound) beep(3);
-      if (data.settings.vibrate) vibrate([120, 60, 120]);
-      toast.push(
-        t('Rest time is up. Start your next set when you’re ready.'),
-      );
-    }
-    previousRest.current = restLeft;
-  }, [
-    restLeft,
-    active?.restEndsAt,
-    now,
-    data.settings.sound,
-    data.settings.vibrate,
-    toast.push,
-    t,
-  ]);
 
   const current = active?.exercises[active.currentIndex];
   const catalog = useMemo(
@@ -293,7 +266,7 @@ export default function Session() {
   const blocked = paused || readOnly;
   const mode = current ? modeFor(current) : '';
   const load = current ? loadKindFor(current) : undefined;
-  const elapsed = activeElapsed(active);
+  const hasRest = active.restEndsAt != null || (active.restFrozen ?? 0) > 0;
   const totalSets = active.exercises.reduce(
     (count, ex) => count + ex.sets.length,
     0,
@@ -404,7 +377,7 @@ export default function Session() {
             <Pencil size={12} />
           </button>
           <p className="text-[11px] font-bold text-mute">
-            {fmtDuration(elapsed)} ·{' '}
+            <ElapsedClock active={active} /> ·{' '}
             {t('{done}/{total} sets', { done: doneSets, total: totalSets })} ·{' '}
             {volumeLabel(volume, unit)}
           </p>
@@ -434,44 +407,8 @@ export default function Session() {
           {t('Workout paused · resume to continue logging')}
         </div>
       )}
-      {restLeft > 0 && !paused && (
-        <Card className="mb-3 flex items-center gap-2 border-[var(--accent-line)] bg-[var(--accent-soft)] p-3">
-          <Timer size={20} className="text-[var(--accent)]" />
-          <div className="flex-1">
-            <p className="text-xs font-black">{t('Rest timer')}</p>
-            <p
-              role="timer"
-              aria-live="off"
-              className="num text-xl font-black text-[var(--accent)]"
-            >
-              {fmtClock(restLeft)}
-            </p>
-          </div>
-          <Btn
-            size="icon"
-            disabled={readOnly}
-            aria-label={t('Subtract 15 seconds rest')}
-            onClick={() => actions.nudgeRest(-15)}
-          >
-            <Minus size={15} />
-          </Btn>
-          <Btn
-            size="icon"
-            disabled={readOnly}
-            aria-label={t('Add 15 seconds rest')}
-            onClick={() => actions.nudgeRest(15)}
-          >
-            <Plus size={15} />
-          </Btn>
-          <Btn
-            size="sm"
-            disabled={readOnly}
-            onClick={actions.skipRest}
-            icon={<SkipForward size={14} />}
-          >
-            {t('Skip')}
-          </Btn>
-        </Card>
+      {hasRest && (
+        <RestTimer active={active} paused={paused} readOnly={readOnly} t={t} />
       )}
       <fieldset disabled={blocked} className="mb-3 min-w-0">
         <legend className="sr-only">{t('Workout exercises')}</legend>
@@ -765,7 +702,7 @@ export default function Session() {
                 {t('Remove exercise')}
               </Btn>
             </div>
-            {restLeft <= 0 && (
+            {!hasRest && (
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
                 <span className="label">{t('Rest')}</span>
                 {[60, 90, 120].map((seconds) => (
@@ -1017,7 +954,7 @@ export default function Session() {
       >
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: 'Duration', value: fmtClock(elapsed) },
+            { label: 'Duration', value: fmtClock(activeElapsed(active)) },
             { label: 'Completed sets', value: String(doneSets) },
             { label: 'Volume', value: volumeLabel(volume, unit) },
             {
@@ -1175,6 +1112,99 @@ export default function Session() {
         </div>
       </Sheet>
     </div>
+  );
+}
+
+/** Keeps the elapsed clock live without re-rendering the whole workout page. */
+function ElapsedClock({ active }: { active: ActiveSession }) {
+  useNow(!active.pausedAt, 1000);
+  return <>{fmtDuration(activeElapsed(active))}</>;
+}
+
+/**
+ * Owns the per-second rest countdown so only this card re-renders. It stays
+ * mounted until the rest is cleared, which lets it fire the completion cue
+ * after the visible countdown reaches zero.
+ */
+function RestTimer({
+  active,
+  paused,
+  readOnly,
+  t,
+}: {
+  active: ActiveSession;
+  paused: boolean;
+  readOnly: boolean;
+  t: (text: string) => string;
+}) {
+  const actions = useStore.getState();
+  const toast = useToast();
+  const sound = useStore((s) => s.data.settings.sound);
+  const vibration = useStore((s) => s.data.settings.vibrate);
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+  const restLeft =
+    active.restFrozen != null
+      ? Math.max(0, Math.ceil(active.restFrozen))
+      : active.restEndsAt
+        ? Math.max(0, Math.ceil((active.restEndsAt - now) / 1000))
+        : 0;
+  const previousRest = useRef(restLeft);
+  useEffect(() => {
+    if (
+      previousRest.current > 0 &&
+      restLeft === 0 &&
+      active.restEndsAt &&
+      now >= active.restEndsAt
+    ) {
+      if (sound) beep(3);
+      if (vibration) vibrate([120, 60, 120]);
+      toast.push(t('Rest time is up. Start your next set when you’re ready.'));
+    }
+    previousRest.current = restLeft;
+  }, [restLeft, active.restEndsAt, now, sound, vibration, toast.push, t]);
+  if (restLeft <= 0 || paused) return null;
+  return (
+    <Card className="mb-3 flex items-center gap-2 border-[var(--accent-line)] bg-[var(--accent-soft)] p-3">
+      <Timer size={20} className="text-[var(--accent)]" />
+      <div className="flex-1">
+        <p className="text-xs font-black">{t('Rest timer')}</p>
+        <p
+          role="timer"
+          aria-live="off"
+          className="num text-xl font-black text-[var(--accent)]"
+        >
+          {fmtClock(restLeft)}
+        </p>
+      </div>
+      <Btn
+        size="icon"
+        disabled={readOnly}
+        aria-label={t('Subtract 15 seconds rest')}
+        onClick={() => actions.nudgeRest(-15)}
+      >
+        <Minus size={15} />
+      </Btn>
+      <Btn
+        size="icon"
+        disabled={readOnly}
+        aria-label={t('Add 15 seconds rest')}
+        onClick={() => actions.nudgeRest(15)}
+      >
+        <Plus size={15} />
+      </Btn>
+      <Btn
+        size="sm"
+        disabled={readOnly}
+        onClick={actions.skipRest}
+        icon={<SkipForward size={14} />}
+      >
+        {t('Skip')}
+      </Btn>
+    </Card>
   );
 }
 

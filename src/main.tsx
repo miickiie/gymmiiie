@@ -5,6 +5,10 @@ import App from './App';
 import './index.css';
 import AccountGate from './components/AccountGate';
 import { ToastProvider } from './components/ui';
+import { loadGuideLanguage } from './lib/guide';
+import { getLanguage } from './lib/i18n';
+
+if (getLanguage() === 'th') void loadGuideLanguage();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

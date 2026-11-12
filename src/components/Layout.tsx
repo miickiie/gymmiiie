@@ -27,6 +27,7 @@ import { useStore } from '../lib/store';
 import { useI18n } from '../lib/i18n';
 import { Avatar, Btn, Sheet, useNow } from './ui';
 import { useAccount } from './AccountGate';
+import type { ActiveSession } from '../types';
 
 const NAV = [
   { to: '/', label: 'Today', icon: Home },
@@ -57,7 +58,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { account, signOut, switchUser } = useAccount();
   const location = useLocation();
   const navigate = useNavigate();
-  const data = useStore((s) => s.data);
+  const active = useStore((s) => s.data.active);
+  const sessions = useStore((s) => s.data.sessions);
+  const checkins = useStore((s) => s.data.checkins);
+  const daysOff = useStore((s) => s.data.daysOff);
+  const weekPlan = useStore((s) => s.data.weekPlan);
+  const unit = useStore((s) => s.data.settings.unit);
+  const weeklyGoal = useStore((s) => s.data.settings.weeklyGoal);
   const [more, setMore] = useState(false);
   const [accountMenu, setAccountMenu] = useState(false);
   const [installVisible, setInstallVisible] = useState(
@@ -73,11 +80,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       window.removeEventListener('gymmiie:installed', onInstalled);
     };
   }, []);
-  const active = data.active;
-  const now = useNow(!!active, 1000);
+  const [today, setToday] = useState(() => dateKey());
+  useEffect(() => {
+    // Re-check the streak when the date rolls over; React bails out when it is
+    // still the same day, so this does not re-render on every tick.
+    const id = setInterval(() => setToday(dateKey()), 60_000);
+    return () => clearInterval(id);
+  }, []);
   const streak = useMemo(
-    () => currentStreak(data),
-    [data.sessions, data.checkins, data.daysOff, dateKey(now)],
+    () => currentStreak({ sessions, checkins, daysOff, weekPlan }),
+    [sessions, checkins, daysOff, weekPlan, today],
   );
   const onSession = location.pathname === '/session';
 
@@ -176,7 +188,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 {t('Live workout')}
               </div>
               <p className="mt-1 num text-lg font-black">
-                {fmtClock(activeElapsed(active))}
+                <LiveElapsed active={active} />
               </p>
               <p className="mt-0.5 flex items-center gap-1 text-[11px] font-bold text-dim">
                 {t('Back to session')} <ArrowRight size={12} />
@@ -188,7 +200,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <Flame size={14} /> {t('{n} day streak', { n: streak })}
               </div>
               <p className="mt-1 text-[11px] font-semibold text-mute">
-                {t('{n} workouts logged · keep it going.', { n: data.sessions.length })}
+                {t('{n} workouts logged · keep it going.', { n: sessions.length })}
               </p>
               <Btn
                 size="sm"
@@ -210,8 +222,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="min-w-0">
               <p className="truncate text-xs font-black">{account.name}</p>
               <p className="text-[10px] font-bold text-mute">
-                {data.settings.unit} ·{' '}
-                {t('{n}× / week', { n: data.settings.weeklyGoal })}
+                {unit} ·{' '}
+                {t('{n}× / week', { n: weeklyGoal })}
               </p>
             </div>
           </button>
@@ -262,7 +274,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           >
             <span className="h-2 w-2 animate-pulseSoft rounded-full bg-[var(--accent)]" />
             {t('Workout in progress')} ·{' '}
-            <span className="num">{fmtClock(activeElapsed(active))}</span>
+            <span className="num">
+              <LiveElapsed active={active} />
+            </span>
             <ArrowRight size={14} className="ml-auto" />
           </button>
         </div>
@@ -395,4 +409,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </Sheet>
     </div>
   );
+}
+
+/** Isolates the per-second live workout clock so the shell does not re-render. */
+function LiveElapsed({ active }: { active: ActiveSession }) {
+  useNow(true, 1000);
+  return <>{fmtClock(activeElapsed(active))}</>;
 }

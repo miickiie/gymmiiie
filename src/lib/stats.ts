@@ -333,7 +333,9 @@ export function daysDoneThisWeek(data: AppData): number {
   return days.size;
 }
 
-export function currentStreak(data: AppData): number {
+export function currentStreak(
+  data: Pick<AppData, 'sessions' | 'checkins' | 'daysOff' | 'weekPlan'>,
+): number {
   const trained = new Set(data.sessions.map((s) => dateKey(s.date)));
   for (const c of data.checkins) trained.add(c);
   if (!trained.size) return 0;
@@ -499,14 +501,6 @@ export function activeVolume(a: ActiveSession | null): number {
     }
   }
   return kg;
-}
-
-export function activeSetsDone(a: ActiveSession | null): number {
-  if (!a) return 0;
-  return a.exercises.reduce(
-    (n, e) => n + e.sets.filter((s) => s.done && s.kind !== 'warmup').length,
-    0,
-  );
 }
 
 export function routineForWeek(

@@ -1,9 +1,7 @@
 import { Search, Star, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
-  EQUIPMENT,
   exerciseMatchesZone,
-  EXERCISES,
   searchExercises,
 } from '../lib/exercises';
 import { BODY_ZONES } from '../lib/stats';
@@ -159,5 +157,3 @@ export default function ExercisePicker({
     </Sheet>
   );
 }
-
-export { EQUIPMENT, EXERCISES };

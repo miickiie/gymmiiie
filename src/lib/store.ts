@@ -399,6 +399,28 @@ let suppressPersistence = false;
 let inFlightToken: string | undefined;
 let pendingCommitData: AppData | null = null;
 
+// Edits arrive per keystroke. Coalesce the journal write and IndexedDB
+// transaction so typing stays smooth; unload/visibility handlers still flush
+// synchronously before the page goes away.
+const PERSIST_DELAY_MS = 350;
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+
+function cancelScheduledPersist() {
+  if (persistTimer !== null) {
+    clearTimeout(persistTimer);
+    persistTimer = null;
+  }
+}
+
+function schedulePersist() {
+  cancelScheduledPersist();
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    journalLatest();
+    void flushQueued().catch(() => undefined);
+  }, PERSIST_DELAY_MS);
+}
+
 function invalidNumbers(
   patch: object,
   keys: readonly string[],
@@ -1212,6 +1234,7 @@ function transitionAccount(action: () => Promise<void>): Promise<void> {
 }
 
 function resetPersistenceContext() {
+  cancelScheduledPersist();
   savedRevision = 0;
   lastPersistedData = null;
   recoveryData = undefined;
@@ -1704,6 +1727,7 @@ function journalLatest(): boolean {
 }
 
 function flushQueued(): Promise<void> {
+  cancelScheduledPersist();
   const scope = activeAccountId,
     epoch = accountEpoch;
   const state = useStore.getState();
@@ -1794,7 +1818,6 @@ async function commitData(data: AppData): Promise<void> {
 useStore.subscribe((state, previous) => {
   if (suppressPersistence || !state.hydrated || state.data === previous.data)
     return;
-  journalLatest();
   if (
     state.persistenceStatus === 'conflict' ||
     state.persistenceStatus === 'error'
@@ -1802,9 +1825,7 @@ useStore.subscribe((state, previous) => {
     return;
   if (state.persistenceStatus !== 'saving')
     useStore.setState({ persistenceStatus: 'saving' });
-  // Start the transaction in the same turn as the edit, before navigation can
-  // unload the page. An existing writer drains any newer snapshot afterward.
-  void flushQueued().catch(() => undefined);
+  schedulePersist();
 });
 
 if (typeof window !== 'undefined') {

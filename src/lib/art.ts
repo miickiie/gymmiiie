@@ -93,6 +93,8 @@ export function loadMotion(slug: string): Promise<ArtData | null> {
 // scripts/build-art.mjs).
 // ---------------------------------------------------------------------------
 import instructions from '../data/instructions.json';
+import { getLanguage } from './i18n';
+import { guideTranslations, loadGuideLanguage } from './guide';
 
 export interface ExerciseInstructions {
   steps: string[];
@@ -106,6 +108,17 @@ const INSTRUCTIONS = instructions as unknown as Record<
   ExerciseInstructions
 >;
 
+function localizeGuide(lines: string[]): string[] {
+  if (getLanguage() !== 'th') return lines;
+  const th = guideTranslations();
+  if (!th) {
+    // The Thai copy loads on demand; the caller re-renders when it arrives.
+    void loadGuideLanguage();
+    return lines;
+  }
+  return lines.map((line) => th[line] ?? line);
+}
+
 export function instructionsOf(
   exerciseId: string,
 ): ExerciseInstructions | undefined {
@@ -117,9 +130,11 @@ export function instructionsOf(
 
 // Reviewed corrections take priority over original catalog or custom-authored steps.
 export function stepsFor(exercise: { id: string; steps: string[] }): string[] {
-  return instructionsOf(exercise.id)?.steps ?? exercise.steps ?? [];
+  return localizeGuide(
+    instructionsOf(exercise.id)?.steps ?? exercise.steps ?? [],
+  );
 }
 
 export function tipsFor(exercise: { id: string }): string[] {
-  return instructionsOf(exercise.id)?.tips ?? [];
+  return localizeGuide(instructionsOf(exercise.id)?.tips ?? []);
 }

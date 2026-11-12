@@ -92,11 +92,6 @@ export function fmtClock(sec: number): string {
   return h > 0 ? `${h}:${pad(m)}:${pad(ss)}` : `${pad(m)}:${pad(ss)}`;
 }
 
-export function fmtNumber(n: number, digits = 0): string {
-  if (!Number.isFinite(n)) return '0';
-  return n.toLocaleString(undefined, { maximumFractionDigits: digits, minimumFractionDigits: 0 });
-}
-
 export function roundTo(n: number, step: number): number {
   if (step <= 0) return n;
   return Math.round(n / step) * step;
