@@ -162,53 +162,32 @@ describe('native D1 account registration and sessions', () => {
     ).toBe(400);
   });
 
-  it('keeps the original account and snapshot when enrolling a legacy telephone account', async () => {
-    const id = crypto.randomUUID();
-    const original = snapshot('Original training log');
-    const payload = JSON.stringify(original);
-    const telephone = '+66812345678';
-    await runtime.db.batch([
-      runtime.db.prepare('INSERT INTO accounts (id, name, normalized_name, telephone, created_at) VALUES (?1, ?2, ?3, ?4, ?5)')
-        .bind(id, identity.name, identity.name.toLowerCase(), telephone, Date.now()),
-      runtime.db.prepare('INSERT INTO account_snapshots (account_id, payload, revision) VALUES (?1, ?2, 7)')
-        .bind(id, payload),
-    ]);
-    const wrongTelephone = await request('POST', '/api/accounts/pin', {
-      ...identity, telephone: '+66812345679',
+  it('rejects the retired telephone enrollment endpoint without changing the current PIN', async () => {
+    const { account } = await register();
+    const before = await runtime.db.prepare(
+      'SELECT pin_hash FROM account_pins WHERE account_id = ?1',
+    ).bind(account.id).first();
+    const sessionsBefore = await runtime.db.prepare(
+      'SELECT COUNT(*) AS count FROM account_sessions',
+    ).first();
+    const retired = await request('POST', '/api/accounts/pin', {
+      name: identity.name,
+      telephone: '+66812345678',
+      pin: '5678',
     });
-    expect(wrongTelephone.status).toBe(404);
-    const enrolled = await request('POST', '/api/accounts/pin', { ...identity, telephone });
-    expect(enrolled.status).toBe(200);
-    expect((await enrolled.json()).account).toEqual({ id, name: identity.name });
-    const cookie = enrolled.headers.get('set-cookie')!.split(';')[0];
-    const saved = await request('GET', `/api/accounts/${id}/data`, undefined, { cookie });
-    expect((await saved.json()).data).toEqual(original);
-    const row = await runtime.db.prepare('SELECT payload, revision FROM account_snapshots WHERE account_id = ?1').bind(id).first();
-    expect(row).toEqual({ payload, revision: 7 });
-    const pinRow = await runtime.db.prepare('SELECT pin_hash FROM account_pins WHERE account_id = ?1').bind(id).first();
-    expect(pinRow.pin_hash).toMatch(/^[a-f0-9]{64}$/);
-    expect(pinRow.pin_hash).not.toBe(identity.pin);
-    expect((await request('POST', '/api/session', identity)).status).toBe(200);
-    expect((await request('POST', '/api/session', { name: identity.name, telephone })).status).toBe(400);
-    expect((await request('POST', '/api/accounts/pin', { ...identity, telephone })).status).toBe(404);
-  });
-
-  it('keeps a legacy account accessible when its selected name and PIN are already taken', async () => {
-    const existing = await register();
-    const id = crypto.randomUUID();
-    const telephone = '+66899999999';
-    await runtime.db.batch([
-      runtime.db.prepare('INSERT INTO accounts (id, name, normalized_name, telephone, created_at) VALUES (?1, ?2, ?3, ?4, ?5)')
-        .bind(id, identity.name, identity.name.toLowerCase(), telephone, Date.now()),
-      runtime.db.prepare('INSERT INTO account_snapshots (account_id) VALUES (?1)').bind(id),
-    ]);
-    expect((await request('POST', '/api/accounts/pin', { ...identity, telephone })).status).toBe(409);
-    const legacy = await runtime.db.prepare('SELECT telephone FROM accounts WHERE id = ?1').bind(id).first();
-    expect(legacy.telephone).toBe(telephone);
-    const enrolled = await request('POST', '/api/accounts/pin', { ...identity, telephone, pin: '5678' });
-    expect(enrolled.status).toBe(200);
-    expect((await enrolled.json()).account.id).toBe(id);
-    expect((await (await request('POST', '/api/session', identity)).json()).account.id).toBe(existing.account.id);
+    expect(retired.status).toBe(404);
+    expect(await retired.json()).toEqual({ error: 'Not found' });
+    expect(retired.headers.get('set-cookie')).toBeNull();
+    expect(await runtime.db.prepare(
+      'SELECT pin_hash FROM account_pins WHERE account_id = ?1',
+    ).bind(account.id).first()).toEqual(before);
+    expect(await runtime.db.prepare(
+      'SELECT COUNT(*) AS count FROM account_sessions',
+    ).first()).toEqual(sessionsBefore);
+    const login = await request('POST', '/api/session', identity);
+    expect(login.status).toBe(200);
+    expect((await login.json()).account.id).toBe(account.id);
+    expect((await request('POST', '/api/session', { ...identity, pin: '5678' })).status).toBe(404);
   });
 
   it('limits PIN attempts by normalized name across different IPs', async () => {

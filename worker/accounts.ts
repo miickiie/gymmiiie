@@ -1,5 +1,4 @@
 import {
-  normalizeIdentity,
   normalizePinIdentity,
   IdentityValidationError,
 } from '../src/lib/identity';
@@ -27,10 +26,6 @@ export const MAX_ACCOUNT_PAYLOAD_BYTES = 1_900_000;
 export interface Account {
   id: string;
   name: string;
-}
-interface AccountRow extends Account {
-  normalized_name: string;
-  telephone: string;
 }
 interface CommitReceipt {
   request_hash: string;
@@ -170,18 +165,6 @@ async function findPinAccount(
   ).bind(normalizedName, pinHash).first<Account>();
 }
 
-async function findAccount(
-  env: Env,
-  normalizedName: string,
-  telephone: string,
-): Promise<AccountRow | null> {
-  return env.DB.prepare(
-    'SELECT id, name, normalized_name, telephone FROM accounts WHERE normalized_name = ?1 AND telephone = ?2',
-  )
-    .bind(normalizedName, telephone)
-    .first<AccountRow>();
-}
-
 async function issueSession(
   request: Request,
   env: Env,
@@ -231,16 +214,6 @@ async function requireSession(request: Request, env: Env): Promise<Account> {
       'Your session expired. Sign in again.',
     );
   return account;
-}
-
-function identity(body: Record<string, unknown>) {
-  try {
-    return normalizeIdentity({ name: body.name, telephone: body.telephone });
-  } catch (error) {
-    if (error instanceof IdentityValidationError)
-      throw new ApiError('invalid_identity', 400, error.message);
-    throw error;
-  }
 }
 
 function pinIdentity(body: Record<string, unknown>) {
@@ -330,34 +303,6 @@ async function register(request: Request, env: Env): Promise<Response> {
       'This account already exists. Sign in with its name and PIN.',
     );
   return issueSession(request, env, account, 201);
-}
-
-async function enrollPin(request: Request, env: Env): Promise<Response> {
-  await rateLimit(request, env, 'login');
-  const body = await readJson(request, AUTH_BODY_BYTES);
-  const legacy = identity(body);
-  const normalized = pinIdentity(body);
-  await limitPinAttempts(env, normalized.normalizedName);
-  const account = await findAccount(env, legacy.normalizedName, legacy.telephone);
-  if (!account)
-    throw new ApiError('account_not_found', 404, 'No account matches this name and telephone.');
-  const pinHash = await hashPin(env, normalized, true);
-  await env.DB.batch([
-    env.DB.prepare(
-      `INSERT INTO account_pins (account_id, normalized_name, pin_hash)
-       SELECT id, normalized_name, ?2 FROM accounts WHERE id = ?1 AND telephone = ?3
-       ON CONFLICT DO NOTHING`,
-    ).bind(account.id, pinHash, legacy.telephone),
-    env.DB.prepare(
-      `UPDATE accounts SET telephone = ?2 WHERE id = ?1 AND EXISTS (
-         SELECT 1 FROM account_pins WHERE account_id = ?1 AND pin_hash = ?3
-       )`,
-    ).bind(account.id, `pin:${account.id}`, pinHash),
-  ]);
-  const enrolled = await findPinAccount(env, normalized.normalizedName, pinHash);
-  if (enrolled?.id !== account.id)
-    throw new ApiError('pin_unavailable', 409, 'This name and PIN are already in use. Choose another PIN.');
-  return issueSession(request, env, enrolled);
 }
 
 async function session(request: Request, env: Env): Promise<Response> {
@@ -517,14 +462,9 @@ export async function handleAccounts(
 ): Promise<Response | null> {
   const path = new URL(request.url).pathname;
   const match = /^\/api\/accounts\/([^/]+)\/data$/.exec(path);
-  if (path !== '/api/accounts/register' && path !== '/api/accounts/pin' && path !== '/api/session' && !match)
+  if (path !== '/api/accounts/register' && path !== '/api/session' && !match)
     return null;
   requireSameOrigin(request);
-  if (path === '/api/accounts/pin') {
-    if (request.method !== 'POST')
-      throw new ApiError('method_not_allowed', 405, 'Method not allowed.');
-    return enrollPin(request, env);
-  }
   if (path === '/api/accounts/register') {
     if (request.method !== 'POST')
       throw new ApiError('method_not_allowed', 405, 'Method not allowed.');

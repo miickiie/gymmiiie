@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { parseBackup } from '../src/lib/backup';
-import { defaultData } from '../src/lib/defaults';
 import { enterNumber, seed, snapshot, startWithPushup } from './fixtures';
 
 const origin = `http://127.0.0.1:${process.env.GYMMIIE_TEST_PORT ?? 4173}`;
@@ -353,50 +352,13 @@ test('older device tracking stays separate until its import is explicitly confir
   ).toBe(15);
 });
 
-test('a legacy account enrolls a PIN and keeps its active workout', async ({ page }) => {
-  await page.context().setExtraHTTPHeaders({ 'X-Gymmiie-Test-Client': randomUUID() });
-  const user = { name: `Legacy athlete ${randomUUID()}`, pin: '0042' };
-  const data = defaultData();
-  data.onboarded = true;
-  data.active = {
-    id: 'legacy-workout', startedAt: Date.now(), pausedTotalSec: 0, currentIndex: 0,
-    exercises: [{ uid: 'legacy-machine', id: 'legacy-machine', name: 'Original machine',
-      primary: 'chest', mode: '', loadKind: 'external',
-      sets: [{ reps: 12, weight: 25, done: false, kind: 'normal' }],
-    }],
-  };
-  const seeded = await page.request.post('/__test/seed', {
-    data: { data, name: user.name, legacyTelephone: '+12025550121' },
-  });
-  expect(seeded.status()).toBe(201);
-  const { account } = await seeded.json();
-  await page.goto('/');
-  await expect(page.getByLabel('Telephone', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Set PIN for existing account', exact: true }).click();
-  await page.getByLabel('Name', { exact: true }).fill(user.name);
-  await page.getByLabel('Telephone', { exact: true }).fill('+12025550122');
-  await page.getByLabel('PIN (4 digits)', { exact: true }).fill(user.pin);
-  await page.getByRole('button', { name: 'Set PIN and sign in', exact: true }).click();
-  await expect(page.getByRole('alert')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Set your 4-digit PIN', exact: true })).toBeVisible();
-  await page.getByLabel('Telephone', { exact: true }).fill('+12025550121');
-  await page.getByRole('button', { name: 'Set PIN and sign in', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Page content' })).toBeVisible();
-  expect(parseBackup(await snapshot(page, account.id)).active).toEqual(data.active);
-  await signOut(page);
-  await signIn(page, user);
-  await expect(page.getByRole('region', { name: 'Page content' })).toBeVisible();
-  const session = await page.request.get('/api/session');
-  expect((await session.json()).account.id).toBe(account.id);
-  expect(parseBackup(await snapshot(page, account.id)).active).toEqual(data.active);
-});
-
 test('sign in requires exactly four PIN digits', async ({
   page,
 }) => {
   await page.goto('/');
   await page.getByLabel('Name', { exact: true }).fill('Validation athlete');
   await expect(page.getByLabel('Telephone', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Set PIN for existing account', exact: true })).toHaveCount(0);
   const pin = page.getByLabel('PIN (4 digits)', { exact: true });
   await expect(pin).toHaveAttribute('type', 'password');
   await expect(pin).toHaveAttribute('inputmode', 'numeric');

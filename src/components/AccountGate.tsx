@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router-dom';
 import type { AppData } from '../types';
 import {
   AccountApiError,
-  enrollAccountPin,
   getRememberedAccount,
   getSession,
   isLocallySignedOut,
@@ -19,7 +18,7 @@ import {
   registerAccount,
   type Account,
 } from '../lib/accounts';
-import { identityFieldErrors, pinIdentityFieldErrors, PIN_LENGTH } from '../lib/identity';
+import { pinIdentityFieldErrors, PIN_LENGTH } from '../lib/identity';
 import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import { Btn, Card, Confirm, Field, Sheet, useToast } from './ui';
@@ -28,12 +27,6 @@ const TH: Record<string, string> = {
   'PIN (4 digits)': 'PIN 4 หลัก',
   'Enter your 4-digit PIN.': 'กรอก PIN 4 หลัก',
   'Use exactly 4 digits for your PIN.': 'ใช้ตัวเลข 4 หลักสำหรับ PIN',
-  'Set your 4-digit PIN': 'ตั้ง PIN 4 หลัก',
-  'Setting your PIN…': 'กำลังตั้ง PIN…',
-  'Set PIN and sign in': 'ตั้ง PIN และเข้าสู่ระบบ',
-  'Set PIN for existing account': 'ตั้ง PIN สำหรับบัญชีเดิม',
-  'Verify your existing name and telephone once. Your workout history stays with this account.':
-    'ยืนยันชื่อและเบอร์โทรเดิมครั้งเดียว ประวัติการฝึกจะอยู่กับบัญชีเดิม',
   'Enter the same name and 4-digit PIN to open your training log.':
     'กรอกชื่อและ PIN 4 หลักเดิมเพื่อเปิดบันทึกการฝึกของคุณ',
   'Your session has ended. Enter your name and PIN to continue. Unsynced changes are kept with this account on this device.':
@@ -42,8 +35,6 @@ const TH: Record<string, string> = {
     'ซิงก์ข้อมูลแล้ว กรอกชื่อและ PIN ของผู้ใช้คนอื่น',
   'Account: {name}': 'บัญชี: {name}',
   'No account matches this name and PIN.': 'ไม่พบบัญชีที่ตรงกับชื่อและ PIN นี้',
-  'This name and PIN are already in use. Choose another PIN.':
-    'มีผู้ใช้ชื่อและ PIN นี้แล้ว กรุณาเลือก PIN อื่น',
   'The older device log could not be opened. It has been kept.':
     'เปิดบันทึกเดิมในเครื่องไม่ได้ แต่ยังเก็บไว้อยู่',
   'The account log could not be loaded.': 'โหลดบันทึกของบัญชีไม่ได้',
@@ -94,9 +85,6 @@ const TH: Record<string, string> = {
   'No user was found with these details. A registration passphrase is required to create one.':
     'ไม่พบผู้ใช้ที่ตรงกับข้อมูลนี้ ต้องใช้รหัสสมัครสมาชิกเพื่อสร้างใหม่',
   Name: 'ชื่อ',
-  Telephone: 'เบอร์โทร',
-  'Include + and the international country calling code.':
-    'ใส่ + และรหัสประเทศด้วย',
   'Registration passphrase': 'รหัสสมัครสมาชิก',
   'Creating user…': 'กำลังสร้างผู้ใช้…',
   'Opening your log…': 'กำลังเปิดบันทึกของคุณ…',
@@ -649,15 +637,13 @@ function AccountForm({
 }) {
   const { t } = useI18n(TH);
   const [name, setName] = useState('');
-  const [telephone, setTelephone] = useState('');
   const [pin, setPin] = useState('');
   const [passphrase, setPassphrase] = useState('');
   const [register, setRegister] = useState(false);
-  const [upgrade, setUpgrade] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(initialError);
   const [fields, setFields] = useState<
-    Partial<Record<'name' | 'telephone' | 'pin', string>>
+    Partial<Record<'name' | 'pin', string>>
   >({});
   const resetIdentity = () => {
     setRegister(false);
@@ -668,10 +654,7 @@ function AccountForm({
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (busy) return;
-    const invalid = {
-      ...pinIdentityFieldErrors(name, pin),
-      ...(upgrade ? identityFieldErrors(name, telephone) : {}),
-    };
+    const invalid = pinIdentityFieldErrors(name, pin);
     setFields(invalid);
     if (Object.keys(invalid).length) return;
     if (register && !passphrase) {
@@ -681,19 +664,15 @@ function AccountForm({
     setBusy(true);
     setError('');
     try {
-      const candidate = upgrade
-        ? await enrollAccountPin(name, telephone, pin)
-        : register
-          ? await registerAccount(name, pin, passphrase)
-          : await loginAccount(name, pin);
+      const candidate = register
+        ? await registerAccount(name, pin, passphrase)
+        : await loginAccount(name, pin);
       setPassphrase('');
       setPin('');
-      setTelephone('');
       await onAccount(candidate);
     } catch (failure) {
       if (
         !register &&
-        !upgrade &&
         failure instanceof AccountApiError &&
         failure.status === 404 &&
         failure.code === 'account_not_found'
@@ -714,12 +693,10 @@ function AccountForm({
   return (
     <form onSubmit={(event) => void submit(event)}>
       <h1 className="text-2xl font-black">
-        {upgrade ? t('Set your 4-digit PIN') : register ? t('Create your user') : t('Welcome to Gymmiie')}
+        {register ? t('Create your user') : t('Welcome to Gymmiie')}
       </h1>
       <p className="mt-2 text-sm font-semibold text-dim">
-        {upgrade
-          ? t('Verify your existing name and telephone once. Your workout history stays with this account.')
-          : register
+        {register
           ? t(
               'No user was found with these details. A registration passphrase is required to create one.',
             )
@@ -760,38 +737,6 @@ function AccountForm({
             {t(fields.name)}
           </p>
         )}
-        {upgrade && <Field
-          label={t('Telephone')}
-          hint={t('Include + and the international country calling code.')}
-        >
-          <input
-            aria-label={t('Telephone')}
-            name="telephone"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            className="input"
-            value={telephone}
-            disabled={busy}
-            aria-invalid={!!fields.telephone}
-            aria-describedby={
-              fields.telephone ? 'account-telephone-error' : undefined
-            }
-            onChange={(event) => {
-              setTelephone(event.target.value);
-              resetIdentity();
-            }}
-          />
-        </Field>}
-        {fields.telephone && (
-          <p
-            role="alert"
-            id="account-telephone-error"
-            className="text-xs font-bold text-[var(--bad)]"
-          >
-            {t(fields.telephone)}
-          </p>
-        )}
         <Field label={t('PIN (4 digits)')}>
           <input
             aria-label={t('PIN (4 digits)')}
@@ -799,7 +744,7 @@ function AccountForm({
             type="password"
             inputMode="numeric"
             maxLength={PIN_LENGTH}
-            autoComplete={register || upgrade ? 'new-password' : 'current-password'}
+            autoComplete={register ? 'new-password' : 'current-password'}
             className="input tracking-widest"
             value={pin}
             disabled={busy}
@@ -842,34 +787,19 @@ function AccountForm({
         disabled={busy}
       >
         {busy
-          ? upgrade
-            ? t('Setting your PIN…')
-            : register
+          ? register
             ? t('Creating user…')
             : t('Opening your log…')
-          : upgrade
-            ? t('Set PIN and sign in')
-            : register
+          : register
             ? t('Create user')
             : t('Continue')}
       </Btn>
-      {(register || upgrade) && (
+      {register && (
         <Btn className="mt-2 w-full" disabled={busy} onClick={() => {
-          setUpgrade(false);
           setPin('');
-          setTelephone('');
           resetIdentity();
         }}>
           {t('Back to sign in')}
-        </Btn>
-      )}
-      {!register && !upgrade && (
-        <Btn className="mt-2 w-full" disabled={busy} onClick={() => {
-          resetIdentity();
-          setPin('');
-          setUpgrade(true);
-        }}>
-          {t('Set PIN for existing account')}
         </Btn>
       )}
       {initialError && !register && (

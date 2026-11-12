@@ -26,7 +26,7 @@ Guide coverage and outstanding catalogue review are tracked in
 ## Accounts and user flow
 
 - The signed-out home asks for **Name** and a masked **4-digit PIN**. Leading zeros are preserved and the same validation runs in the browser and server.
-- Existing accounts choose **Set PIN for existing account**, confirm their original name and international telephone once, and choose a PIN. Their account ID and tracking data stay intact. Telephone access is disabled after successful enrollment.
+- Existing accounts return with their current name and PIN. Account IDs and tracking data stay intact.
 - PINs are stored as PBKDF2-SHA-256 hashes with random salts per normalized name. Both IP and normalized-name attempt limits apply. Different users can share a name if their PINs differ.
 - **Continue** opens an existing user. Only a confirmed account-not-found response offers **Create user**, which additionally requires the registration passphrase. Connection/server failures offer retry and never create a replacement user automatically.
 - Account identity is separate from the editable training display name in Settings.

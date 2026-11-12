@@ -1,4 +1,4 @@
-export type IdentityField = 'name' | 'telephone' | 'pin';
+export type IdentityField = 'name' | 'pin';
 
 export const PIN_LENGTH = 4;
 
@@ -10,12 +10,6 @@ export class IdentityValidationError extends Error {
     super(message);
     this.name = 'IdentityValidationError';
   }
-}
-
-export interface NormalizedIdentity {
-  name: string;
-  normalizedName: string;
-  telephone: string;
 }
 
 export interface NormalizedPinIdentity {
@@ -49,63 +43,18 @@ export function normalizePinIdentity(input: {
   return { ...name, pin };
 }
 
-/** Telephone is accepted only to enroll an existing account in PIN sign-in. */
-export function normalizeIdentity(input: {
-  name: unknown;
-  telephone: unknown;
-}): NormalizedIdentity {
-  const name = normalizeName(input.name);
-  if (typeof input.telephone !== 'string')
-    throw new IdentityValidationError(
-      'telephone',
-      'Enter your telephone number.',
-    );
-  const telephone = input.telephone
-    .normalize('NFKC')
-    .trim()
-    .replace(/[\s()./\-]/gu, '');
-  if (!/^\+[1-9][0-9]{7,14}$/.test(telephone))
-    throw new IdentityValidationError(
-      'telephone',
-      'Use + and your country code, followed by 8–15 digits in total.',
-    );
-  return { ...name, telephone };
-}
-
-export function identityFieldErrors(
-  name: string,
-  telephone: string,
-): Partial<Record<IdentityField, string>> {
-  return validationErrors(name, telephone, 'telephone');
-}
-
 export function pinIdentityFieldErrors(
   name: string,
   pin: string,
 ): Partial<Record<IdentityField, string>> {
-  return validationErrors(name, pin, 'pin');
-}
-
-function validationErrors(
-  name: string,
-  credential: string,
-  credentialField: 'telephone' | 'pin',
-): Partial<Record<IdentityField, string>> {
   const errors: Partial<Record<IdentityField, string>> = {};
   // Validate independently so both fields can show useful feedback together.
-  for (const field of ['name', credentialField] as const) {
+  for (const field of ['name', 'pin'] as const) {
     try {
-      const validationName = field === 'name' ? name : 'Validation';
-      if (credentialField === 'pin')
-        normalizePinIdentity({
-          name: validationName,
-          pin: field === 'pin' ? credential : '0000',
-        });
-      else
-        normalizeIdentity({
-          name: validationName,
-          telephone: field === 'telephone' ? credential : '+1234567890',
-        });
+      normalizePinIdentity({
+        name: field === 'name' ? name : 'Validation',
+        pin: field === 'pin' ? pin : '0000',
+      });
     } catch (error) {
       if (error instanceof IdentityValidationError)
         errors[field] = error.message;

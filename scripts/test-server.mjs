@@ -73,18 +73,6 @@ async function sendWorkerResponse(response, outgoing) {
 // These fixture routes exist only in this local test server, never in the deployed Worker.
 async function seedAccount(request, outgoing) {
   const input = JSON.parse((await bodyOf(request)).toString('utf8'));
-  if (typeof input.legacyTelephone === 'string') {
-    const account = { id: randomUUID(), name: input.name };
-    await runtime.db.batch([
-      runtime.db.prepare('INSERT INTO accounts (id, name, normalized_name, telephone, created_at) VALUES (?1, ?2, ?3, ?4, ?5)')
-        .bind(account.id, account.name, account.name.toLowerCase(), input.legacyTelephone, Date.now()),
-      runtime.db.prepare('INSERT INTO account_snapshots (account_id, payload, revision) VALUES (?1, ?2, 1)')
-        .bind(account.id, JSON.stringify(input.data)),
-    ]);
-    outgoing.writeHead(201, { 'content-type': 'application/json', 'cache-control': 'no-store' });
-    outgoing.end(JSON.stringify({ account }));
-    return;
-  }
   const suffix = randomUUID().replaceAll('-', '');
   const identity = {
     name: input.name || `Browser test ${suffix}`,

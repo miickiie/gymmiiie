@@ -198,20 +198,6 @@ export async function registerAccount(
   return account;
 }
 
-export async function enrollAccountPin(
-  name: string,
-  telephone: string,
-  pin: string,
-): Promise<Account> {
-  const result = (await request('/api/accounts/pin', {
-    method: 'POST',
-    body: JSON.stringify({ name, telephone, pin }),
-  })) as { account: unknown };
-  const account = validAccount(result.account);
-  rememberAccount(account);
-  announceSession(account.id);
-  return account;
-}
 export async function logoutAccount(accountId: string): Promise<void> {
   lockDevice(accountId);
   announceSession(null, accountId);
