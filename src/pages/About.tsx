@@ -20,8 +20,6 @@ import { useStore } from '../lib/store';
 const TH: Record<string, string> = {
   About: 'เกี่ยวกับ',
   'Built for the long haul': 'สร้างมาเพื่อระยะยาว',
-  'Gym training log and library':
-    'บันทึกการฝึกสำหรับ Gym',
   'Flexible workouts': 'ฝึกได้ยืดหยุ่น',
   'Use a routine, start empty, or review optional muscle-based suggestions.':
     'ใช้ตารางฝึก เริ่มจากว่าง หรือดูคำแนะนำตามกล้ามเนื้อ',
@@ -121,7 +119,6 @@ export default function About() {
       <PageHeader
         eyebrow={t('About')}
         title={t('Built for the long haul')}
-        subtitle={t('Gym training log and library')}
       />
 
       <Card className="relative overflow-hidden p-6">
