@@ -147,6 +147,7 @@ export default function Routines() {
       <PageHeader
         eyebrow={t('Routines')}
         title={t('Your weekly plan')}
+        stackActionsOnMobile
         subtitle={t(
           '{n} routines · tap a day to plan it · start any routine in one tap',
           { n: data.routines.length },

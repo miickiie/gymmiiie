@@ -169,15 +169,28 @@ export function PageHeader({
   title,
   subtitle,
   action,
+  stackActionsOnMobile = false,
 }: {
   eyebrow?: string;
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
+  stackActionsOnMobile?: boolean;
 }) {
   return (
-    <div className="mb-5 flex items-start justify-between gap-4">
-      <div>
+    <div
+      className={clsx(
+        'mb-5 flex gap-4',
+        stackActionsOnMobile
+          ? 'flex-col items-stretch sm:flex-row sm:items-start sm:justify-between'
+          : 'items-start justify-between',
+      )}
+    >
+      <div
+        className={
+          stackActionsOnMobile ? 'min-w-0 w-full text-left sm:flex-1' : undefined
+        }
+      >
         {eyebrow && <p className="label mb-1">{eyebrow}</p>}
         <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
           {title}
@@ -188,7 +201,13 @@ export function PageHeader({
           </p>
         )}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
+      {action && (
+        <div
+          className={clsx('shrink-0', stackActionsOnMobile && 'w-full sm:w-auto')}
+        >
+          {action}
+        </div>
+      )}
     </div>
   );
 }
