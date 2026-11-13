@@ -48,18 +48,34 @@ const ToastCtx = createContext<{
   push: (msg: string, tone?: Tone) => void;
   clear: () => void;
   mountCat: (host: HTMLElement) => () => void;
+  mountCatDock: (host: HTMLElement) => () => void;
 }>({
   push: () => {},
   clear: () => {},
   mountCat: () => () => {},
+  mountCatDock: () => () => {},
 });
 export const useToast = () => useContext(ToastCtx);
+
+export function CatDock() {
+  const { mountCatDock } = useToast();
+  const host = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (host.current) return mountCatDock(host.current);
+  }, [mountCatDock]);
+  return <div ref={host} className="gym-cat-dock" />;
+}
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const { t } = useI18n(TH);
   const update = useAppUpdate();
   const [items, setItems] = useState<ToastItem[]>([]);
   const [catHosts, setCatHosts] = useState<HTMLElement[]>([]);
+  const [catDock, setCatDock] = useState<HTMLElement>();
+  const mountCatDock = useCallback((host: HTMLElement) => {
+    setCatDock(host);
+    return () => setCatDock((current) => current === host ? undefined : current);
+  }, []);
   const mountCat = useCallback((host: HTMLElement) => {
     setCatHosts((hosts) => [...hosts, host]);
     return () => setCatHosts((hosts) => hosts.filter((item) => item !== host));
@@ -84,7 +100,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     },
   } : undefined;
   return (
-    <ToastCtx.Provider value={{ push, clear, mountCat }}>
+    <ToastCtx.Provider value={{ push, clear, mountCat, mountCatDock }}>
       {children}
       <CatCompanion
         message={items[0] ?? updateNotice}
@@ -92,6 +108,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         onDismiss={items.length ? dismiss : update.dismiss}
         onEncourage={encourage}
         host={catHosts.at(-1)}
+        dock={catDock}
       />
     </ToastCtx.Provider>
   );
@@ -434,8 +451,8 @@ export function NumericInput({
           value={value}
           unit={unit}
           onCancel={() => setOpen(false)}
-          onApply={(raw) => {
-            if (raw !== String(value)) onValueChange(raw);
+          onApply={(raw, edited) => {
+            if (edited || raw !== String(value)) onValueChange(raw);
             onValueCommit?.(raw);
             setOpen(false);
           }}
@@ -968,7 +985,7 @@ export function BarChart({
             className="group flex h-full flex-1 flex-col justify-end gap-1"
           >
             <div
-              className="relative w-full rounded-t-md bg-[var(--accent)]/85 transition-all hover:bg-[var(--accent)]"
+              className="relative w-full rounded-t-md bg-[var(--accent)] transition-all"
               style={{ height: `${Math.max(2, (d.value / max) * 100)}%` }}
               title={`${d.label}: ${fmt(d.value)}`}
             />

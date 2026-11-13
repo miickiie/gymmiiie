@@ -60,7 +60,7 @@ describe('exercise logging defaults', () => {
   it('starts cardio without fabricating distance and preserves duration-only history', () => {
     const ex = exercise('running');
     expect(openingSets(ex, [], 'kg')).toEqual([
-      { reps: 0, weight: 0, sec: 0, km: 0, done: false, kind: 'normal' },
+      { editedFields: {}, reps: 0, weight: 0, sec: 0, km: 0, done: false, kind: 'normal' },
     ]);
     expect(
       openingSets(

@@ -1,5 +1,6 @@
 import {
   ArrowDown,
+  ArrowLeft,
   ArrowUp,
   BookOpen,
   CalendarDays,
@@ -16,11 +17,13 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import BodyMap from '../components/BodyMap';
 import { ArtThumb } from '../components/ExerciseArt';
+import { ExerciseGuide } from '../components/ExerciseGuide';
 import ExercisePicker from '../components/ExercisePicker';
 import { ExerciseIcon } from '../components/ExerciseTile';
 import {
   Btn,
   Card,
+  CatDock,
   Chip,
   EmptyState,
   PageHeader,
@@ -83,6 +86,8 @@ const TH: Record<string, string> = {
   Train: 'ฝึก',
   'Warm-up': 'วอร์มอัป',
   'Workout in progress': 'กำลังฝึกอยู่',
+  'Form guide': 'คำแนะนำการทำท่า',
+  'Form guide · {name}': 'คู่มือท่า · {name}',
 };
 
 const WARMUP_IDS = [
@@ -106,6 +111,7 @@ export default function Train() {
   const [picks, setPicks] = useState<Exercise[]>([]);
   const [picker, setPicker] = useState(false);
   const [replaceId, setReplaceId] = useState<string | null>(null);
+  const [guideExercise, setGuideExercise] = useState<Exercise | null>(null);
   const all = useMemo(() => allExercises(), [data.customExercises]);
   const today = routineForWeek(data);
   const uncovered = selected.filter(
@@ -415,7 +421,13 @@ export default function Train() {
                       fallback={<ExerciseIcon ex={ex} size={40} />}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-black">{ex.name}</p>
+                      <button
+                        type="button"
+                        className="text-left text-sm font-black hover:text-[var(--accent)]"
+                        onClick={() => setGuideExercise(ex)}
+                      >
+                        {ex.name}
+                      </button>
                       <p className="text-xs font-semibold text-mute">
                         {tm(ex.primary, MUSCLE_LABEL[ex.primary] ?? ex.primary)}{' '}
                         · {t(ex.equipment)}
@@ -428,6 +440,14 @@ export default function Train() {
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap justify-end gap-1">
+                    <Btn
+                      size="sm"
+                      aria-label={t('Form guide · {name}', { name: ex.name })}
+                      icon={<BookOpen size={14} />}
+                      onClick={() => setGuideExercise(ex)}
+                    >
+                      {t('Form guide')}
+                    </Btn>
                     <Btn
                       size="icon"
                       disabled={index === 0}
@@ -475,8 +495,16 @@ export default function Train() {
               }
             />
           )}
-          <div className="sticky bottom-20 z-10 mt-4 flex gap-2 rounded-2xl border border-line bg-[var(--bg)]/95 p-2 backdrop-blur lg:bottom-4">
-            <Btn onClick={() => setReviewing(false)}>{t('Change focus')}</Btn>
+          <div className="floating-actions sticky z-10 mt-4 flex items-end gap-1 rounded-2xl bg-[var(--bg)]">
+            <div className="flex min-w-0 flex-1 gap-2 rounded-2xl border border-line bg-[var(--bg)]/95 p-2 backdrop-blur">
+            <Btn
+              className="min-h-11 min-w-11 shrink-0"
+              aria-label={t('Change focus')}
+              icon={<ArrowLeft size={16} />}
+              onClick={() => setReviewing(false)}
+            >
+              <span className="hidden sm:inline">{t('Change focus')}</span>
+            </Btn>
             <Btn
               variant="primary"
               className="flex-1"
@@ -485,9 +513,16 @@ export default function Train() {
             >
               {t('Start workout')}
             </Btn>
+            </div>
+            <CatDock />
           </div>
         </>
       )}
+      <ExerciseGuide
+        exercise={guideExercise}
+        open={Boolean(guideExercise)}
+        onClose={() => setGuideExercise(null)}
+      />
       <ExercisePicker
         open={picker}
         onClose={() => setPicker(false)}

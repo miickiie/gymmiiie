@@ -151,6 +151,7 @@ export function openingSets(
     const weight = load === 'none' ? 0 : (previous?.weight ?? 0);
     if (mode === 'cardio')
       return {
+        editedFields: {},
         reps: 0,
         weight: 0,
         done: false,
@@ -160,6 +161,7 @@ export function openingSets(
       };
     if (mode === 'time')
       return {
+        editedFields: {},
         reps: 0,
         weight,
         done: false,
@@ -167,6 +169,7 @@ export function openingSets(
         sec: previous?.sec ?? 30,
       };
     return {
+      editedFields: {},
       reps: previous?.left ?? previous?.reps ?? targetReps,
       repsR: previous?.right,
       weight,
@@ -185,6 +188,7 @@ export function openingSets(
   const base = working[0].weight;
   const step = weightStep(unit);
   const warm: SessionSet[] = [0.5, 0.7].map((pct) => ({
+    editedFields: {},
     reps: 8,
     weight: fromDisplayWeight(
       roundTo(toDisplayWeight(base * pct, unit), step),

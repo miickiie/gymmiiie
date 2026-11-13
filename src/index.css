@@ -28,7 +28,10 @@ html[data-theme='dark'] {
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 18px 44px -24px rgba(0, 0, 0, 0.7);
   --glow-1: rgba(223, 127, 74, 0.13);
   --glow-2: rgba(194, 90, 42, 0.08);
-  --nav-h: 72px;
+  --nav-h: 58px;
+  --cat-dock-size: 56px;
+  --floating-gap: 4px;
+  --floating-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + var(--floating-gap));
   color-scheme: dark;
 }
 
@@ -561,7 +564,7 @@ fieldset:disabled textarea {
 /* Reserve the space occupied by the session actions and mobile navigation.
    Focused/scrolled controls must remain above both fixed bars. */
 html.session-route {
-  --session-content-inset: calc(10rem + env(safe-area-inset-bottom));
+  --session-content-inset: calc(var(--nav-h) + 5rem + env(safe-area-inset-bottom));
   scroll-padding-top: 5rem;
   scroll-padding-bottom: var(--session-content-inset);
 }
@@ -578,10 +581,24 @@ html.session-route {
 .session-actions {
   position: fixed;
   inset-inline: 1rem;
-  bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  bottom: var(--floating-bottom);
+}
+
+.floating-actions { bottom: var(--floating-bottom); }
+
+.session-set-input { appearance: textfield; }
+.session-set-input::-webkit-inner-spin-button,
+.session-set-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 @media (min-width: 1024px) {
+  :root,
+  html[data-theme='dark'] {
+    --cat-dock-size: 64px;
+    --floating-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
   html.session-route {
     --session-content-inset: 7rem;
     scroll-padding-top: 2rem;
@@ -590,6 +607,6 @@ html.session-route {
   .session-actions {
     left: calc(248px + 2rem);
     right: 2rem;
-    bottom: 1rem;
+    bottom: var(--floating-bottom);
   }
 }

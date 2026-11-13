@@ -47,6 +47,7 @@ const TH: Record<string, string> = {
   'Could not share': 'แชร์ไม่สำเร็จ',
   'Workout deleted': 'ลบการฝึกแล้ว',
   'started {time}': 'เริ่ม {time}',
+  'finished {time}': 'จบ {time}',
   '{n} total sets': 'รวม {n} เซ็ต',
   'Working sets': 'เซ็ตฝึกจริง',
   'excluding warm-ups': 'ไม่รวมวอร์มอัป',
@@ -202,7 +203,9 @@ export default function SessionDetail() {
             label: t('Duration'),
             value: fmtDuration(session.durationSec),
             icon: <Clock size={14} />,
-            sub: t('started {time}', { time: fmtTime(d) }),
+          sub: session.startedAt
+            ? t('started {time}', { time: fmtTime(new Date(session.startedAt)) })
+            : t('finished {time}', { time: fmtTime(d) }),
           },
           {
             label: t('Exercises'),

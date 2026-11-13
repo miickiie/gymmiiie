@@ -359,6 +359,7 @@ function recalcActive(data: AppData) {
     if (!e.sets.length) {
       const mode = modeFor(e);
       e.sets.push({
+        editedFields: {},
         reps: mode ? 0 : 10,
         weight: 0,
         done: false,
@@ -724,6 +725,12 @@ export const useStore = create<Store>((set, get) => ({
             return;
         }
         Object.assign(st, patch);
+        for (const key of ['weight', 'reps', 'repsR'] as const) {
+          if (Object.prototype.hasOwnProperty.call(patch, key)) {
+            st.editedFields ??= { weight: true, reps: true, repsR: true };
+            st.editedFields[key] = true;
+          }
+        }
       }
     }),
 
@@ -742,11 +749,13 @@ export const useStore = create<Store>((set, get) => ({
       completed.done = becomingDone;
       if (becomingDone) {
         for (const next of target.sets.slice(index + 1)) {
-          if (next.done) continue;
-          next.weight = completed.weight;
-          next.reps = completed.reps;
-          if (completed.repsR === undefined) delete next.repsR;
-          else next.repsR = completed.repsR;
+          if (next.done || !next.editedFields) continue;
+          if (!next.editedFields.weight) next.weight = completed.weight;
+          if (!next.editedFields.reps) next.reps = completed.reps;
+          if (!next.editedFields.repsR) {
+            if (completed.repsR === undefined) delete next.repsR;
+            else next.repsR = completed.repsR;
+          }
         }
       }
     });
@@ -766,6 +775,7 @@ export const useStore = create<Store>((set, get) => ({
       ex.sets.push(
         last
           ? {
+              editedFields: {},
               reps: last.reps,
               weight: last.weight,
               done: false,
@@ -775,7 +785,7 @@ export const useStore = create<Store>((set, get) => ({
               repsR: last.repsR,
               rest: last.rest,
             }
-          : { reps: 10, weight: 0, done: false, kind: 'normal' },
+          : { editedFields: {}, reps: 10, weight: 0, done: false, kind: 'normal' },
       );
     }),
 
@@ -905,10 +915,14 @@ export const useStore = create<Store>((set, get) => ({
           })),
       }))
       .filter((e) => e.sets.length > 0);
+    const sessionStartedAt = new Date(a.startedAt);
     const session: LoggedSession | null = exercises.length
       ? {
           id: newId('w'),
           date: isoNow(),
+          startedAt: Number.isFinite(sessionStartedAt.getTime())
+            ? sessionStartedAt.toISOString()
+            : undefined,
           durationSec: Math.max(1, activeElapsed(a)),
           exercises,
           routineId: a.routineId,
@@ -962,6 +976,7 @@ export const useStore = create<Store>((set, get) => ({
       mode: modeFor(e),
       loadKind: e.loadKind,
       sets: e.sets.map((s) => ({
+        editedFields: {},
         reps: s.left ?? s.reps,
         repsR: s.left != null && s.right != null ? s.right : undefined,
         weight: s.weight,
@@ -1115,7 +1130,10 @@ export const useStore = create<Store>((set, get) => ({
 
   addMeasure: (key, value, day = dateKey()) =>
     get().update((d) => {
-      if (!key.trim() || !Number.isFinite(value) || value <= 0) return;
+      if (
+        !key.trim() || !Number.isFinite(value) || value <= 0 ||
+        (key === 'bodyfat' && value > 100)
+      ) return;
       const existing = d.measures.find((m) => m.key === key && m.date === day);
       if (existing) existing.value = value;
       else d.measures.push({ id: newId('m'), key, date: day, value });

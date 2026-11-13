@@ -151,6 +151,8 @@ const TH: Record<string, string> = {
   'Goal saved': 'บันทึกเป้าหมายแล้ว',
   'Goal cleared': 'ล้างเป้าหมายแล้ว',
   'Enter a positive, finite measurement': 'ใส่ค่าที่เป็นจำนวนบวก',
+  'Body fat must be above 0% and at most 100%':
+    'ไขมันในร่างกายต้องมากกว่า 0% และไม่เกิน 100%',
   'Measurement saved': 'บันทึกสัดส่วนแล้ว',
   Bodyweight: 'น้ำหนักตัว',
   '{n} entries · {delta} {unit} since first':
@@ -682,6 +684,7 @@ function BodyTab() {
   );
   const [key, setKey] = useState('waist');
   const [value, setValue] = useState('');
+  const [measureError, setMeasureError] = useState('');
   const [day, setDay] = useState(dateKey());
 
   const weights = data.bodyweights;
@@ -716,8 +719,14 @@ function BodyTab() {
   };
   const saveMeasure = () => {
     const v = Number(value);
-    if (!Number.isFinite(v) || v <= 0) {
-      toast.push(t('Enter a positive, finite measurement'), 'bad');
+    const error = !Number.isFinite(v) || v <= 0
+      ? t('Enter a positive, finite measurement')
+      : key === 'bodyfat' && v > 100
+        ? t('Body fat must be above 0% and at most 100%')
+        : '';
+    setMeasureError(error);
+    if (error) {
+      toast.push(error, 'bad');
       return;
     }
     addMeasure(key, v, day);
@@ -853,7 +862,10 @@ function BodyTab() {
               <select
                 className="input"
                 value={key}
-                onChange={(e) => setKey(e.target.value)}
+                onChange={(e) => {
+                  setKey(e.target.value);
+                  setMeasureError('');
+                }}
               >
                 {MEASURE_KEYS.map((m) => (
                   <option key={m.key} value={m.key}>
@@ -865,14 +877,27 @@ function BodyTab() {
             <label>
               <span className="label mb-1 block">{t('Value')}</span>
               <NumericInput
+                id="measurement-value"
                 className="input num"
-                unit="cm"
+                unit={key === 'bodyfat' ? '%' : 'cm'}
                 inputMode="decimal"
+                min={0}
+                max={key === 'bodyfat' ? 100 : undefined}
                 step="0.1"
-                placeholder="cm"
+                placeholder={key === 'bodyfat' ? '%' : 'cm'}
                 value={value}
-                onValueChange={setValue}
+                aria-invalid={Boolean(measureError)}
+                aria-describedby={measureError ? 'measurement-error' : undefined}
+                onValueChange={(raw) => {
+                  setValue(raw);
+                  setMeasureError('');
+                }}
               />
+              {measureError && (
+                <span id="measurement-error" role="alert" className="mt-1 block text-xs font-bold text-bad">
+                  {measureError}
+                </span>
+              )}
             </label>
             <label>
               <span className="label mb-1 block">{t('Date')}</span>

@@ -30,6 +30,7 @@ async function seedWorkout(page: Page, count = names.length): Promise<void> {
         mode: '',
         loadKind: 'external',
         sets: Array.from({ length: 3 }, () => ({
+          editedFields: {},
           reps: 10,
           weight: 10,
           done: false,
@@ -59,6 +60,40 @@ async function expectCentered(strip: Locator): Promise<void> {
     )
     .toBeLessThan(2);
 }
+
+test('automatic prefill preserves independently edited fields and same-value edits after reload', async ({ page }, testInfo) => {
+  await seedWorkout(page, 1);
+  const weight = (set: number) => page.getByLabel(`Set ${set} weight`, { exact: true });
+  const reps = (set: number) => page.getByLabel(`Set ${set} repetitions`, { exact: true });
+  await enterNumber(weight(1), '42.5');
+  await enterNumber(reps(1), '8');
+  await enterNumber(weight(2), '55');
+
+  if (testInfo.project.name === 'mobile') {
+    await reps(3).click();
+    const pad = page.getByRole('dialog', { name: 'Set 3 repetitions', exact: true });
+    await pad.getByRole('button', { name: 'Clear number', exact: true }).click();
+    await pad.getByRole('button', { name: '1', exact: true }).click();
+    await pad.getByRole('button', { name: '0', exact: true }).click();
+    await pad.getByRole('button', { name: 'Use value', exact: true }).click();
+  } else {
+    await reps(3).fill('');
+    await reps(3).fill('10');
+  }
+
+  await page.reload();
+  await expect(weight(2)).toHaveValue('55');
+  await expect(reps(3)).toHaveValue('10');
+  await page.getByRole('button', { name: 'Complete set 1', exact: true }).click();
+  await expect(weight(2)).toHaveValue('55');
+  await expect(reps(2)).toHaveValue('8');
+  await expect(weight(3)).toHaveValue('42.5');
+  await expect(reps(3)).toHaveValue('10');
+
+  await page.getByRole('button', { name: 'Complete set 2', exact: true }).click();
+  await expect(weight(3)).toHaveValue('55');
+  await expect(reps(3)).toHaveValue('10');
+});
 
 test('completing sets prefills later sets and centers the next exercise on auto-advance', async ({ page }) => {
   await seedWorkout(page, 2);

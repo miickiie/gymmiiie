@@ -37,6 +37,7 @@ interface CatCompanionProps {
   onDismiss: () => void;
   onEncourage: (message: string) => void;
   host?: HTMLElement;
+  dock?: HTMLElement;
 }
 
 const ENCOURAGEMENTS = [
@@ -91,6 +92,7 @@ export function CatCompanion({
   onDismiss,
   onEncourage,
   host,
+  dock,
 }: CatCompanionProps) {
   const { t } = useI18n(TH);
   const { pathname } = useLocation();
@@ -151,12 +153,12 @@ export function CatCompanion({
       window.removeEventListener('resize', schedule);
       if (frame !== undefined) window.cancelAnimationFrame(frame);
     };
-  }, [host, visible]);
+  }, [host, dock, visible]);
 
   useEffect(() => {
     setHovered(false);
     setFocused(false);
-  }, [host]);
+  }, [host, dock]);
 
   useEffect(() => {
     if (!visible) setHovered(false);
@@ -196,7 +198,7 @@ export function CatCompanion({
   const content = (
     <aside
       aria-label={t('Mochi, your workout cat')}
-      className={`gym-cat-companion${pathname === '/session' ? ' is-training' : ''}${host ? ' in-dialog' : ''}`}
+      className={`gym-cat-companion${pathname === '/session' ? ' is-training' : ''}${host ? ' in-dialog' : dock ? ' in-dock' : ''}`}
       data-tone={tone}
       onFocusCapture={() => setFocused(true)}
       onBlurCapture={(event) => {
@@ -250,5 +252,6 @@ export function CatCompanion({
       </button>
     </aside>
   );
-  return host ? createPortal(content, host) : content;
+  const portalHost = host ?? dock;
+  return portalHost ? createPortal(content, portalHost) : content;
 }

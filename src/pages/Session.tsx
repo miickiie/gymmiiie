@@ -19,13 +19,15 @@ import {
 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArtThumb, ExerciseArt } from '../components/ExerciseArt';
+import { ArtThumb } from '../components/ExerciseArt';
+import { ExerciseGuide } from '../components/ExerciseGuide';
 import ExercisePicker from '../components/ExercisePicker';
 import { ExerciseIcon } from '../components/ExerciseTile';
 import { recordLabel, recordValue } from '../components/recordLabels';
 import {
   Btn,
   Card,
+  CatDock,
   Confirm,
   EmptyState,
   Field,
@@ -35,8 +37,6 @@ import {
   useNow,
   useToast,
 } from '../components/ui';
-import { instructionsOf, stepsFor, tipsFor } from '../lib/art';
-import { useGuideLanguage } from '../lib/guide';
 import { beep, unlockAudio, vibrate } from '../lib/audio';
 import { fmtClock, fmtDuration } from '../lib/date';
 import { isCompletableSet, loadKindFor, modeFor } from '../lib/exercises';
@@ -207,8 +207,6 @@ export default function Session() {
   const data = useStore((s) => s.data);
   const status = useStore((s) => s.persistenceStatus);
   const isCommitting = useStore((s) => s.isCommitting);
-  // Loads the Thai form-guide copy on demand and re-renders when it arrives.
-  useGuideLanguage();
   const actions = useStore.getState();
   const active = data.active;
   const [picker, setPicker] = useState(false);
@@ -300,7 +298,6 @@ export default function Session() {
     (count, ex) => count + ex.sets.length,
     0,
   );
-  const guide = catalog ? instructionsOf(catalog.id) : undefined;
   const detailExercise = active.exercises.find((ex) => ex.uid === detail?.uid);
   const detailSet = detail ? detailExercise?.sets[detail.index] : undefined;
   const allDone =
@@ -569,11 +566,11 @@ export default function Session() {
               <span>{t('Set')}</span>
               <span>
                 {mode === 'cardio'
-                  ? t('Distance')
+                  ? `${t('Distance')} (km)`
                   : mode === 'time'
                     ? t('Seconds')
                     : load === 'assistance'
-                      ? t('Assistance')
+                      ? `${t('Assistance')} (${weightUnit})`
                       : load === 'none'
                         ? t('Load')
                         : weightUnit}
@@ -582,7 +579,7 @@ export default function Session() {
                 {mode === 'cardio'
                   ? t('Seconds')
                   : mode === 'time'
-                    ? t('Load')
+                    ? `${t('Load')} (${weightUnit})`
                     : t('Reps')}
               </span>
               <span className="sr-only">{t('Complete')}</span>
@@ -802,13 +799,16 @@ export default function Session() {
           }
         />
       )}
-      <div className="session-actions z-40 flex gap-2 rounded-2xl border border-line bg-[var(--bg)]/95 p-2 backdrop-blur">
+      <div className="session-actions z-40 flex items-end gap-1 rounded-2xl bg-[var(--bg)]">
+        <div className="flex min-w-0 flex-1 gap-2 rounded-2xl border border-line bg-[var(--bg)]/95 p-2 backdrop-blur">
         <Btn
           size="sm"
-          className="min-h-11 flex-1 sm:text-sm"
+          className="min-h-11 min-w-11 shrink-0 sm:flex-1 sm:text-sm"
+          aria-label={t('Session options')}
+          icon={<MoreHorizontal size={18} />}
           onClick={() => setMenuOpen(true)}
         >
-          {t('Session options')}
+          <span className="hidden sm:inline">{t('Session options')}</span>
         </Btn>
         <Btn
           variant="primary"
@@ -822,6 +822,8 @@ export default function Session() {
         >
           {t('Finish workout')}
         </Btn>
+        </div>
+        <CatDock />
       </div>
       <ExercisePicker
         open={picker && !blocked}
@@ -839,69 +841,12 @@ export default function Session() {
           setSwapUid(null);
         }}
       />
-      <Sheet
+      <ExerciseGuide
+        exercise={catalog}
+        name={current?.name}
         open={howToOpen}
         onClose={() => setHowToOpen(false)}
-        title={t('Form guide · {name}', {
-          name: current?.name ?? t('Exercise'),
-        })}
-      >
-        {catalog ? (
-          <>
-            <ExerciseArt
-              slug={catalog.art}
-              height={220}
-              fallback={<ExerciseIcon ex={catalog} size={64} />}
-            />
-            {stepsFor(catalog).length ? (
-              <ol className="mt-4 list-decimal space-y-3 pl-5 text-sm font-semibold text-dim">
-                {stepsFor(catalog).map((step, index) => (
-                  <li key={index}>{step}</li>
-                ))}
-              </ol>
-            ) : (
-              <p className="mt-3 text-sm font-semibold text-mute">
-                {t('Verified form guidance is not available for this movement.')}
-              </p>
-            )}
-            {tipsFor(catalog).length > 0 && (
-              <ul className="mt-4 list-disc space-y-2 pl-5 text-xs text-dim">
-                {tipsFor(catalog).map((tip, index) => (
-                  <li key={index}>{tip}</li>
-                ))}
-              </ul>
-            )}
-            {catalog.kind === 'custom' && (
-              <p className="mt-3 text-xs text-mute">
-                {t('Your exercise instructions')}
-              </p>
-            )}
-            {guide && (
-              <p className="mt-3 text-xs text-mute">
-                {t('Reviewed form guide')}
-                {guide.url && (
-                  <>
-                    {' '}
-                    ·{' '}
-                    <a
-                      href={guide.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[var(--accent)] underline"
-                    >
-                      {t('Reference')}
-                    </a>
-                  </>
-                )}
-              </p>
-            )}
-          </>
-        ) : (
-          <p className="text-sm text-mute">
-            {t('No form guide is available for this saved exercise.')}
-          </p>
-        )}
-      </Sheet>
+      />
       <Sheet
         open={!!detail && !!detailSet}
         onClose={() => setDetail(null)}
@@ -1283,14 +1228,14 @@ function SetInput({
 }) {
   const [text, setText] = useState<string | null>(null);
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <NumericInput
         aria-label={label}
         unit={suffix}
         inputMode="decimal"
         min={0}
         step={step}
-        className="input min-h-11 !py-2 !pr-9 !text-right !text-sm font-black"
+        className="input session-set-input min-h-11 !px-2 !py-2 !text-center !text-sm font-black"
         value={text ?? String(Math.round(value * 10) / 10)}
         onFocus={(event) => event.target.select()}
         onValueChange={(raw) => {
@@ -1300,9 +1245,6 @@ function SetInput({
         }}
         onValueCommit={() => setText(null)}
       />
-      <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-mute">
-        {suffix}
-      </span>
     </div>
   );
 }

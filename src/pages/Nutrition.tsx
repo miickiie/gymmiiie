@@ -537,6 +537,7 @@ export default function Nutrition() {
           />
           <Card className="p-4">
             <MacroDonut
+              kcal={totals.kcal}
               protein={totals.protein}
               carbs={totals.carbs}
               fat={totals.fat}
@@ -673,10 +674,12 @@ function MacroBar({
 }
 
 function MacroDonut({
+  kcal,
   protein,
   carbs,
   fat,
 }: {
+  kcal: number;
   protein: number;
   carbs: number;
   fat: number;
@@ -727,7 +730,7 @@ function MacroDonut({
       <div className="absolute inset-0 grid place-items-center text-center">
         <div>
           <p className="text-sm font-black">
-            {total > 0 ? Math.round(total) : 0}
+            {Math.round(kcal)}
           </p>
           <p className="text-[8px] font-black uppercase text-mute">kcal</p>
         </div>

@@ -2,6 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { parseBackup } from './backup';
 import { defaultData } from './defaults';
 
+function activeWithEditedFields(editedFields: unknown) {
+  return {
+    ...defaultData(),
+    active: {
+      id: 'active', startedAt: Date.now(), currentIndex: 0, pausedTotalSec: 0,
+      exercises: [{
+        uid: 'bench', id: 'bench', name: 'Bench', primary: 'chest',
+        sets: [{ reps: 8, weight: 40, done: false, kind: 'normal', editedFields }],
+      }],
+    },
+  };
+}
+
 describe('backup validation', () => {
   it('normalizes legacy v1 missing nested fields without rewriting historical metrics', () => {
     const source = {
@@ -54,6 +67,41 @@ describe('backup validation', () => {
         },
       }),
     ).toEqual(data);
+  });
+
+  it('round trips per-field edits and leaves legacy edit provenance unknown', () => {
+    const snapshot = activeWithEditedFields({ weight: true, reps: false });
+    const restored = parseBackup(JSON.parse(JSON.stringify(snapshot)));
+    expect(restored.active?.exercises[0].sets[0].editedFields).toEqual({
+      weight: true, reps: false,
+    });
+    expect(parseBackup(activeWithEditedFields(undefined)).active?.exercises[0].sets[0].editedFields).toBeUndefined();
+  });
+
+  it.each([
+    { editedFields: null },
+    { editedFields: [] },
+    { editedFields: { weight: 'yes' } },
+    { editedFields: { unknown: true } },
+  ])('rejects malformed set edit metadata: $editedFields', ({ editedFields }) => {
+    expect(() => parseBackup(activeWithEditedFields(editedFields))).toThrow('editedFields');
+  });
+
+  it('preserves saved start timestamps and rejects invalid start dates', () => {
+    const session = {
+      id: 'workout', date: '2026-11-13T04:04:57.000Z',
+      startedAt: '2026-11-13T04:02:45.000Z', durationSec: 132, exercises: [],
+    };
+    expect(parseBackup({ ...defaultData(), sessions: [session] }).sessions[0].startedAt).toBe(session.startedAt);
+    expect(() => parseBackup({
+      ...defaultData(), sessions: [{ ...session, startedAt: 'invalid' }],
+    })).toThrow('sessions[0].startedAt');
+  });
+
+  it('keeps legacy body fat measurements readable for correction', () => {
+    const data = defaultData();
+    data.measures.push({ id: 'legacy', key: 'bodyfat', date: '2026-11-13', value: 101 });
+    expect(parseBackup(data).measures[0].value).toBe(101);
   });
 
   it.each(['name', 'note', 'routineId'])(

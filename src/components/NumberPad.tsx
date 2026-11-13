@@ -22,7 +22,7 @@ export function NumberPad({
 }: {
   value: string | number;
   unit?: string;
-  onApply: (value: string) => void;
+  onApply: (value: string, edited: boolean) => void;
   onCancel: () => void;
 }) {
   const { t } = useI18n(TH);
@@ -53,7 +53,7 @@ export function NumberPad({
     setReplace(false);
   };
   const apply = () => {
-    if (valid) onApply(draft.endsWith('.') ? draft.slice(0, -1) : draft);
+    if (valid) onApply(draft.endsWith('.') ? draft.slice(0, -1) : draft, !replace);
   };
   const keyboard = (event: KeyboardEvent<HTMLFormElement>) => {
     if (event.ctrlKey || event.metaKey || event.altKey) return;

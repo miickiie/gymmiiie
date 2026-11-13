@@ -67,6 +67,7 @@ export interface LoggedExercise {
 }
 
 export interface LoggedSession {
+  startedAt?: string; // ISO timestamp at start; absent on older sessions
   id: string;
   date: string; // ISO timestamp at finish
   durationSec: number;
@@ -78,6 +79,8 @@ export interface LoggedSession {
 }
 
 export interface SessionSet {
+  // Missing metadata preserves legacy values; an empty object permits prefill.
+  editedFields?: Partial<Record<'weight' | 'reps' | 'repsR', boolean>>;
   reps: number;
   repsR?: number;
   weight: number;

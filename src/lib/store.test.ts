@@ -488,9 +488,10 @@ describe('durable workout state', () => {
           rest: 30,
           rpe: 6,
           note: 'Keep this note',
+          editedFields: {},
         },
         { reps: 11, weight: 70, done: true, kind: 'normal' },
-        { reps: 9, weight: 25, done: false, kind: 'normal' },
+        { reps: 9, weight: 25, done: false, kind: 'normal', editedFields: {} },
       ];
     });
     const before = useStore.getState().data.active!;
@@ -507,11 +508,124 @@ describe('durable workout state', () => {
         rest: 30,
         rpe: 6,
         note: 'Keep this note',
+        editedFields: {},
       },
       before.exercises[0].sets[3],
-      { reps: 8, weight: 42.5, done: false, kind: 'normal' },
+      { reps: 8, weight: 42.5, done: false, kind: 'normal', editedFields: {} },
     ]);
     expect(after.exercises[1]).toEqual(before.exercises[1]);
+  });
+
+  it('prefills untouched fields while preserving independently edited weight and repetitions', () => {
+    useStore.getState().startFromExercises([bench.id]);
+    useStore.getState().setSettings({ autoRest: false });
+    const uid = useStore.getState().data.active!.exercises[0].uid;
+    useStore.getState().updateSet(uid, 0, { weight: 40, reps: 12 });
+    useStore.getState().updateSet(uid, 1, { weight: 45 });
+    useStore.getState().updateSet(uid, 2, { reps: 6 });
+
+    useStore.getState().toggleSet(uid, 0);
+
+    expect(useStore.getState().data.active!.exercises[0].sets[1]).toMatchObject({
+      weight: 45, reps: 12, done: false,
+    });
+    expect(useStore.getState().data.active!.exercises[0].sets[2]).toMatchObject({
+      weight: 40, reps: 6, done: false,
+    });
+  });
+
+  it('preserves explicit default values and cleared right repetitions during automatic prefill', () => {
+    useStore.getState().startFromExercises([bench.id]);
+    useStore.getState().setSettings({ autoRest: false });
+    const uid = useStore.getState().data.active!.exercises[0].uid;
+    useStore.getState().updateSet(uid, 0, { weight: 50, reps: 12, repsR: 8 });
+    useStore.getState().updateSet(uid, 1, { weight: 0, reps: 10 });
+    useStore.getState().updateSet(uid, 2, { repsR: undefined });
+
+    useStore.getState().toggleSet(uid, 0);
+
+    expect(useStore.getState().data.active!.exercises[0].sets[1]).toMatchObject({
+      weight: 0, reps: 10, repsR: 8,
+    });
+    const last = useStore.getState().data.active!.exercises[0].sets[2];
+    expect(last).toMatchObject({ weight: 50, reps: 12 });
+    expect(last.repsR).toBeUndefined();
+  });
+
+  it('retains per-field edit protection after persistence and hydration', async () => {
+    useStore.getState().startFromExercises([bench.id]);
+    useStore.getState().setSettings({ autoRest: false });
+    const uid = useStore.getState().data.active!.exercises[0].uid;
+    useStore.getState().updateSet(uid, 0, { weight: 40, reps: 12 });
+    useStore.getState().updateSet(uid, 1, { weight: 45 });
+    await useStore.getState().flushPersistence();
+    useStore.setState({ data: defaultData(), hydrated: false });
+    await useStore.getState().hydrate();
+
+    useStore.getState().toggleSet(uid, 0);
+
+    expect(useStore.getState().data.active!.exercises[0].sets[1]).toMatchObject({
+      weight: 45, reps: 12, editedFields: { weight: true },
+    });
+  });
+
+  it('preserves pending legacy rows whose edit provenance is unknown', () => {
+    useStore.getState().startFromExercises([bench.id]);
+    useStore.getState().setSettings({ autoRest: false });
+    const uid = useStore.getState().data.active!.exercises[0].uid;
+    useStore.getState().updateSet(uid, 0, { weight: 40, reps: 12 });
+    useStore.getState().update((data) => {
+      const legacy = data.active!.exercises[0].sets[1];
+      legacy.weight = 45;
+      legacy.reps = 7;
+      delete legacy.editedFields;
+    });
+
+    useStore.getState().toggleSet(uid, 0);
+
+    expect(useStore.getState().data.active!.exercises[0].sets[1]).toMatchObject({
+      weight: 45, reps: 7,
+    });
+  });
+
+  it('stores the actual workout start separately from the finish date', async () => {
+    useStore.getState().startFromExercises([bench.id]);
+    useStore.getState().setSettings({ autoRest: false });
+    const startedAt = Date.now() - 120_000;
+    useStore.getState().update((data) => { data.active!.startedAt = startedAt; });
+    const uid = useStore.getState().data.active!.exercises[0].uid;
+    useStore.getState().updateSet(uid, 0, { reps: 8, weight: 40 });
+    useStore.getState().toggleSet(uid, 0);
+
+    const result = await useStore.getState().finishSession();
+
+    expect(result.status).toBe('saved');
+    const saved = useStore.getState().data.sessions[0];
+    expect(saved.startedAt).toBe(new Date(startedAt).toISOString());
+    expect(new Date(saved.date).getTime()).toBeGreaterThanOrEqual(startedAt + 120_000);
+  });
+
+  it('can finish legacy active workouts with an out-of-range numeric start date', async () => {
+    useStore.getState().startFromExercises([bench.id]);
+    useStore.getState().setSettings({ autoRest: false });
+    useStore.getState().update((data) => { data.active!.startedAt = 1e20; });
+    const uid = useStore.getState().data.active!.exercises[0].uid;
+    useStore.getState().updateSet(uid, 0, { weight: 40, reps: 8 });
+    useStore.getState().toggleSet(uid, 0);
+
+    const result = await useStore.getState().finishSession();
+
+    expect(result.status).toBe('saved');
+    expect(useStore.getState().data.sessions[0].startedAt).toBeUndefined();
+  });
+
+  it('rejects body fat above 100 without replacing a valid measurement', () => {
+    useStore.getState().addMeasure('bodyfat', 16.5);
+    useStore.getState().addMeasure('bodyfat', 101);
+    expect(useStore.getState().data.measures).toHaveLength(1);
+    expect(useStore.getState().data.measures[0].value).toBe(16.5);
+    useStore.getState().addMeasure('bodyfat', 100);
+    expect(useStore.getState().data.measures[0].value).toBe(100);
   });
 
   it('carries forward the latest completed left/right reps without propagating undo', () => {
@@ -520,8 +634,8 @@ describe('durable workout state', () => {
       data.settings.autoRest = false;
       data.active!.exercises[0].sets = [
         { reps: 12, repsR: 9, weight: 15, done: false, kind: 'normal' },
-        { reps: 8, weight: 10, done: false, kind: 'normal' },
-        { reps: 8, weight: 10, done: false, kind: 'normal' },
+        { reps: 8, weight: 10, done: false, kind: 'normal', editedFields: {} },
+        { reps: 8, weight: 10, done: false, kind: 'normal', editedFields: {} },
       ];
     });
     const uid = useStore.getState().data.active!.exercises[0].uid;

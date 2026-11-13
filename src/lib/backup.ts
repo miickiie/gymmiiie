@@ -107,6 +107,13 @@ function setRow(value: unknown, path: string, active: boolean): Obj {
   if (active) {
     row.done ??= false;
     boolean(row.done, `${path}.done`);
+    optional(row, 'editedFields', path, (value, fieldPath) => {
+      const fields = object(value, fieldPath);
+      for (const [key, edited] of Object.entries(fields)) {
+        enumeration(key, ['weight', 'reps', 'repsR'], fieldPath);
+        boolean(edited, `${fieldPath}.${key}`);
+      }
+    });
   }
   return row;
 }
@@ -176,6 +183,7 @@ export function parseBackup(input: unknown): AppData {
     text(row.id, `${path}.id`, false);
     date(row.date, `${path}.date`);
     number(row.durationSec, `${path}.durationSec`);
+    optional(row, 'startedAt', path, date);
     for (const key of ['name', 'note', 'routineId'])
       optional(row, key, path, text);
     optional(row, 'deload', path, boolean);

@@ -6,7 +6,7 @@
   z-index: 45;
   display: flex;
   align-items: flex-end;
-  gap: 0.65rem;
+  gap: 0.25rem;
   max-width: calc(100vw - 2rem);
   pointer-events: none;
 }
@@ -175,6 +175,32 @@
 .gym-cat-companion.in-dialog .gym-cat-button { flex-basis: 56px; width: 56px; }
 .gym-cat-companion.in-dialog .gym-cat-sprite { width: 56px; }
 
+.gym-cat-dock {
+  flex: 0 0 var(--cat-dock-size);
+  width: var(--cat-dock-size);
+  align-self: flex-end;
+}
+.gym-cat-companion.in-dock {
+  position: relative;
+  inset: auto;
+  z-index: 1;
+  max-width: 100%;
+}
+.gym-cat-companion.in-dock .gym-cat-button {
+  flex-basis: var(--cat-dock-size);
+  width: var(--cat-dock-size);
+  padding-top: 0;
+}
+.gym-cat-companion.in-dock .gym-cat-sprite { width: var(--cat-dock-size); }
+.gym-cat-companion.in-dock .gym-cat-bubble {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--floating-gap));
+  width: max-content;
+  max-width: min(17.5rem, calc(100vw - 2rem));
+  margin-bottom: 0;
+}
+
 @keyframes gym-cat-speech { from { opacity: 0; transform: translateY(5px) scale(0.96); } to { opacity: 1; transform: none; } }
 @keyframes gym-cat-breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 @keyframes gym-cat-blink { 0%, 43%, 47%, 100% { transform: scaleY(1); } 45% { transform: scaleY(0.08); } }
@@ -183,7 +209,7 @@
 
 @media (min-width: 1024px) {
   .gym-cat-companion { right: 1.5rem; bottom: 1rem; }
-  .gym-cat-companion.is-training:not(.in-dialog) { bottom: 6rem; }
+  .gym-cat-companion.is-training:not(.in-dialog):not(.in-dock) { bottom: 6rem; }
   .gym-cat-button { flex-basis: 80px; width: 80px; }
   .gym-cat-sprite { width: 80px; }
 }

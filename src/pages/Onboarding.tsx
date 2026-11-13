@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Btn, Field, NumField, Segmented, Stepper } from '../components/ui';
+import { Btn, CatDock, Field, NumField, Segmented, Stepper } from '../components/ui';
 import { fromDisplayWeight, toDisplayWeight } from '../lib/stats';
 import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
@@ -128,7 +128,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden px-5 pb-8 pt-6 sm:px-8">
+    <div className="relative flex min-h-screen flex-col overflow-hidden px-5 pb-4 pt-6 sm:px-8">
       <div className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full bg-[var(--accent)] opacity-[0.12] blur-3xl" />
       <div className="pointer-events-none absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-[var(--accent-strong)] opacity-[0.08] blur-3xl" />
 
@@ -262,9 +262,10 @@ export default function Onboarding() {
                     onChange={(e) => setName(e.target.value)}
                   />
                 </Field>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Field label={t('Sex')}>
                     <Segmented
+                      className="[&>button]:min-h-11"
                       value={sex}
                       options={[
                         { value: 'male', label: t('Male') },
@@ -383,25 +384,29 @@ export default function Onboarding() {
           )}
         </div>
 
-        <div className="relative flex items-center gap-2">
           {step === 0 && (
-            <Btn variant="ghost" onClick={finish}>
+            <Btn variant="ghost" className="mb-2 self-start" onClick={finish}>
               {t('Set up later')}
             </Btn>
           )}
+        <div className="relative flex items-end gap-1">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
           {step > 0 && (
             <Btn
               variant="ghost"
+              size="sm"
+              className="min-h-11 min-w-11"
+              aria-label={t('Back')}
               onClick={() => setStep(step - 1)}
               icon={<ArrowLeft size={16} />}
             >
-              {t('Back')}
+              <span className="hidden sm:inline">{t('Back')}</span>
             </Btn>
           )}
           <Btn
             variant="primary"
             size="lg"
-            className="ml-auto flex-1 sm:flex-none sm:min-w-[190px]"
+            className="ml-auto min-w-0 flex-1 !px-3 sm:flex-none sm:min-w-[190px] sm:!px-5"
             onClick={() => (last ? finish() : setStep(step + 1))}
             trailing={<ArrowRight size={17} />}
           >
@@ -411,9 +416,11 @@ export default function Onboarding() {
                 ? t('Enter Gymmiie')
                 : t('Continue')}
           </Btn>
+          </div>
+          <CatDock />
         </div>
 
-        <p className="mt-4 text-center text-[10px] font-bold text-mute">
+        <p className="mt-2 text-center text-[10px] font-bold text-mute">
           {t(
             'Based on GymMane by InlitX · GPL-3.0 · Offline logging with account sync',
           )}
