@@ -53,7 +53,9 @@ export async function seed(
   const body: { account: Account } = await response.json();
   accounts.set(page, body.account);
   await page.goto('/');
-  const content = page.getByRole('region', { name: 'Page content' });
+  const content = page.getByRole('region', {
+    name: /^(Page content|เนื้อหาหน้า)$/,
+  });
   const name = page.getByLabel('Name', { exact: true });
   await expect(content.or(name).first()).toBeVisible();
   if (await name.isVisible()) {

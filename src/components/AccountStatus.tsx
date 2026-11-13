@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import { useAccount } from './AccountGate';
-import { Btn, Card, Confirm } from './ui';
+import { Btn, Card, Confirm, useToast } from './ui';
 
 const TH: Record<string, string> = {
   'Saved on device · syncing account': 'บันทึกในเครื่องแล้ว · กำลังซิงก์บัญชี',
@@ -47,24 +47,49 @@ export function accountSyncLabel(status: string) {
 }
 
 export function AccountSyncNotice() {
-  const { t } = useI18n(TH);
+  const { language, t } = useI18n(TH);
+  const { push } = useToast();
+  const accountId = useStore((state) => state.account?.id);
+  const preferredLanguage = useStore(
+    (state) => state.data.settings.language ?? 'en',
+  );
   const status = useStore((state) => state.cloudStatus);
   const localStatus = useStore((state) => state.persistenceStatus);
   const error = useStore((state) => state.cloudError);
+  const announced = useRef(new Set<string>());
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState('');
   const [reload, setReload] = useState(false);
+
+  useEffect(() => {
+    if (
+      !accountId ||
+      localStatus !== 'idle' ||
+      language !== preferredLanguage
+    )
+      return;
+    const announcement =
+      status === 'idle'
+        ? 'synced'
+        : status === 'pending' || status === 'syncing' || status === 'offline'
+          ? 'waiting'
+          : null;
+    if (!announcement) return;
+    const key = `${accountId}:${announcement}`;
+    if (announced.current.has(key)) return;
+    announced.current.add(key);
+    push(
+      t(
+        announcement === 'synced'
+          ? 'Account sync up to date'
+          : 'Saved on device · account sync waiting',
+      ),
+    );
+  }, [accountId, localStatus, status, language, preferredLanguage, t, push]);
+
   if (status === 'session-expired') return null;
   if (status === 'idle' || status === 'pending' || status === 'syncing')
-    return (
-      <p role="status" className="mb-3 min-h-5 text-xs font-semibold text-mute">
-        {localStatus === 'saving'
-          ? t('Saving on this device…')
-          : localStatus === 'error' || localStatus === 'conflict'
-            ? t('Account sync paused while this device copy needs recovery')
-            : t(accountSyncLabel(status))}
-      </p>
-    );
+    return null;
   const run = async (action: () => Promise<void>) => {
     setBusy(true);
     setActionError('');
@@ -161,9 +186,13 @@ export function AccountSettingsCard() {
           <dd className="mt-1 text-sm font-bold">{account.name}</dd>
         </div>
       </dl>
-      <p role="status" className="mt-3 text-xs font-semibold text-dim">
-        {t(accountSyncLabel(status))}
-      </p>
+      {(status === 'offline' ||
+        status === 'conflict' ||
+        status === 'session-expired') && (
+        <p role="status" className="mt-3 text-xs font-semibold text-dim">
+          {t(accountSyncLabel(status))}
+        </p>
+      )}
       <p className="mt-2 text-xs text-mute">
         {t(
           'Use this account name and PIN when returning. Your training display name can be edited separately below.',

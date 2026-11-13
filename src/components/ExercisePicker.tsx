@@ -67,7 +67,6 @@ export default function ExercisePicker({
             className="absolute left-3 top-1/2 -translate-y-1/2 text-mute"
           />
           <input
-            autoFocus
             className="input pl-9"
             aria-label={t('Search exercises')}
             placeholder={t('Search exercises…')}

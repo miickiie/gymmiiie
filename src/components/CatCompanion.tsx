@@ -159,6 +159,10 @@ export function CatCompanion({
   }, [host]);
 
   useEffect(() => {
+    if (!visible) setHovered(false);
+  }, [visible]);
+
+  useEffect(() => {
     if (paused || !message || message.persistent) return;
     const timeout = window.setTimeout(onDismiss, 4000);
     return () => window.clearTimeout(timeout);

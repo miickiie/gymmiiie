@@ -472,6 +472,91 @@ describe('durable workout state', () => {
     expect(useStore.getState().data.sessions).toHaveLength(1);
   });
 
+  it('prefills only later unfinished sets from the completed set', () => {
+    useStore.getState().startFromExercises([bench.id, '25GPyDY']);
+    useStore.getState().update((data) => {
+      data.settings.autoRest = false;
+      data.active!.exercises[0].sets = [
+        { reps: 3, weight: 5, done: false, kind: 'normal' },
+        { reps: 8, weight: 42.5, done: false, kind: 'normal' },
+        {
+          reps: 10,
+          repsR: 6,
+          weight: 10,
+          done: false,
+          kind: 'warmup',
+          rest: 30,
+          rpe: 6,
+          note: 'Keep this note',
+        },
+        { reps: 11, weight: 70, done: true, kind: 'normal' },
+        { reps: 9, weight: 25, done: false, kind: 'normal' },
+      ];
+    });
+    const before = useStore.getState().data.active!;
+    expect(useStore.getState().toggleSet(before.exercises[0].uid, 1)).toBe(true);
+    const after = useStore.getState().data.active!;
+    expect(after.exercises[0].sets).toEqual([
+      before.exercises[0].sets[0],
+      { ...before.exercises[0].sets[1], done: true },
+      {
+        reps: 8,
+        weight: 42.5,
+        done: false,
+        kind: 'warmup',
+        rest: 30,
+        rpe: 6,
+        note: 'Keep this note',
+      },
+      before.exercises[0].sets[3],
+      { reps: 8, weight: 42.5, done: false, kind: 'normal' },
+    ]);
+    expect(after.exercises[1]).toEqual(before.exercises[1]);
+  });
+
+  it('carries forward the latest completed left/right reps without propagating undo', () => {
+    useStore.getState().startFromExercises([bench.id]);
+    useStore.getState().update((data) => {
+      data.settings.autoRest = false;
+      data.active!.exercises[0].sets = [
+        { reps: 12, repsR: 9, weight: 15, done: false, kind: 'normal' },
+        { reps: 8, weight: 10, done: false, kind: 'normal' },
+        { reps: 8, weight: 10, done: false, kind: 'normal' },
+      ];
+    });
+    const uid = useStore.getState().data.active!.exercises[0].uid;
+    useStore.getState().toggleSet(uid, 0);
+    expect(useStore.getState().data.active!.exercises[0].sets[1]).toMatchObject({
+      reps: 12,
+      repsR: 9,
+      weight: 15,
+      done: false,
+    });
+    useStore.getState().updateSet(uid, 1, { reps: 10, repsR: 7, weight: 17.5 });
+    useStore.getState().toggleSet(uid, 1);
+    expect(useStore.getState().data.active!.exercises[0].sets[2]).toMatchObject({
+      reps: 10,
+      repsR: 7,
+      weight: 17.5,
+      done: false,
+    });
+    useStore.getState().updateSet(uid, 2, { reps: 6, weight: 20 });
+    const next = useStore.getState().data.active!.exercises[0].sets[2];
+    expect(useStore.getState().toggleSet(uid, 1)).toBe(false);
+    expect(useStore.getState().data.active!.exercises[0].sets[2]).toEqual(next);
+  });
+
+  it('selects a newly added exercise without changing selection for a duplicate', () => {
+    useStore.getState().startFromExercises([bench.id]);
+    useStore.getState().addExerciseToSession('25GPyDY');
+    expect(useStore.getState().data.active!.currentIndex).toBe(1);
+    expect(useStore.getState().data.active!.exercises[1].id).toBe('25GPyDY');
+    useStore.getState().setCurrentExercise(0);
+    useStore.getState().addExerciseToSession('25GPyDY');
+    expect(useStore.getState().data.active!.currentIndex).toBe(0);
+    expect(useStore.getState().data.active!.exercises).toHaveLength(2);
+  });
+
   it('honors routine working-set counts/rest and preserves unequal left/right reps on repeat', async () => {
     const id = useStore.getState().createRoutine({
       name: 'Two sets',

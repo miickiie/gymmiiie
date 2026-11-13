@@ -47,10 +47,7 @@ export function exerciseMatchesZone(
   zone: string,
 ): boolean {
   const muscles: readonly string[] = BODY_ZONES[zone] ?? [zone];
-  return (
-    muscles.includes(exercise.primary) ||
-    exercise.secondary.some((muscle) => muscles.includes(muscle))
-  );
+  return muscles.includes(exercise.primary);
 }
 
 export function foldText(s: string): string {

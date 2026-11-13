@@ -17,7 +17,7 @@ import {
   Timer,
   Trash2,
 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArtThumb, ExerciseArt } from '../components/ExerciseArt';
 import ExercisePicker from '../components/ExercisePicker';
@@ -225,8 +225,33 @@ export default function Session() {
   const [detail, setDetail] = useState<{ uid: string; index: number } | null>(
     null,
   );
+  const exerciseStripRef = useRef<HTMLDivElement>(null);
+  const selectedExerciseRef = useRef<HTMLButtonElement>(null);
 
   const current = active?.exercises[active.currentIndex];
+  useLayoutEffect(() => {
+    const strip = exerciseStripRef.current;
+    const selected = selectedExerciseRef.current;
+    if (!strip || !selected) return;
+
+    const centerSelected = () => {
+      const stripBounds = strip.getBoundingClientRect();
+      const selectedBounds = selected.getBoundingClientRect();
+      strip.scrollTo({
+        left:
+          strip.scrollLeft +
+          selectedBounds.left -
+          stripBounds.left -
+          (strip.clientWidth - selectedBounds.width) / 2,
+        behavior: 'auto',
+      });
+    };
+    centerSelected();
+    const observer = new ResizeObserver(centerSelected);
+    observer.observe(strip);
+    observer.observe(selected);
+    return () => observer.disconnect();
+  }, [current?.uid, active?.exercises]);
   const catalog = useMemo(
     () =>
       current ? allExercises().find((ex) => ex.id === current.id) : undefined,
@@ -416,10 +441,14 @@ export default function Session() {
       )}
       <fieldset disabled={blocked} className="mb-3 min-w-0">
         <legend className="sr-only">{t('Workout exercises')}</legend>
-        <div className="scroll-x pb-1">
+        <div ref={exerciseStripRef} className="scroll-x pb-1">
+          <span aria-hidden="true" className="w-1/2 shrink-0" />
           {active.exercises.map((ex, index) => (
             <button
               key={ex.uid}
+              ref={
+                index === active.currentIndex ? selectedExerciseRef : undefined
+              }
               type="button"
               aria-pressed={index === active.currentIndex}
               onClick={() => actions.setCurrentExercise(index)}
@@ -443,6 +472,7 @@ export default function Session() {
           >
             {t('Add')}
           </Btn>
+          <span aria-hidden="true" className="w-1/2 shrink-0" />
         </div>
       </fieldset>
       {allDone && (

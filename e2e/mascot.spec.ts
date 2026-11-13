@@ -1,8 +1,32 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { enterNumber, seed, startWithPushup } from './fixtures';
+
+async function dismissSyncNotices(page: Page, waiting = false): Promise<void> {
+  const companion = page.getByRole('complementary', {
+    name: 'Mochi, your workout cat',
+  });
+  const status = companion.getByRole('status');
+  const dismiss = companion.getByRole('button', {
+    name: 'Dismiss Mochi’s message',
+  });
+  if (!waiting) {
+    await expect(status).toHaveText('Account sync up to date');
+    await dismiss.click();
+  } else {
+    if (await status.filter({ hasText: /^Account sync up to date$/ }).isVisible())
+      await dismiss.click();
+    await expect(status).toHaveText('Saved on device · account sync waiting');
+    await dismiss.click();
+  }
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  });
+  await page.mouse.move(0, 0);
+}
 
 test.beforeEach(async ({ page }) => {
   await seed(page);
+  await dismissSyncNotices(page);
 });
 
 test('Mochi gives encouragement, queues speech, and stays after dismissal', async ({ page }) => {
@@ -24,8 +48,9 @@ test('Mochi gives encouragement, queues speech, and stays after dismissal', asyn
   await expect(cat).toBeVisible();
 });
 
-test('workouts stay quiet until a meaningful notification or a cat tap', async ({ page }, testInfo) => {
+test('workouts stay quiet after the one-time sync notices until a notification or a cat tap', async ({ page }, testInfo) => {
   await startWithPushup(page);
+  await dismissSyncNotices(page, true);
   const companion = page.getByRole('complementary', { name: 'Mochi, your workout cat' });
   await expect(companion.getByRole('status')).toHaveCount(0);
   await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '12');
@@ -43,12 +68,15 @@ test('workouts stay quiet until a meaningful notification or a cat tap', async (
   await expect(companion.getByRole('status')).toHaveText('Workout saved');
 });
 
-test('speech expires after reading time and respects reduced motion', async ({ page }) => {
+test('speech expires after a previous bubble is dismissed and respects reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.clock.install();
   const companion = page.getByRole('complementary', { name: 'Mochi, your workout cat' });
   await page.getByRole('button', { name: 'Pet Mochi for workout encouragement' }).click();
   await expect(companion.getByRole('status')).toContainText('One rep at a time.');
+  await companion.getByRole('button', { name: 'Dismiss Mochi’s message' }).click();
+  await page.getByRole('button', { name: 'Pet Mochi for workout encouragement' }).click();
+  await expect(companion.getByRole('status')).toContainText('Tiny steps, strong habits.');
   await page.evaluate(() => {
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
   });
@@ -63,6 +91,7 @@ test('notifications stay accessible inside dialogs and errors take priority', as
     fixture.passes = [{ id: 'test-pass', name: 'Test Gym', code: 'MEMBER-48271', hue: 24 }];
   });
   await page.goto('/pass');
+  await dismissSyncNotices(page);
   await page.getByRole('button', { name: 'Show Test Gym pass', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Test Gym', exact: true });
   await page.evaluate(() => {
@@ -92,9 +121,7 @@ test('notifications stay accessible inside dialogs and errors take priority', as
 
 test('Mochi announces the end of a rest timer', async ({ page }) => {
   await startWithPushup(page);
-  while (await page.getByRole('button', { name: 'Dismiss Mochi’s message' }).isVisible()) {
-    await page.getByRole('button', { name: 'Dismiss Mochi’s message' }).click();
-  }
+  await dismissSyncNotices(page, true);
   await page.clock.install();
   await page.getByRole('button', { name: '60s', exact: true }).click();
   await page.clock.fastForward(61_000);
@@ -135,5 +162,6 @@ test('the cat looks towards desktop pointers and mobile taps without speaking', 
   await expect.poll(lookX).toBeGreaterThan(0);
   await expect(page.getByRole('complementary', { name: 'Mochi, your workout cat' }).getByRole('status')).toHaveCount(0);
   await page.goto('/library');
+  await dismissSyncNotices(page);
   await expect(page.getByRole('complementary', { name: 'Mochi, your workout cat' }).getByRole('status')).toHaveCount(0);
 });

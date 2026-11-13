@@ -663,6 +663,7 @@ export const useStore = create<Store>((set, get) => ({
       d.active.exercises.push(
         makeSessionExercise(ex, data.sessions, d.settings.unit),
       );
+      d.active.currentIndex = d.active.exercises.length - 1;
     });
   },
 
@@ -736,7 +737,18 @@ export const useStore = create<Store>((set, get) => ({
     if (becomingDone && !isCompletableSet(modeFor(ex!), st)) return false;
     get().update((d) => {
       const target = d.active?.exercises.find((e) => e.uid === uid);
-      if (target?.sets[index]) target.sets[index].done = becomingDone;
+      const completed = target?.sets[index];
+      if (!target || !completed) return;
+      completed.done = becomingDone;
+      if (becomingDone) {
+        for (const next of target.sets.slice(index + 1)) {
+          if (next.done) continue;
+          next.weight = completed.weight;
+          next.reps = completed.reps;
+          if (completed.repsR === undefined) delete next.repsR;
+          else next.repsR = completed.repsR;
+        }
+      }
     });
     if (becomingDone && data.settings.autoRest) {
       const sec = st.rest ?? data.settings.restSec;

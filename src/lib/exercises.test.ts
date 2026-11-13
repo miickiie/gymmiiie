@@ -98,6 +98,16 @@ describe('exercise logging defaults', () => {
 });
 
 describe('exercise discovery', () => {
+  it('filters by primary muscles instead of secondary muscles', () => {
+    for (const id of ['EIeI8Vf', 'I4hDWkc']) {
+      const chestExercise = exercise(id);
+      expect(exerciseMatchesZone(chestExercise, 'Chest')).toBe(true);
+      expect(exerciseMatchesZone(chestExercise, 'Arms')).toBe(false);
+      expect(exerciseMatchesZone(chestExercise, 'Shoulders')).toBe(false);
+      expect(exerciseMatchesZone(chestExercise, 'triceps')).toBe(false);
+    }
+    expect(exerciseMatchesZone(exercise('25GPyDY'), 'Arms')).toBe(true);
+  });
   it('covers complete muscle zones instead of their first muscle', () => {
     expect(
       exerciseMatchesZone({ primary: 'triceps', secondary: [] }, 'Arms'),

@@ -166,10 +166,7 @@ export default function Library() {
     );
     if (fav) list = list.filter((e) => data.favorites[e.id]);
     if (zone) list = list.filter((e) => exerciseMatchesZone(e, zone));
-    if (muscle)
-      list = list.filter(
-        (e) => e.primary === muscle || e.secondary.includes(muscle),
-      );
+    if (muscle) list = list.filter((e) => exerciseMatchesZone(e, muscle));
     if (equipment) list = list.filter((e) => e.equipment === equipment);
     list = searchExercises(list, dq);
     if (sort === 'az')
