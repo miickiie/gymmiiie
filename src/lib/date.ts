@@ -1,6 +1,11 @@
+import type { LoggedSession } from '../types';
 import { getLanguage, translateNow } from './i18n';
 
 export const DAY_MS = 86400000;
+
+export function sessionTrainingDate(session: Pick<LoggedSession, 'date' | 'startedAt'>): string {
+  return session.startedAt ?? session.date;
+}
 
 function locale(): string | undefined {
   return getLanguage() === 'th' ? 'th-TH-u-ca-gregory' : undefined;

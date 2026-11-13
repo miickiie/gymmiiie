@@ -14,6 +14,8 @@ import {
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ExerciseIcon } from '../components/ExerciseTile';
+import GenerateRoutine from '../components/GenerateRoutine';
+import { AI_WORKOUT_TH } from '../lib/ai-workout';
 import {
   Btn,
   Card,
@@ -32,6 +34,7 @@ import type { Routine } from '../types';
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const TH: Record<string, string> = {
+  ...AI_WORKOUT_TH,
   Routines: 'ตารางฝึก',
   'Your weekly plan': 'แผนรายสัปดาห์ของคุณ',
   '{n} routines · tap a day to plan it · start any routine in one tap':
@@ -100,6 +103,7 @@ export default function Routines() {
   const startFromRoutine = useStore((s) => s.startFromRoutine);
   const setWeekPlan = useStore((s) => s.setWeekPlan);
   const addTemplate = useStore((s) => s.addTemplate);
+  const [generator, setGenerator] = useState(false);
   const [confirm, setConfirm] = useState<Routine | null>(null);
 
   const all = useMemo(() => allExercises(), [data.customExercises]);
@@ -139,6 +143,7 @@ export default function Routines() {
 
   return (
     <div className="page-enter">
+      {generator && <GenerateRoutine onClose={() => setGenerator(false)} onSaved={id => { setGenerator(false); navigate(`/routines/${id}`); }} />}
       <PageHeader
         eyebrow={t('Routines')}
         title={t('Your weekly plan')}
@@ -147,6 +152,8 @@ export default function Routines() {
           { n: data.routines.length },
         )}
         action={
+          <div className="flex flex-wrap gap-2">
+          <Btn size="sm" icon={<Sparkles size={15} />} onClick={() => setGenerator(true)}>{t('Generate with AI')}</Btn>
           <Btn
             variant="primary"
             size="sm"
@@ -155,6 +162,7 @@ export default function Routines() {
           >
             {t('New routine')}
           </Btn>
+          </div>
         }
       />
 

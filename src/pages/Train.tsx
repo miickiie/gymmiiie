@@ -1,7 +1,5 @@
 import {
-  ArrowDown,
   ArrowLeft,
-  ArrowUp,
   BookOpen,
   CalendarDays,
   Dumbbell,
@@ -9,17 +7,16 @@ import {
   HeartPulse,
   Play,
   Plus,
-  RotateCcw,
   Sparkles,
   X,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import BodyMap from '../components/BodyMap';
-import { ArtThumb } from '../components/ExerciseArt';
-import { ExerciseGuide } from '../components/ExerciseGuide';
-import ExercisePicker from '../components/ExercisePicker';
-import { ExerciseIcon } from '../components/ExerciseTile';
+import WorkoutDraftReview from '../components/WorkoutDraftReview';
+import AiProfileSummary from '../components/AiProfileSummary';
+import { AI_WORKOUT_TH } from '../lib/ai-workout';
+import { useAiWorkout } from '../lib/useAiWorkout';
 import {
   Btn,
   Card,
@@ -37,6 +34,7 @@ import { allExercises, useStore } from '../lib/store';
 import type { Exercise } from '../types';
 
 const TH: Record<string, string> = {
+  ...AI_WORKOUT_TH,
   'Review your workout': 'ตรวจดูแผนฝึกก่อนเริ่ม',
   'Start your workout': 'เริ่มฝึก',
   'Arrange exercises, check your focus, then begin logging.':
@@ -97,55 +95,43 @@ const WARMUP_IDS = [
   'band-pull-apart',
 ];
 const CARDIO_IDS = ['treadmill-incline-walk', 'cycling', 'rowing'];
-const isWarmup = (ex: Exercise) =>
-  ex.kind === 'warmup' || WARMUP_IDS.includes(ex.id);
 
 export default function Train() {
   const { t, tm } = useI18n(TH);
   const navigate = useNavigate();
   const data = useStore((s) => s.data);
+  const accountId = useStore(s => s.account?.id);
+  const ai = useAiWorkout();
+  const [reasons, setReasons] = useState<Record<string, string>>({});
   const { requestStart, dialogs } = useWorkoutStart();
   const [focusOpen, setFocusOpen] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [reviewing, setReviewing] = useState(false);
   const [picks, setPicks] = useState<Exercise[]>([]);
-  const [picker, setPicker] = useState(false);
-  const [replaceId, setReplaceId] = useState<string | null>(null);
-  const [guideExercise, setGuideExercise] = useState<Exercise | null>(null);
+  useEffect(() => { setReviewing(false); setPicks([]); setReasons({}); }, [accountId]);
   const all = useMemo(() => allExercises(), [data.customExercises]);
+  useEffect(() => { setPicks(values => values.filter(exercise => !data.archived.includes(exercise.id) && all.some(current => current.id === exercise.id))); }, [all, data.archived]);
   const today = routineForWeek(data);
-  const uncovered = selected.filter(
-    (muscle) => !picks.some((ex) => !isWarmup(ex) && ex.primary === muscle),
-  );
-  const toggle = (id: string) =>
+  const toggle = (id: string) => {
+    ai.cancel();
     setSelected((values) =>
       values.includes(id)
         ? values.filter((value) => value !== id)
         : [...values, id],
     );
-  const build = () => {
-    setPicks(
-      defaultPicks(
-        all,
-        data.sessions,
-        selected,
-        data.favorites,
-        8,
-        data.archived,
-      ),
-    );
+  };
+  const build = async (): Promise<void> => {
+    setReasons({});
+    setPicks(defaultPicks(all, data.sessions, selected, data.favorites, 8, data.archived));
     setReviewing(true);
+    const result = await ai.generate('suggest', selected);
+    if (result) {
+      setPicks(result.items.flatMap(item => all.filter(exercise => exercise.id === item.exerciseId)));
+      setReasons(Object.fromEntries(result.items.map(item => [item.exerciseId, item.reason])));
+    }
   };
   const startList = (ids: string[], name?: string) =>
     requestStart(() => useStore.getState().startFromExercises(ids, name));
-  const move = (from: number, to: number) =>
-    setPicks((values) => {
-      if (to < 0 || to >= values.length) return values;
-      const next = [...values];
-      const [item] = next.splice(from, 1);
-      next.splice(to, 0, item);
-      return next;
-    });
 
   return (
     <div className="page-enter">
@@ -322,6 +308,7 @@ export default function Train() {
                 >
                   <BodyMap selected={selected} onToggle={toggle} />
                   <div className="flex flex-col justify-center">
+                    <AiProfileSummary />
                     <p className="text-sm font-semibold text-dim">
                       {t(
                         'Select muscles on the map. Review every suggestion before starting.',
@@ -338,7 +325,7 @@ export default function Train() {
                     <Btn
                       variant="primary"
                       disabled={!selected.length}
-                      onClick={build}
+                      onClick={() => { void build(); }}
                     >
                       {t('Review suggestions')}
                     </Btn>
@@ -364,151 +351,28 @@ export default function Train() {
         </>
       ) : (
         <>
-          <Card className="mb-4 p-4">
-            <div className="flex flex-wrap gap-2">
-              {selected.map((muscle) => (
-                <Chip key={muscle} on>
-                  {tm(muscle, MUSCLE_LABEL[muscle] ?? muscle)}
-                </Chip>
-              ))}
-            </div>
-            <p className="mt-3 text-xs font-semibold text-dim">
-              {t(
-                'Suggestions are a starting point. Add, replace, remove, or reorder exercises for the workout you want.',
-              )}
-            </p>
-            {uncovered.length > 0 && (
-              <p
-                role="status"
-                className="mt-3 text-sm font-bold text-[var(--warn)]"
-              >
-                {t(
-                  'No primary movement for {muscles}. Add an exercise or change the focus.',
-                  {
-                    muscles: uncovered
-                      .map((muscle) =>
-                        tm(muscle, MUSCLE_LABEL[muscle] ?? muscle),
-                      )
-                      .join(', '),
-                  },
-                )}
-              </p>
-            )}
-          </Card>
-          <SectionHeader
-            title={t('{n} exercises', { n: picks.length })}
-            action={
-              <Btn
-                size="sm"
-                onClick={() => setPicker(true)}
-                icon={<Plus size={15} />}
-              >
-                {t('Add exercise')}
-              </Btn>
-            }
-          />
-          {picks.length ? (
-            <div className="space-y-2">
-              {picks.map((ex, index) => (
-                <Card key={ex.id} className="p-3">
-                  <div className="flex items-center gap-3">
-                    <span className="w-4 shrink-0 text-xs font-black text-mute">
-                      {index + 1}
-                    </span>
-                    <ArtThumb
-                      slug={ex.art}
-                      size={40}
-                      fallback={<ExerciseIcon ex={ex} size={40} />}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <button
-                        type="button"
-                        className="text-left text-sm font-black hover:text-[var(--accent)]"
-                        onClick={() => setGuideExercise(ex)}
-                      >
-                        {ex.name}
-                      </button>
-                      <p className="text-xs font-semibold text-mute">
-                        {tm(ex.primary, MUSCLE_LABEL[ex.primary] ?? ex.primary)}{' '}
-                        · {t(ex.equipment)}
-                      </p>
-                      {isWarmup(ex) && (
-                        <span className="mt-1 inline-block rounded-full bg-[var(--warn)]/15 px-2 py-0.5 text-[10px] font-black text-[var(--warn)]">
-                          {t('Warm-up / mobility')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mt-2 flex flex-wrap justify-end gap-1">
-                    <Btn
-                      size="sm"
-                      aria-label={t('Form guide · {name}', { name: ex.name })}
-                      icon={<BookOpen size={14} />}
-                      onClick={() => setGuideExercise(ex)}
-                    >
-                      {t('Form guide')}
-                    </Btn>
-                    <Btn
-                      size="icon"
-                      disabled={index === 0}
-                      aria-label={t('Move {name} up', { name: ex.name })}
-                      onClick={() => move(index, index - 1)}
-                    >
-                      <ArrowUp size={16} />
-                    </Btn>
-                    <Btn
-                      size="icon"
-                      disabled={index === picks.length - 1}
-                      aria-label={t('Move {name} down', { name: ex.name })}
-                      onClick={() => move(index, index + 1)}
-                    >
-                      <ArrowDown size={16} />
-                    </Btn>
-                    <Btn
-                      size="sm"
-                      onClick={() => setReplaceId(ex.id)}
-                      icon={<RotateCcw size={14} />}
-                    >
-                      {t('Replace')}
-                    </Btn>
-                    <Btn
-                      size="icon"
-                      aria-label={t('Remove {name}', { name: ex.name })}
-                      onClick={() =>
-                        setPicks((values) =>
-                          values.filter((value) => value.id !== ex.id),
-                        )
-                      }
-                    >
-                      <X size={16} />
-                    </Btn>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              icon={<Dumbbell size={22} />}
-              title={t('No exercises selected')}
-              action={
-                <Btn onClick={() => setPicker(true)}>{t('Add exercise')}</Btn>
-              }
-            />
-          )}
+          {ai.loading ? <Card className="mb-4 space-y-3 p-4"><p role="status">{t('AI is arranging your workout…')}</p><Btn onClick={ai.cancel}>{t('Use basic suggestions')}</Btn></Card> : <>
+            {ai.notice && <p role="status" className="mb-3 text-sm text-[var(--warn)]">{t(ai.notice)}</p>}
+            <WorkoutDraftReview selectedMuscles={selected} draft={{ mode: 'suggest', items: picks.map(exercise => ({ exerciseId: exercise.id, reason: reasons[exercise.id] ?? '' })) }} onChange={draft => {
+              ai.cancel();
+              setPicks(draft.items.flatMap(item => all.filter(exercise => exercise.id === item.exerciseId)));
+              setReasons(Object.fromEntries(draft.items.map(item => [item.exerciseId, item.reason])));
+            }} />
+          </>}
           <div className="floating-actions sticky z-10 mt-4 flex items-end gap-1 rounded-2xl bg-[var(--bg)]">
             <div className="flex min-w-0 flex-1 gap-2 rounded-2xl border border-line bg-[var(--bg)]/95 p-2 backdrop-blur">
             <Btn
               className="min-h-11 min-w-11 shrink-0"
               aria-label={t('Change focus')}
               icon={<ArrowLeft size={16} />}
-              onClick={() => setReviewing(false)}
+              onClick={() => { ai.cancel(); setReviewing(false); }}
             >
               <span className="hidden sm:inline">{t('Change focus')}</span>
             </Btn>
             <Btn
               variant="primary"
               className="flex-1"
-              disabled={!picks.length}
+              disabled={!picks.length || ai.loading}
               onClick={() => startList(picks.map((ex) => ex.id))}
             >
               {t('Start workout')}
@@ -518,29 +382,6 @@ export default function Train() {
           </div>
         </>
       )}
-      <ExerciseGuide
-        exercise={guideExercise}
-        open={Boolean(guideExercise)}
-        onClose={() => setGuideExercise(null)}
-      />
-      <ExercisePicker
-        open={picker}
-        onClose={() => setPicker(false)}
-        exclude={picks.map((ex) => ex.id)}
-        onPick={(ex) => setPicks((values) => [...values, ex])}
-      />
-      <ExercisePicker
-        open={!!replaceId}
-        onClose={() => setReplaceId(null)}
-        title={t('Replace exercise')}
-        exclude={picks.map((ex) => ex.id)}
-        onPick={(ex) => {
-          setPicks((values) =>
-            values.map((value) => (value.id === replaceId ? ex : value)),
-          );
-          setReplaceId(null);
-        }}
-      />
       {dialogs}
     </div>
   );

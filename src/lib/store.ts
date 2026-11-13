@@ -326,6 +326,7 @@ interface Store {
   deleteSession: (id: string) => void;
   startFromSession: (id: string) => StartResult;
   createRoutine: (r: Omit<Routine, 'id' | 'createdAt'>) => string;
+  saveGeneratedRoutine: (draft: Pick<Routine, 'name' | 'exerciseIds' | 'sets' | 'rest'>, expectedAccountId: string) => Promise<FinishResult>;
   updateRoutine: (id: string, patch: Partial<Routine>) => void;
   deleteRoutine: (id: string) => void;
   addTemplate: (templateId: string) => string[];
@@ -1001,6 +1002,28 @@ export const useStore = create<Store>((set, get) => ({
       d.routines.push({ ...r, id, createdAt: isoNow() });
     });
     return id;
+  },
+
+  saveGeneratedRoutine: async (draft, expectedAccountId) => {
+    const current = get();
+    const epoch = accountEpoch;
+    const failure = { status: 'error' as const, message: 'Could not save routine. Check storage and account status, then retry.' };
+    if (!canMutate(current) || current.account?.id !== expectedAccountId) return failure;
+    const all = allExercisesFor(current.data);
+    if (!draft.name.trim() || draft.name.length > 160 || !draft.exerciseIds.length || new Set(draft.exerciseIds).size !== draft.exerciseIds.length) return failure;
+    if (draft.exerciseIds.some(id => {
+      const sets = draft.sets[id], rest = draft.rest[id];
+      return !all.some(exercise => exercise.id === id) || current.data.archived.includes(id) ||
+        !Number.isInteger(sets) || sets < 1 || sets > 12 || !Number.isFinite(rest) || rest < 0 || rest > 600 || rest % 15 !== 0;
+    })) return failure;
+    const id = newId('r');
+    const next = produce(current.data, data => {
+      data.routines.push({ id, createdAt: isoNow(), name: draft.name.trim(), exerciseIds: [...draft.exerciseIds], sets: { ...draft.sets }, rest: { ...draft.rest } });
+    });
+    try {
+      await commitData(next);
+      return epoch === accountEpoch && get().account?.id === expectedAccountId ? { status: 'saved', id } : failure;
+    } catch { return failure; }
   },
 
   updateRoutine: (id, patch) =>

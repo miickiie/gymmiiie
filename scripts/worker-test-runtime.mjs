@@ -8,12 +8,25 @@ const projectRoot = fileURLToPath(new URL('../', import.meta.url));
 /** Native workerd + SQLite D1, isolated per call. Never loads Wrangler or env files. */
 export async function createWorkerTestRuntime({
   registrationPassphrase = 'test-invite',
+  aiEnabled = false,
+  aiResponse = null,
+  aiError = '',
   assets = () =>
     new Response('Test assets are served by the Node test server.', { status: 404 }),
 } = {}) {
   const compiled = await build({
     absWorkingDir: projectRoot,
-    entryPoints: ['worker/index.ts'],
+    stdin: {
+      contents: `import worker from './worker/index.ts';
+        export default { fetch(request, env) {
+          return worker.fetch(request, { ...env, AI: { async run() {
+            if (env.TEST_AI_ERROR) throw new Error(env.TEST_AI_ERROR);
+            return JSON.parse(env.TEST_AI_RESPONSE);
+          } } });
+        } };`,
+      resolveDir: projectRoot,
+      sourcefile: 'worker-test-entry.ts',
+    },
     bundle: true,
     write: false,
     format: 'esm',
@@ -27,10 +40,12 @@ export async function createWorkerTestRuntime({
       script: compiled.outputFiles[0].text,
       compatibilityDate: '2024-12-05',
       d1Databases: { DB: 'gymmiie-tests' },
-      bindings:
-        registrationPassphrase === undefined || registrationPassphrase === null
-          ? {}
-          : { REGISTRATION_PASSPHRASE: registrationPassphrase },
+      bindings: {
+        ...(registrationPassphrase === undefined || registrationPassphrase === null ? {} : { REGISTRATION_PASSPHRASE: registrationPassphrase }),
+        AI_ENABLED: aiEnabled ? 'true' : 'false',
+        TEST_AI_RESPONSE: JSON.stringify(aiResponse),
+        TEST_AI_ERROR: aiError,
+      },
       telemetry: { enabled: false },
       serviceBindings: {
         ASSETS: assets,

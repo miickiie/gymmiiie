@@ -1,6 +1,7 @@
 /// <reference path="./worker-configuration.d.ts" />
 /** Account snapshots are server-readable. The separate legacy sync API remains encrypted. */
 import { handleAccounts } from './accounts';
+import { handleAiWorkout } from './ai-workout';
 import { appUpdateResponse } from './app-update';
 import { ApiError, json as apiJson } from './http';
 
@@ -97,6 +98,8 @@ export default {
       const accountResponse = await handleAccounts(request, env);
       if (accountResponse) return accountResponse;
       const url = new URL(request.url);
+
+      if (url.pathname === '/api/ai/workout-plan') return await handleAiWorkout(request, env);
 
       if (url.pathname === '/api/app-update') {
         if (request.method !== 'GET') {

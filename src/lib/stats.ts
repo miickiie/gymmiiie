@@ -6,6 +6,7 @@ import {
   dateKey,
   daysBetween,
   parseKey,
+  sessionTrainingDate,
   startOfWeek,
   weekdayIndex,
 } from './date';
@@ -147,7 +148,7 @@ export function sessionVolumeOfDay(
 
 export function sortedSessions(sessions: LoggedSession[]): LoggedSession[] {
   return [...sessions].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    (a, b) => new Date(sessionTrainingDate(b)).getTime() - new Date(sessionTrainingDate(a)).getTime(),
   );
 }
 
@@ -158,7 +159,10 @@ export function lastSetsFor(
   const sorted = sortedSessions(sessions);
   for (const s of sorted) {
     const ex = s.exercises.find((e) => e.id === id);
-    if (ex) return workingSets(ex.sets);
+    if (ex) {
+      const working = workingSets(ex.sets);
+      if (working.length) return working;
+    }
   }
   return [];
 }

@@ -80,7 +80,7 @@ export async function readJson(
     throw new ApiError(
       'payload_too_large',
       413,
-      'This snapshot is too large. Keep a local export.',
+      'This request is too large.',
     );
   const reader = request.body?.getReader();
   if (!reader)
@@ -98,7 +98,7 @@ export async function readJson(
         throw new ApiError(
           'payload_too_large',
           413,
-          'This snapshot is too large. Keep a local export.',
+          'This request is too large.',
         );
       }
       bytes.set(value, length);

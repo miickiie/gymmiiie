@@ -2,6 +2,12 @@ name = "gymmiie"
 main = "worker/index.ts"
 compatibility_date = "2024-12-05"
 
+[vars]
+AI_ENABLED = "true"
+
+[ai]
+binding = "AI"
+
 # Single Worker: static SPA, account snapshots, and legacy encrypted sync.
 [secrets]
 required = ["REGISTRATION_PASSPHRASE"]

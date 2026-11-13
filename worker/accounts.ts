@@ -79,9 +79,9 @@ async function rateLimit(
   ]);
 }
 
-async function limitAttempts(env: Env, key: string, maximum: number): Promise<void> {
+export async function limitAttempts(env: Env, key: string, maximum: number, windowMs = WINDOW_MS): Promise<void> {
   const now = Date.now(),
-    windowStart = Math.floor(now / WINDOW_MS) * WINDOW_MS;
+    windowStart = Math.floor(now / windowMs) * windowMs;
   const row = await env.DB.prepare(
     `
     INSERT INTO account_rate_limits (key, window_start, attempts, expires_at)
@@ -92,7 +92,7 @@ async function limitAttempts(env: Env, key: string, maximum: number): Promise<vo
     RETURNING attempts
   `,
   )
-    .bind(key, windowStart, windowStart + 2 * WINDOW_MS)
+    .bind(key, windowStart, windowStart + 2 * windowMs)
     .first<{ attempts: number }>();
   if (!row || row.attempts > maximum)
     throw new ApiError(
@@ -101,7 +101,7 @@ async function limitAttempts(env: Env, key: string, maximum: number): Promise<vo
       'Too many attempts. Try again later.',
       {
         'retry-after': String(
-          Math.max(1, Math.ceil((windowStart + WINDOW_MS - now) / 1000)),
+          Math.max(1, Math.ceil((windowStart + windowMs - now) / 1000)),
         ),
       },
     );
@@ -193,7 +193,7 @@ async function issueSession(
   });
 }
 
-async function requireSession(request: Request, env: Env): Promise<Account> {
+export async function requireSession(request: Request, env: Env): Promise<Account> {
   const token = cookieValue(request);
   if (!token || !/^[a-f0-9]{64}$/.test(token))
     throw new ApiError(
