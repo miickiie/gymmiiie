@@ -142,7 +142,7 @@ export function sessionVolumeOfDay(
   day: string,
 ): number {
   return sessions
-    .filter((s) => dateKey(s.date) === day)
+    .filter((s) => dateKey(sessionTrainingDate(s)) === day)
     .reduce((n, s) => n + sessionVolume(s), 0);
 }
 
@@ -177,7 +177,7 @@ export function exerciseHistory(
       ex: session.exercises.find((e) => e.id === id),
     }))
     .filter((x): x is { session: LoggedSession; ex: LoggedExercise } => !!x.ex)
-    .map((x) => ({ date: x.session.date, session: x.session, ex: x.ex }));
+    .map((x) => ({ date: sessionTrainingDate(x.session), session: x.session, ex: x.ex }));
 }
 
 type ExerciseEntry = { exercise: LoggedExercise; date: string };
@@ -290,7 +290,7 @@ export function personalRecords(sessions: LoggedSession[]): PR[] {
   for (const session of sortedSessions(sessions)) {
     for (const exercise of session.exercises) {
       const entries = map.get(exercise.id) ?? [];
-      entries.push({ exercise, date: session.date });
+      entries.push({ exercise, date: sessionTrainingDate(session) });
       map.set(exercise.id, entries);
     }
   }
@@ -323,14 +323,14 @@ export function recordFor(
 
 export function workoutsThisWeek(data: AppData): number {
   const start = startOfWeek(new Date(), data.settings.weekStart);
-  return data.sessions.filter((s) => new Date(s.date) >= start).length;
+  return data.sessions.filter((s) => new Date(sessionTrainingDate(s)) >= start).length;
 }
 
 export function daysDoneThisWeek(data: AppData): number {
   const start = startOfWeek(new Date(), data.settings.weekStart);
   const days = new Set<string>();
   for (const s of data.sessions) {
-    const d = new Date(s.date);
+    const d = new Date(sessionTrainingDate(s));
     if (d >= start) days.add(dateKey(d));
   }
   for (const c of data.checkins) if (parseKey(c) >= start) days.add(c);
@@ -340,7 +340,7 @@ export function daysDoneThisWeek(data: AppData): number {
 export function currentStreak(
   data: Pick<AppData, 'sessions' | 'checkins' | 'daysOff' | 'weekPlan'>,
 ): number {
-  const trained = new Set(data.sessions.map((s) => dateKey(s.date)));
+  const trained = new Set(data.sessions.map((s) => dateKey(sessionTrainingDate(s))));
   for (const c of data.checkins) trained.add(c);
   if (!trained.size) return 0;
   const first = [...trained].sort()[0];
@@ -376,7 +376,7 @@ export function totalSets(sessions: LoggedSession[]): number {
 export function heatmapLevels(sessions: LoggedSession[], days = 119): number[] {
   const loads = new Map<string, number>();
   for (const s of sessions) {
-    const k = dateKey(s.date);
+    const k = dateKey(sessionTrainingDate(s));
     loads.set(k, (loads.get(k) ?? 0) + s.durationSec + sessionSets(s) * 60);
   }
   const values = [...loads.values()].sort((a, b) => a - b);
@@ -399,7 +399,7 @@ export function muscleSetsBetween(
 ): Record<string, number> {
   const out: Record<string, number> = {};
   for (const s of sessions) {
-    const d = new Date(s.date);
+    const d = new Date(sessionTrainingDate(s));
     if (d < from || d > to) continue;
     for (const e of s.exercises) {
       const n = workingSets(e.sets).length;
@@ -454,7 +454,7 @@ export function weeklyVolume(
     const start = startOfWeek(addDays(new Date(now), -i * 7), 1);
     const end = addDays(new Date(start), 7);
     const inWeek = sessions.filter((s) => {
-      const d = new Date(s.date);
+      const d = new Date(sessionTrainingDate(s));
       return d >= start && d < end;
     });
     out.push({

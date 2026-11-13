@@ -10,8 +10,8 @@ import {
   Sparkles,
   X,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import BodyMap from '../components/BodyMap';
 import WorkoutDraftReview from '../components/WorkoutDraftReview';
 import AiProfileSummary from '../components/AiProfileSummary';
@@ -99,16 +99,33 @@ const CARDIO_IDS = ['treadmill-incline-walk', 'cycling', 'rowing'];
 export default function Train() {
   const { t, tm } = useI18n(TH);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const muscleEntry = searchParams.get('focus') === 'muscles';
   const data = useStore((s) => s.data);
   const accountId = useStore(s => s.account?.id);
   const ai = useAiWorkout();
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const { requestStart, dialogs } = useWorkoutStart();
-  const [focusOpen, setFocusOpen] = useState(false);
+  const [focusOpen, setFocusOpen] = useState(muscleEntry);
   const [selected, setSelected] = useState<string[]>([]);
   const [reviewing, setReviewing] = useState(false);
   const [picks, setPicks] = useState<Exercise[]>([]);
   useEffect(() => { setReviewing(false); setPicks([]); setReasons({}); }, [accountId]);
+  const musclePicker = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (muscleEntry) {
+      setFocusOpen(true);
+      setReviewing(false);
+    }
+  }, [muscleEntry]);
+  useEffect(() => {
+    if (!muscleEntry || !focusOpen || reviewing) return;
+    const frame = window.requestAnimationFrame(() => {
+      musclePicker.current?.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior });
+      musclePicker.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [muscleEntry, focusOpen, reviewing]);
   const all = useMemo(() => allExercises(), [data.customExercises]);
   useEffect(() => { setPicks(values => values.filter(exercise => !data.archived.includes(exercise.id) && all.some(current => current.id === exercise.id))); }, [all, data.archived]);
   const today = routineForWeek(data);
@@ -304,7 +321,11 @@ export default function Train() {
               <Card className="mt-3 p-4">
                 <div
                   id="muscle-suggestions"
-                  className="grid gap-4 lg:grid-cols-[1.3fr_1fr]"
+                  ref={musclePicker}
+                  role="group"
+                  aria-label={t('Suggest by muscle')}
+                  tabIndex={-1}
+                  className="grid scroll-mt-20 gap-4 lg:grid-cols-[1.3fr_1fr]"
                 >
                   <BodyMap selected={selected} onToggle={toggle} />
                   <div className="flex flex-col justify-center">

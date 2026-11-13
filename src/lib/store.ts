@@ -16,7 +16,7 @@ import type {
   SessionSet,
   Settings,
 } from '../types';
-import { dateKey, isoNow } from './date';
+import { dateKey, isoNow, sessionTrainingDate } from './date';
 import {
   downloadFile,
   loadPersisted,
@@ -935,7 +935,7 @@ export const useStore = create<Store>((set, get) => ({
       d.active = null;
       if (session) {
         d.sessions.push(session);
-        d.checkins = d.checkins.filter((c) => c !== dateKey(session.date));
+        d.checkins = d.checkins.filter((c) => c !== dateKey(sessionTrainingDate(session)));
         if (!d.profile.since) d.profile.since = isoNow();
       }
     });
@@ -1238,7 +1238,7 @@ export const useStore = create<Store>((set, get) => ({
 
   toggleCheckin: (day) =>
     get().update((d) => {
-      if (d.sessions.some((s) => dateKey(s.date) === day)) return;
+      if (d.sessions.some((s) => dateKey(sessionTrainingDate(s)) === day)) return;
       if (d.checkins.includes(day))
         d.checkins = d.checkins.filter((c) => c !== day);
       else {

@@ -19,7 +19,7 @@ import { ExerciseIcon, MuscleDot } from '../components/ExerciseTile';
 import { formatLoggedSet } from '../components/recordLabels';
 import { Btn, Card, Confirm, EmptyState, useToast } from '../components/ui';
 import { useWorkoutStart } from '../components/WorkoutStart';
-import { fmtDate, fmtDuration, fmtTime } from '../lib/date';
+import { fmtDate, fmtDuration, fmtTime, sessionTrainingDate } from '../lib/date';
 import { EXERCISES } from '../lib/exercises';
 import { useI18n } from '../lib/i18n';
 import {
@@ -94,7 +94,7 @@ export default function SessionDetail() {
   const prior = useMemo(
     () =>
       session
-        ? data.sessions.filter((s) => new Date(s.date) < new Date(session.date))
+        ? data.sessions.filter((s) => new Date(sessionTrainingDate(s)) < new Date(sessionTrainingDate(session)))
         : [],
     [data.sessions, session],
   );
@@ -114,7 +114,7 @@ export default function SessionDetail() {
     );
   }
 
-  const d = new Date(session.date);
+  const d = new Date(sessionTrainingDate(session));
   const routine = data.routines.find((r) => r.id === session.routineId);
   const prs = sessionPRCount(session, prior);
   const volume = sessionVolume(session);
@@ -203,9 +203,9 @@ export default function SessionDetail() {
             label: t('Duration'),
             value: fmtDuration(session.durationSec),
             icon: <Clock size={14} />,
-          sub: session.startedAt
-            ? t('started {time}', { time: fmtTime(new Date(session.startedAt)) })
-            : t('finished {time}', { time: fmtTime(d) }),
+            sub: t(session.startedAt ? 'started {time}' : 'finished {time}', {
+              time: fmtTime(d),
+            }),
           },
           {
             label: t('Exercises'),

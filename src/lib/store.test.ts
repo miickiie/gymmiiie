@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as db from './db';
 import { defaultData, useStore } from './store';
 import { EXERCISES } from './exercises';
+import { dateKey } from './date';
+import { daysDoneThisWeek } from './stats';
 import { readPendingSnapshot, writePendingSnapshot } from './pendingSnapshot';
 
 const bench = EXERCISES.find((e) => e.name === 'Barbell Bench Press')!;
@@ -586,6 +588,37 @@ describe('durable workout state', () => {
     expect(useStore.getState().data.active!.exercises[0].sets[1]).toMatchObject({
       weight: 45, reps: 7,
     });
+  });
+
+  it.each([false, true])('saves overnight workouts on the start day and preserves independent finish-day check-ins: %s', async (finishDayCheckin) => {
+    const start = new Date(2026, 10, 13, 23, 50);
+    const finish = new Date(2026, 10, 14, 1, 15);
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(finish);
+    try {
+      useStore.getState().startFromExercises([bench.id]);
+      useStore.getState().setSettings({ autoRest: false, weekStart: 1 });
+      useStore.getState().update((data) => { data.active!.startedAt = start.getTime(); });
+      useStore.getState().toggleCheckin(dateKey(start));
+      if (finishDayCheckin) useStore.getState().toggleCheckin(dateKey(finish));
+      const uid = useStore.getState().data.active!.exercises[0].uid;
+      useStore.getState().updateSet(uid, 0, { weight: 40, reps: 10 });
+      useStore.getState().toggleSet(uid, 0);
+
+      const result = await useStore.getState().finishSession();
+
+      expect(result.status).toBe('saved');
+      const data = useStore.getState().data;
+      expect(data.sessions[0]).toMatchObject({
+        startedAt: start.toISOString(), date: finish.toISOString(), durationSec: 85 * 60,
+      });
+      expect(data.checkins).toEqual(finishDayCheckin ? [dateKey(finish)] : []);
+      expect(daysDoneThisWeek(data)).toBe(finishDayCheckin ? 2 : 1);
+      useStore.getState().toggleCheckin(dateKey(start));
+      expect(useStore.getState().data.checkins).toEqual(data.checkins);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('stores the actual workout start separately from the finish date', async () => {

@@ -28,6 +28,7 @@ import {
   fmtDuration,
   fmtTime,
   relativeDay,
+  sessionTrainingDate,
 } from '../lib/date';
 import {
   heatmapLevels,
@@ -101,7 +102,7 @@ export default function History() {
     const query = q.trim().toLowerCase();
     const cutoff = range === 'all' ? 0 : Date.now() - Number(range) * 86400000;
     return sessions.filter((s) => {
-      if (cutoff && new Date(s.date).getTime() < cutoff) return false;
+      if (cutoff && new Date(sessionTrainingDate(s)).getTime() < cutoff) return false;
       if (routineId && s.routineId !== routineId) return false;
       if (!query) return true;
       const routine = data.routines.find((r) => r.id === s.routineId);
@@ -114,7 +115,7 @@ export default function History() {
   const groups = useMemo(() => {
     const map = new Map<string, LoggedSession[]>();
     for (const s of filtered) {
-      const d = new Date(s.date);
+      const d = new Date(sessionTrainingDate(s));
       const key = fmtDate(d, {
         month: 'long',
         year: 'numeric',
@@ -303,8 +304,8 @@ export default function History() {
             </div>
             <div className="space-y-2">
               {list.map((s) => {
-                const d = new Date(s.date);
-                const prior = data.sessions.filter((p) => new Date(p.date) < d);
+                const d = new Date(sessionTrainingDate(s));
+                const prior = data.sessions.filter((p) => new Date(sessionTrainingDate(p)) < d);
                 const prs = sessionPRCount(s, prior);
                 const routine = data.routines.find((r) => r.id === s.routineId);
                 return (
@@ -360,7 +361,7 @@ export default function History() {
                           {volumeLabel(sessionVolume(s), unit)}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Timer size={10} /> {fmtTime(s.date)}
+                          <Timer size={10} /> {fmtTime(sessionTrainingDate(s))}
                         </span>
                       </div>
                     </div>
@@ -405,8 +406,8 @@ export default function History() {
             total: data.sessions.length,
             range:
               filtered.length === 1
-                ? relativeDay(dateKey(filtered[0].date))
-                : `${fmtDate(filtered[filtered.length - 1].date, { day: 'numeric', month: 'short' })} — ${fmtDate(filtered[0].date, { day: 'numeric', month: 'short' })}`,
+                ? relativeDay(dateKey(sessionTrainingDate(filtered[0])))
+                : `${fmtDate(sessionTrainingDate(filtered[filtered.length - 1]), { day: 'numeric', month: 'short' })} — ${fmtDate(sessionTrainingDate(filtered[0]), { day: 'numeric', month: 'short' })}`,
           })}
         </p>
       )}

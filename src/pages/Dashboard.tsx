@@ -37,6 +37,7 @@ import {
   fmtDuration,
   fmtTime,
   parseKey,
+  sessionTrainingDate,
   weekDates,
   weekdayIndex,
 } from '../lib/date';
@@ -186,7 +187,7 @@ export default function Dashboard() {
   const volume = useMemo(() => totalVolume(data.sessions), [data.sessions]);
   const sets = useMemo(() => totalSets(data.sessions), [data.sessions]);
   const days = weekDates(data.settings.weekStart, now);
-  const trainedDays = new Set(data.sessions.map((s) => dateKey(s.date)));
+  const trainedDays = new Set(data.sessions.map((s) => dateKey(sessionTrainingDate(s))));
   const isOff = !!data.daysOff[today];
   const isCheckin = data.checkins.includes(today);
   const todayEntries = data.nutrition.entries.filter((e) => e.date === today);
@@ -551,7 +552,7 @@ export default function Dashboard() {
                 <Btn
                   variant="primary"
                   size="sm"
-                  onClick={() => navigate('/train')}
+                  onClick={() => navigate('/train?focus=muscles')}
                 >
                   {t('Pick muscles')}
                 </Btn>
@@ -589,7 +590,7 @@ export default function Dashboard() {
                       </p>
                       <p className="text-[11px] font-bold text-mute">
                         {t('{date} · {dur} · {n} exercises', {
-                          date: fmtDate(s.date, {
+                          date: fmtDate(sessionTrainingDate(s), {
                             weekday: 'short',
                             day: 'numeric',
                             month: 'short',
@@ -639,7 +640,7 @@ export default function Dashboard() {
                 title: t('By muscle'),
                 hint: t('Body map picks'),
                 icon: <Dumbbell size={18} />,
-                to: '/train',
+                to: '/train?focus=muscles',
               },
               {
                 title: t('Browse'),
