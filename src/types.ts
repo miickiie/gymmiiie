@@ -9,8 +9,22 @@ export type ThemePref =
 export type SetKind =
   'normal' | 'warmup' | 'drop' | 'failure' | 'restPause' | 'cluster';
 export type EffortMode = 'off' | 'rpe' | 'rir';
-/** Empty mode is the existing repetition-based logging format. */
-export type ExerciseMode = '' | 'time' | 'cardio';
+/**
+ * GymMane v2.2.0 logging taxonomy. Legacy `time`/`cardio`/empty values remain
+ * valid for saved workouts and user-created exercises.
+ */
+export type ExerciseMode =
+  | ''
+  | 'time'
+  | 'cardio'
+  | 'distance_duration'
+  | 'duration'
+  | 'weight_duration'
+  | 'assisted_bodyweight'
+  | 'bodyweight_reps'
+  | 'weight_reps';
+/** How a movement is driven for tracking and PR leaderboards. */
+export type ExerciseKind = 'strength' | 'cardio' | 'mobility' | 'sport';
 export type LoadKind = 'external' | 'added' | 'assistance' | 'none';
 export type MuscleId =
   | 'chest'
@@ -42,7 +56,13 @@ export interface Exercise {
   /** Reviewed movement family used only to diversify automatic suggestions. */
   suggestionGroup?: string;
   aliases: string[];
-  kind: string;
+  kind: ExerciseKind | 'custom';
+  /** One limb at a time; offers the between-sides rest timer while logging. */
+  unilateral?: boolean;
+  /** Attachment or machine variant, e.g. `Smith Machine`, `Trap Bar`, `EZ-Bar`. */
+  sub_equipment?: string | null;
+  /** Deterministic swap candidates ranked by artwork and muscle overlap. */
+  similar_ids?: string[];
 }
 
 export interface LoggedSet {
@@ -63,6 +83,9 @@ export interface LoggedExercise {
   primary: string;
   mode?: ExerciseMode;
   loadKind?: LoadKind;
+  /** Snapshot of the catalog kind; older logs fall back to the catalog lookup. */
+  kind?: ExerciseKind | 'custom';
+  unilateral?: boolean;
   sets: LoggedSet[];
 }
 
@@ -100,6 +123,10 @@ export interface SessionExercise {
   primary: string;
   mode?: ExerciseMode;
   loadKind?: LoadKind;
+  /** Snapshot of the catalog kind; a mobility row never feeds strength PRs. */
+  kind?: ExerciseKind | 'custom';
+  /** Whether each side is trained separately for the between-sides rest cue. */
+  unilateral?: boolean;
   weightUnit?: Unit;
   sets: SessionSet[];
   linkedNext?: boolean;

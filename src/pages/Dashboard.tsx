@@ -644,7 +644,7 @@ export default function Dashboard() {
               },
               {
                 title: t('Browse'),
-                hint: t('{n} exercises', { n: 466 }),
+                hint: t('{n} exercises', { n: 501 }),
                 icon: <BookOpen size={18} />,
                 to: '/library',
               },

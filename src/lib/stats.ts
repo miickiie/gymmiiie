@@ -289,6 +289,9 @@ export function personalRecords(sessions: LoggedSession[]): PR[] {
   const map = new Map<string, ExerciseEntry[]>();
   for (const session of sortedSessions(sessions)) {
     for (const exercise of session.exercises) {
+      // Mobility and warm-up drills stay out of the strength PR leaderboard.
+      const kind = exercise.kind ?? exerciseKind(exercise.id);
+      if (kind === 'mobility') continue;
       const entries = map.get(exercise.id) ?? [];
       entries.push({ exercise, date: sessionTrainingDate(session) });
       map.set(exercise.id, entries);
@@ -413,14 +416,20 @@ export function muscleSetsBetween(
   return out;
 }
 
-let secondaryCache: Map<string, string[]> | null = null;
+type ExerciseLookupEntry = { secondary: string[]; kind?: string };
+let exerciseCache: Map<string, ExerciseLookupEntry> | null = null;
 export function setExerciseLookup(
-  exercises: { id: string; secondary: string[] }[],
+  exercises: { id: string; secondary: string[]; kind?: string }[],
 ) {
-  secondaryCache = new Map(exercises.map((e) => [e.id, e.secondary]));
+  exerciseCache = new Map(
+    exercises.map((e) => [e.id, { secondary: e.secondary, kind: e.kind }]),
+  );
 }
 export function exercisesSecondary(id: string): string[] {
-  return secondaryCache?.get(id) ?? [];
+  return exerciseCache?.get(id)?.secondary ?? [];
+}
+export function exerciseKind(id: string): string | undefined {
+  return exerciseCache?.get(id)?.kind;
 }
 
 export function oneRmSeries(

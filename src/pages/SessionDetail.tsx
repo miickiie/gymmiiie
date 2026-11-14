@@ -398,6 +398,6 @@ function exerciseStub(ex: LoggedExercise): Exercise {
     mode: ex.mode ?? '',
     loadKind: ex.loadKind,
     aliases: [],
-    kind: '',
+    kind: 'custom',
   };
 }

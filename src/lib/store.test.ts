@@ -787,7 +787,7 @@ describe('durable workout state', () => {
   });
 
   it('rejects completing empty metric sets but permits undoing imported invalid done sets', () => {
-    const cardio = EXERCISES.find((e) => e.mode === 'cardio')!;
+    const cardio = EXERCISES.find((e) => e.mode === 'distance_duration')!;
     useStore.getState().startFromExercises([cardio.id]);
     const ex = useStore.getState().data.active!.exercises[0];
     expect(useStore.getState().toggleSet(ex.uid, 0)).toBe(false);

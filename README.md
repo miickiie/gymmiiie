@@ -12,7 +12,7 @@ Gymmiie keeps each user’s training log under an account identified by name and
 - **Live session logging** — weight, reps, cardio, time, RPE/RIR, set kinds and notes through mobile set details; automatic rest with end beep/vibration, PR context, reorder/swap/remove. Active workouts cannot be replaced without confirmation.
 - **Routines & programs** — build routines, schedule weekdays, or install Full Body, Push/Pull/Legs, Upper/Lower and Arnold templates.
 - **Progress that means something** — e1RM, records, streaks, heatmaps, weekly volume, bodyweight, measurements, goals and awards.
-- **466-exercise library** — search/filter by muscle and equipment, custom tracking modes and load types, favourites, archive, per-exercise notes and charts. Original exercise instructions and available animations are shown, with reviewed corrections retained and confirmed incompatible artwork excluded.
+- **501-exercise library** — search/filter by muscle and equipment, custom tracking modes and load types, favourites, archive, per-exercise notes and charts. Original exercise instructions and available animations are shown, with reviewed corrections retained and confirmed incompatible artwork excluded.
 - **Nutrition** — 561 foods and 27 dishes, meal slots, macro goals, water tracking and custom foods.
 - **Tools & journal** — 1RM, BMI, TDEE/macros, body fat, FFMI, plate maths, warm-up ramps, RPE load, DOTS and Wilks, plus a tagged training journal.
 - **Offline PWA** — installable, dark/light, versioned precache of the app shell and route chunks; installed screens remain available offline.
@@ -150,7 +150,7 @@ src/
   pages/           17 screens (onboarding, dashboard, train, session, …)
   components/      Layout, UI primitives, body map, exercise picker/tiles
   lib/             store, stats, foods, exercises, date, IndexedDB, cloud sync
-  data/            extracted exercises (466), foods (561), dishes (27)
+  data/            extracted exercises (501), foods (561), dishes (27)
 worker/index.ts    Cloudflare Worker: assets + encrypted snapshot API
 migrations/        D1 schema
 public/            manifest, service worker, icons

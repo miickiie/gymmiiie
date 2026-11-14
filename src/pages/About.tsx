@@ -26,7 +26,7 @@ const TH: Record<string, string> = {
   'Live set logging': 'บันทึกเซ็ตแบบสด',
   'Rest timer, set details, RPE or RIR, cardio distance and timed exercises.':
     'จับเวลาพัก รายละเอียดเซ็ต RPE หรือ RIR ระยะคาร์ดิโอ และท่าจับเวลา',
-  '466 exercises': '466 ท่าออกกำลัง',
+  '501 exercises': '501 ท่าออกกำลัง',
   'Search by muscle, equipment or name. Reviewed form guides appear where available.':
     'ค้นหาตามกล้ามเนื้อ อุปกรณ์ หรือชื่อ มีคู่มือท่าที่ตรวจแล้วในบางท่า',
   'Progress that sticks': 'ความก้าวหน้าที่เห็นจริง',
@@ -81,7 +81,7 @@ const FEATURES = [
   },
   {
     icon: <BookOpen size={18} />,
-    title: '466 exercises',
+    title: '501 exercises',
     body: 'Search by muscle, equipment or name. Reviewed form guides appear where available.',
   },
   {

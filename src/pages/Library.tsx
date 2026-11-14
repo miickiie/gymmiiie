@@ -517,9 +517,21 @@ function CreateExercise({
         .map((s) => s.trim())
         .filter(Boolean),
       mode,
-      loadKind: mode === 'cardio' ? 'none' : loadKind,
+      loadKind:
+        mode === 'cardio' || mode === 'distance_duration'
+          ? 'none'
+          : mode === 'assisted_bodyweight'
+            ? 'assistance'
+            : mode === 'bodyweight_reps'
+              ? 'added'
+              : mode === 'weight_reps' || mode === 'weight_duration'
+                ? 'external'
+                : loadKind,
       aliases: [],
       kind: 'custom',
+      unilateral: false,
+      sub_equipment: null,
+      similar_ids: [],
     });
     setName('');
     setSteps('');
@@ -625,11 +637,23 @@ function CreateExercise({
               onChange={(e) => setMode(e.target.value as ExerciseMode)}
             >
               <option value="">{t('Repetitions')}</option>
+              <option value="weight_reps">{t('Repetitions + weight')}</option>
+              <option value="bodyweight_reps">
+                {t('Bodyweight repetitions')}
+              </option>
+              <option value="assisted_bodyweight">
+                {t('Assisted bodyweight')}
+              </option>
               <option value="time">{t('Time')}</option>
+              <option value="duration">{t('Bodyweight hold')}</option>
+              <option value="weight_duration">{t('Weighted hold')}</option>
               <option value="cardio">{t('Distance and time')}</option>
+              <option value="distance_duration">
+                {t('Distance + duration')}
+              </option>
             </select>
           </Field>
-          {mode !== 'cardio' && (
+          {mode !== 'cardio' && mode !== 'distance_duration' && (
             <Field label={t('Load type')}>
               <select
                 className="input"

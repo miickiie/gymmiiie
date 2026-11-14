@@ -693,6 +693,8 @@ export const useStore = create<Store>((set, get) => ({
       const snapshot = makeSessionExercise(ex, data.sessions, d.settings.unit);
       target.mode = snapshot.mode;
       target.loadKind = snapshot.loadKind;
+      target.kind = ex.kind;
+      target.unilateral = ex.unilateral;
       delete target.weightUnit;
       target.sets = openingSets(ex, data.sessions, d.settings.unit);
     });
@@ -898,6 +900,8 @@ export const useStore = create<Store>((set, get) => ({
         primary: e.primary,
         mode: e.mode,
         loadKind: e.loadKind,
+        kind: e.kind,
+        unilateral: e.unilateral,
         sets: e.sets
           .filter((s) => s.done)
           .map((s) => ({
@@ -973,6 +977,8 @@ export const useStore = create<Store>((set, get) => ({
       primary: e.primary,
       mode: modeFor(e),
       loadKind: e.loadKind,
+      kind: e.kind,
+      unilateral: e.unilateral,
       sets: e.sets.map((s) => ({
         editedFields: {},
         reps: s.left ?? s.reps,
@@ -1287,13 +1293,24 @@ function resetPersistenceContext() {
 }
 
 async function deactivateAccountContext(): Promise<void> {
-  if (useStore.getState().isCommitting)
+  const state = useStore.getState();
+  if (state.isCommitting)
     throw new Error(
       'Wait for the current save to finish before switching accounts.',
     );
-  if (useStore.getState().hydrated) await flushQueued();
-  await synchronizer?.stop();
+  // Stop cloud coordination before the final flush: an in-flight remote install
+  // writes a new local revision and would otherwise race this save.
+  const sync = synchronizer;
+  const account = state.account;
+  await sync?.stop();
   synchronizer = null;
+  try {
+    if (state.hydrated) await flushQueued();
+  } catch (error) {
+    if (account && !synchronizer)
+      synchronizer = makeSynchronizer(account, accountEpoch);
+    throw error;
+  }
   accountEpoch++;
   activeAccountId = undefined;
   resetPersistenceContext();

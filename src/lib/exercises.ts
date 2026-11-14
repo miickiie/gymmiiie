@@ -39,7 +39,7 @@ export const DIFFICULTIES = ['Beginner', 'Intermediate', 'Advanced'];
 
 /** Compatibility lookup for the built-in catalogue; snapshots should use modeFor. */
 export function modeOf(id: string): ExerciseMode {
-  return byId.get(id)?.mode ?? '';
+  return modeFor(byId.get(id) ?? {});
 }
 
 export function exerciseMatchesZone(
@@ -63,10 +63,56 @@ export function searchExercises(list: Exercise[], query: string): Exercise[] {
   const words = q.split(/\s+/);
   return list.filter((e) => {
     const hay = foldText(
-      `${e.name} ${e.aliases.join(' ')} ${e.primary} ${e.secondary.join(' ')} ${e.equipment}`,
+      `${e.name} ${e.aliases.join(' ')} ${e.primary} ${e.secondary.join(' ')} ${e.equipment} ${e.sub_equipment ?? ''} ${e.kind}`,
     );
     return words.every((w) => hay.includes(w));
   });
+}
+
+/**
+ * Resolve a Hevy/Strong/FitNotes-style exercise name against names, aliases and
+ * the `<Movement> (<Equipment>)` convention used by those CSV exports.
+ */
+export function resolveExerciseName(
+  name: string,
+  list: Exercise[] = EXERCISES,
+): Exercise | undefined {
+  const target = foldText(name.trim());
+  if (!target) return undefined;
+  const compact = (value: string) =>
+    foldText(value).replace(/[^a-z0-9]+/g, '');
+  const wanted = compact(name);
+
+  // Canonical names win over aliases so a shared artwork alias cannot steal a
+  // dedicated EZ-bar (or similar) exercise from its own exact name.
+  const exactName = list.find((exercise) => foldText(exercise.name) === target);
+  if (exactName) return exactName;
+  const compactName = list.find(
+    (exercise) => compact(exercise.name) === wanted,
+  );
+  if (compactName) return compactName;
+  const exactAlias = list.find((exercise) =>
+    exercise.aliases.some((alias) => foldText(alias) === target),
+  );
+  if (exactAlias) return exactAlias;
+  const compactAlias = list.find((exercise) =>
+    exercise.aliases.some((alias) => compact(alias) === wanted),
+  );
+  if (compactAlias) return compactAlias;
+
+  const equipmentSuffix = target.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  if (equipmentSuffix) {
+    const movement = equipmentSuffix[1].trim();
+    const equipment = equipmentSuffix[2].trim();
+    const prefixed = `${equipment} ${movement}`;
+    return (
+      list.find((exercise) => foldText(exercise.name) === prefixed) ??
+      list.find((exercise) =>
+        exercise.aliases.some((alias) => foldText(alias) === prefixed),
+      )
+    );
+  }
+  return undefined;
 }
 
 export function defaultPicks(
@@ -213,6 +259,8 @@ export function makeSessionExercise(
     primary: ex.primary,
     mode: modeFor(ex),
     loadKind: loadKindFor(ex),
+    kind: ex.kind,
+    unilateral: ex.unilateral,
     sets: openingSets(ex, sessions, unit, sets),
     linkedNext: false,
   };

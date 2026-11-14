@@ -7,6 +7,7 @@ import {
   modeFor,
   modeOf,
   openingSets,
+  resolveExerciseName,
 } from './exercises';
 import type { Exercise, LoggedSession, LoggedSet } from '../types';
 
@@ -148,9 +149,30 @@ describe('exercise discovery', () => {
       picks.filter((ex) => ex.suggestionGroup === 'horizontal-press'),
     ).toHaveLength(1);
   });
+  it('resolves Hevy/Strong lift names through aliases and equipment suffixes', () => {
+    expect(resolveExerciseName('Bench Press (Barbell)')?.id).toBe('EIeI8Vf');
+    expect(resolveExerciseName('Squat (Barbell)')?.id).toBe('qXTaZnJ');
+    expect(resolveExerciseName('Lat Pulldown')?.id).toBe('RVwzP10');
+    expect(resolveExerciseName('Skullcrusher')?.id).toBe('iZop9xO');
+    expect(resolveExerciseName('EZ Bar Curl')?.id).toBe('ez-bar-curl');
+    expect(resolveExerciseName('Not a real lift')).toBeUndefined();
+  });
+  it('populates the full logging taxonomy for every built-in exercise', () => {
+    for (const exercise of EXERCISES) {
+      expect(exercise.mode).not.toBe('');
+      expect(exercise.kind).not.toBe('');
+      expect(typeof exercise.unilateral).toBe('boolean');
+      expect(Array.isArray(exercise.aliases)).toBe(true);
+      expect(exercise.similar_ids!.length).toBeLessThanOrEqual(6);
+      expect(exercise.similar_ids).not.toContain(exercise.id);
+    }
+    expect(modeOf('running')).toBe('cardio');
+    expect(modeOf('plank-hold')).toBe('time');
+    expect(modeOf('qXTaZnJ')).toBe('');
+  });
   it('preserves catalog IDs and guides while omitting confirmed artwork mismatches', () => {
-    expect(EXERCISES).toHaveLength(466);
-    expect(new Set(EXERCISES.map((ex) => ex.id)).size).toBe(466);
+    expect(EXERCISES).toHaveLength(501);
+    expect(new Set(EXERCISES.map((ex) => ex.id)).size).toBe(501);
     expect(exercise('face-pull').steps[0]).toBe(
       'Set a rope attachment on a cable pulley just above head height.',
     );

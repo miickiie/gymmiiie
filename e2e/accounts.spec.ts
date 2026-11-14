@@ -123,7 +123,10 @@ test('saved tracking loads on another browser without a local cache', async ({
     .toBe(1);
   const savedSession = parseBackup(await accountCopy(page, account.id))
     .sessions[0];
-  const other = await browser.newContext({ baseURL: origin });
+  const other = await browser.newContext({
+    baseURL: origin,
+    extraHTTPHeaders: { 'X-Gymmiie-Test-Client': randomUUID() },
+  });
   try {
     const otherPage = await other.newPage();
     await signIn(otherPage, user);
@@ -409,7 +412,10 @@ test('an online sign-out flushes the latest tracking before another device signs
   await startWithPushup(page);
   await enterNumber(page.getByLabel('Set 1 repetitions', { exact: true }), '34');
   await signOut(page);
-  const other = await browser.newContext({ baseURL: origin });
+  const other = await browser.newContext({
+    baseURL: origin,
+    extraHTTPHeaders: { 'X-Gymmiie-Test-Client': randomUUID() },
+  });
   try {
     const otherPage = await other.newPage();
     await signIn(otherPage, user);

@@ -779,10 +779,11 @@
     ],
     "overrides": {
      "secondary": [
-      "quads",
+      "glutes",
       "hamstrings",
       "calves"
-     ]
+     ],
+     "primary": "quads"
     },
     "sources": [
      "https://www.acefitness.org/resources/pros/expert-articles/5875/5-variations-of-the-body-weight-squat/",
@@ -1336,7 +1337,7 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    },
    "suggestionGroup": "core-hold"
@@ -1479,7 +1480,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -1637,7 +1638,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -2110,7 +2111,7 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -2129,7 +2130,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -2150,7 +2151,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -2169,7 +2170,7 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -2229,7 +2230,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "external",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -2287,7 +2288,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -2698,7 +2699,7 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -2737,7 +2738,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    },
    "suggestionGroup": "front-raise"
@@ -2860,7 +2861,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -3139,7 +3140,7 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -3158,7 +3159,8 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "status": "legacy"
+    "status": "legacy",
+    "loadKind": "none"
    }
   },
   "MvQPqVW": {
@@ -3189,7 +3191,7 @@
      "primary": "glutes",
      "secondary": [
       "hamstrings",
-      "abdomen"
+      "quads"
      ]
     },
     "sources": [
@@ -3269,7 +3271,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -3348,7 +3350,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -3388,7 +3390,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    },
    "suggestionGroup": "core-rotation"
@@ -3427,7 +3429,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -4010,7 +4012,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -4150,7 +4152,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -4699,7 +4701,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "assistance",
     "status": "legacy"
    }
   },
@@ -4796,7 +4798,7 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -5333,7 +5335,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    },
    "suggestionGroup": "dip"
@@ -5431,7 +5433,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    },
    "suggestionGroup": "dip"
@@ -5705,7 +5707,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -6563,7 +6565,7 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -6582,7 +6584,7 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -6641,7 +6643,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -6847,7 +6849,7 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -6866,7 +6868,8 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "status": "legacy"
+    "status": "legacy",
+    "loadKind": "none"
    }
   },
   "band-calf-raise": {
@@ -7186,7 +7189,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -7205,7 +7208,7 @@
    "logging": {
     "mode": "time",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -8794,7 +8797,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "external",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -8816,7 +8819,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "none",
     "status": "legacy"
    }
   },
@@ -9061,7 +9064,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "assistance",
     "status": "legacy"
    },
    "suggestionGroup": "squat"
@@ -9144,7 +9147,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    }
   },
@@ -9455,7 +9458,7 @@
    "logging": {
     "mode": "",
     "basis": "existing-id-mode-list-and-declared-equipment",
-    "loadKind": "added",
+    "loadKind": "external",
     "status": "legacy"
    },
    "suggestionGroup": "horizontal-row"
@@ -9693,7 +9696,672 @@
     "loadKind": "external",
     "status": "legacy"
    }
+  },
+  "seated-calf-raise-machine": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "barbell-walking-lunge": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "sled-push": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "sled-pull": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "barbell-floor-press": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "dumbbell-floor-press": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "low-to-high-cable-fly": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "high-to-low-cable-fly": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "chest-supported-t-bar-row": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "seal-row": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "machine-pullover": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "straight-arm-lat-pulldown": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "lu-raise": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "z-press": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "ez-bar-curl": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "ez-bar-skullcrusher": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "ez-bar-preacher-curl": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "machine-preacher-curl": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "bayesian-cable-curl": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "crossbody-cable-triceps-extension": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "ab-wheel-rollout": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "added",
+    "status": "legacy"
+   }
+  },
+  "toes-to-bar": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "added",
+    "status": "legacy"
+   }
+  },
+  "dumbbell-farmers-walk": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "suitcase-carry": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "power-clean": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "barbell-clean-and-jerk": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "barbell-snatch": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "barbell-thruster": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "dumbbell-thruster": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "turkish-get-up": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "box-jump": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "added",
+    "status": "legacy"
+   }
+  },
+  "wall-ball": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "barbell-hip-thrust": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "incline-cable-fly": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
+  },
+  "chest-supported-dumbbell-row": {
+   "catalog": {
+    "status": "unverified",
+    "flags": [],
+    "reviewedFields": []
+   },
+   "instructions": {
+    "status": "unverified"
+   },
+   "art": {
+    "status": "unverified"
+   },
+   "logging": {
+    "mode": "",
+    "basis": "gymmane-v2.2.0-taxonomy-migration",
+    "loadKind": "external",
+    "status": "legacy"
+   }
   }
  },
- "structuralAudit": "All 466 IDs and source/reference shapes checked by scripts/audit-exercises.mjs. No statement of complete semantic or professional verification."
+ "structuralAudit": "All 501 IDs and source/reference shapes checked by scripts/audit-exercises.mjs. Original 466 IDs are preserved by scripts/patch-exercises.mjs. No statement of complete semantic or professional verification."
 }

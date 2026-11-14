@@ -135,6 +135,8 @@ const TH: Record<string, string> = {
   'Remove exercise': 'ลบท่า',
   Rest: 'พัก',
   'Default {n}s': 'ค่าเริ่มต้น {n} s',
+  'One side at a time': 'ทีละข้าง',
+  'Rest between sides ({n}s)': 'พักระหว่างข้าง ({n}s)',
   'No exercises yet': 'ยังไม่มีท่า',
   'Add a movement to begin logging.': 'เพิ่มท่าก่อนเริ่มบันทึก',
   'Add exercise': 'เพิ่มท่า',
@@ -502,6 +504,7 @@ export default function Session() {
                   : load === 'added'
                     ? t(' · added load')
                     : ''}
+                {catalog?.unilateral ? ` · ${t('One side at a time')}` : ''}
               </p>
               {record && (
                 <p className="mt-1 text-[10px] font-bold text-[var(--warn)]">
@@ -762,6 +765,20 @@ export default function Session() {
             {!hasRest && (
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
                 <span className="label">{t('Rest')}</span>
+                {catalog?.unilateral && (
+                  <Btn
+                    size="sm"
+                    variant="soft"
+                    onClick={() => {
+                      void unlockAudio();
+                      actions.startRest(data.settings.miniRestSec);
+                    }}
+                  >
+                    {t('Rest between sides ({n}s)', {
+                      n: data.settings.miniRestSec,
+                    })}
+                  </Btn>
+                )}
                 {[60, 90, 120].map((seconds) => (
                   <Btn
                     key={seconds}
@@ -1235,7 +1252,7 @@ function SetInput({
         inputMode="decimal"
         min={0}
         step={step}
-        className="input session-set-input min-h-11 !px-2 !py-2 !text-center !text-sm font-black"
+        className="input session-set-input min-h-11 !py-2 !pr-9 !pl-2 !text-center !text-sm font-black"
         value={text ?? String(Math.round(value * 10) / 10)}
         onFocus={(event) => event.target.select()}
         onValueChange={(raw) => {
@@ -1245,6 +1262,9 @@ function SetInput({
         }}
         onValueCommit={() => setText(null)}
       />
+      <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-mute">
+        {suffix}
+      </span>
     </div>
   );
 }

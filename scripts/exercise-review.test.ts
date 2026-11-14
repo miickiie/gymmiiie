@@ -12,7 +12,7 @@ describe('independent exercise guidance review', () => {
       input.instructions,
     );
     expect(errors).toEqual([]);
-    expect(Object.keys(input.manifest.exercises)).toHaveLength(466);
+    expect(Object.keys(input.manifest.exercises)).toHaveLength(501);
     expect(report.catalogUnverified).toBeGreaterThan(0);
     expect(report.instructionsReviewed).toBeGreaterThan(0);
     expect(report.instructionsUnverified).toBeGreaterThan(0);

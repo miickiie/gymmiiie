@@ -23,8 +23,8 @@ describe('restored exercise content', () => {
         expect(artEntry(exercise.art)?.n).toBeGreaterThan(0);
       }
     }
-    expect(EXERCISES.filter((exercise) => exercise.art)).toHaveLength(445);
-    expect(Object.keys(ART)).toHaveLength(384);
+    expect(EXERCISES.filter((exercise) => exercise.art)).toHaveLength(473);
+    expect(Object.keys(ART)).toHaveLength(382);
   });
 
   it('preserves all original guides and prioritizes reviewed corrections', () => {

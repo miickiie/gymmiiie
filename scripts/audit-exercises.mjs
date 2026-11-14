@@ -30,7 +30,17 @@ const EQUIPMENT = new Set([
   'Rings',
   'Other',
 ]);
-const MODES = new Set(['', 'time', 'cardio']);
+const MODES = new Set([
+  '',
+  'time',
+  'cardio',
+  'distance_duration',
+  'duration',
+  'weight_duration',
+  'assisted_bodyweight',
+  'bodyweight_reps',
+  'weight_reps',
+]);
 const LOADS = new Set(['external', 'added', 'assistance', 'none']);
 const isURL = (value) => {
   try {

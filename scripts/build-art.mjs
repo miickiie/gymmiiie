@@ -54,7 +54,9 @@ export function approvedGuidance(
     return {
       ...exercise,
       ...review.catalog.overrides,
-      mode: review.logging.mode,
+      // The source catalog carries the rich GymMane v2.2.0 logging taxonomy.
+      // Legacy review modes remain a fallback for older custom rows.
+      mode: exercise.mode || review.logging.mode,
       loadKind: review.logging.loadKind,
       suggestionGroup: review.suggestionGroup,
       art: artSlugs.get(exercise.id) ?? '',

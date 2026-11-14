@@ -15,7 +15,7 @@ import { ExerciseIcon } from './ExerciseTile';
 import { Btn, Card, Chip, SectionHeader } from './ui';
 
 const WARMUP_IDS = ['jumping-jack', 'cat-cow-stretch', 'leg-swings-stretch', 'band-pull-apart'];
-const isWarmup = (exercise: Exercise): boolean => exercise.kind === 'warmup' || WARMUP_IDS.includes(exercise.id);
+const isWarmup = (exercise: Exercise): boolean => exercise.kind === 'mobility' || WARMUP_IDS.includes(exercise.id);
 
 export default function WorkoutDraftReview({ draft, selectedMuscles, onChange }: {
   draft: AiWorkoutPlan; selectedMuscles: string[]; onChange: (draft: AiWorkoutPlan) => void;

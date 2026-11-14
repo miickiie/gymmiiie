@@ -128,6 +128,13 @@ const TH: Record<string, string> = {
   'Also known as {names}': 'หรือเรียกอีกชื่อว่า {names}',
   time: 'เวลา',
   cardio: 'คาร์ดิโอ',
+  'One side at a time': 'ทีละข้าง',
+  strength: 'ความแข็งแรง',
+  mobility: 'การเคลื่อนไหว',
+  sport: 'กีฬา',
+  'Smith Machine': 'สมิธแมชชีน',
+  'Trap Bar': 'ทราปบาร์',
+  'EZ-Bar': 'อีซีบาร์',
   Beginner: 'เริ่มต้น',
   Intermediate: 'ปานกลาง',
   Advanced: 'ขั้นสูง',
@@ -188,13 +195,21 @@ export default function ExerciseDetail() {
   const history = exerciseHistory(data.sessions, ex.id).slice(0, 8);
   const series = oneRmSeries(data.sessions, ex.id);
   const notes = data.notes.filter((n) => n.exerciseId === ex.id).slice(0, 4);
-  const related = all
-    .filter(
-      (e) =>
-        e.id !== ex.id &&
-        (e.primary === ex.primary || e.secondary.includes(ex.primary)),
-    )
+  const similar = (ex.similar_ids ?? [])
+    .flatMap((id) => {
+      const match = all.find((candidate) => candidate.id === id);
+      return match ? [match] : [];
+    })
     .slice(0, 5);
+  const related = similar.length
+    ? similar
+    : all
+        .filter(
+          (e) =>
+            e.id !== ex.id &&
+            (e.primary === ex.primary || e.secondary.includes(ex.primary)),
+        )
+        .slice(0, 5);
   const muscleOptions = MUSCLES.filter(
     (m) => m.id === ex.primary || ex.secondary.includes(m.id),
   );
@@ -333,9 +348,19 @@ export default function ExerciseDetail() {
               <span className="rounded-full border border-line px-2 py-0.5">
                 {t(ex.equipment)}
               </span>
+              {ex.sub_equipment && (
+                <span className="rounded-full border border-line px-2 py-0.5">
+                  {t(ex.sub_equipment)}
+                </span>
+              )}
               <span className="rounded-full border border-line px-2 py-0.5">
                 {t(ex.difficulty)}
               </span>
+              {ex.unilateral && (
+                <span className="rounded-full border border-line px-2 py-0.5 text-[var(--accent)]">
+                  {t('One side at a time')}
+                </span>
+              )}
               {modeFor(ex) && (
                 <span className="rounded-full border border-line px-2 py-0.5 text-[var(--accent)]">
                   {t(modeFor(ex))}
