@@ -15,7 +15,6 @@ Gymmiie keeps each user’s training log under an account identified by name and
 - **466-exercise library** — search/filter by muscle and equipment, custom tracking modes and load types, favourites, archive, per-exercise notes and charts. Original exercise instructions and available animations are shown, with reviewed corrections retained and confirmed incompatible artwork excluded.
 - **Nutrition** — 561 foods and 27 dishes, meal slots, macro goals, water tracking and custom foods.
 - **Tools & journal** — 1RM, BMI, TDEE/macros, body fat, FFMI, plate maths, warm-up ramps, RPE load, DOTS and Wilks, plus a tagged training journal.
-- **Gym pass cards** — store membership numbers and entry codes locally.
 - **Offline PWA** — installable, dark/light, versioned precache of the app shell and route chunks; installed screens remain available offline.
 - **User accounts** — return with the same name and 4-digit PIN; a server-checked registration passphrase is required only when creating a new user.
 - **Manual encrypted backup** — optional AES-GCM snapshots with a separate code-derived key, alongside automatic account tracking sync.

@@ -58,6 +58,5 @@ export function defaultData(): AppData {
       water: {},
       customFoods: [],
     },
-    passes: [],
   } as AppData;
 }

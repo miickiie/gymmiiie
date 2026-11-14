@@ -107,11 +107,6 @@ for the signed-in account, with device caching and automatic account synchroniza
 - Notes with title/body, type tags (note, plan, done, pain), exercise links and dates.
 - Search/filter, pin/edit/delete.
 
-## Gym pass
-
-- Locally stored pass cards: gym name, holder, membership number, entry code, colour.
-- Add/delete, copy codes and a full membership-code view for showing at the desk. No decorative barcode is presented as scannable.
-
 ## Tools (10 calculators)
 
 - Estimated 1RM, BMI, maintenance calories/macros, US Navy body fat, FFMI,

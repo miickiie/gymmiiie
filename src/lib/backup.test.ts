@@ -125,7 +125,6 @@ describe('backup validation', () => {
     const badRows: Record<string, unknown>[] = [
       { active: { id: 's', startedAt: 1, exercises: [], name: {} } },
       { active: { id: 's', startedAt: 1, exercises: [], manual: 'yes' } },
-      { passes: [{ id: 'p', name: 'gym', code: '123', hue: 10, member: {} }] },
       {
         notes: [
           {

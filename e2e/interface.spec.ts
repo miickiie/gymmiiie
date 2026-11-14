@@ -162,50 +162,6 @@ test('negative custom macros are rejected and correcting them permits a food ent
   });
 });
 
-test('Show at desk keeps the gym pass and membership code visible', async ({
-  page,
-}, testInfo) => {
-  await page.goto('/pass');
-  await page.getByRole('button', { name: 'Add pass', exact: true }).click();
-  const editor = page.getByRole('dialog', {
-    name: 'Add gym pass',
-    exact: true,
-  });
-  await editor
-    .getByRole('textbox', { name: 'Pass name', exact: true })
-    .fill('Test Gym');
-  await editor
-    .getByRole('textbox', { name: 'Member name (optional)', exact: true })
-    .fill('Mickey');
-  await editor
-    .getByRole('textbox', { name: 'Code / number', exact: true })
-    .fill('MEMBER-48271');
-  await editor.getByRole('button', { name: 'Save pass', exact: true }).click();
-  await expect(editor).toHaveCount(0);
-  await page
-    .getByRole('button', { name: 'Show Test Gym pass', exact: true })
-    .click();
-  const pass = page.getByRole('dialog', { name: 'Test Gym', exact: true });
-  await pass.getByRole('button', { name: 'Show at desk', exact: true }).click();
-  await expect(pass).toBeVisible();
-  await expect(
-    pass.getByRole('status').getByText('MEMBER-48271', { exact: true }),
-  ).toBeVisible();
-  await page.screenshot({
-    path: testInfo.outputPath('gym-pass-at-desk.png'),
-    fullPage: true,
-    animations: 'disabled',
-  });
-  await expect
-    .poll(async () => parseBackup(await snapshot(page)).passes.length)
-    .toBe(1);
-  expect(parseBackup(await snapshot(page)).passes[0]).toMatchObject({
-    name: 'Test Gym',
-    code: 'MEMBER-48271',
-    member: 'Mickey',
-  });
-});
-
 test('an invalid backup is rejected before confirmation and leaves stored data intact', async ({
   page,
 }) => {

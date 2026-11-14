@@ -52,8 +52,8 @@ const TH: Record<string, string> = {
   'Gymmiie keeps each user’s training log under their account. Return with the same name and 4-digit PIN. Changes save on this device and sync to the account when connected; manual encrypted backups are available separately.':
     'Gymmiie เก็บบันทึกการฝึกของแต่ละบัญชีไว้ กลับมาใช้ชื่อและ PIN 4 หลักเดิม การเปลี่ยนแปลงบันทึกในเครื่องและซิงก์เมื่อออนไลน์ สำรองแบบเข้ารหัสแยกได้',
   Privacy: 'ความเป็นส่วนตัว',
-  'All workouts, notes, nutrition and passes are cached separately for each account on this device.':
-    'การฝึก โน้ต อาหาร และบัตรทั้งหมดถูกแยกเก็บตามบัญชีในเครื่องนี้',
+  'All workouts, notes and nutrition are cached separately for each account on this device.':
+    'การฝึก โน้ต และอาหารทั้งหมดถูกแยกเก็บตามบัญชีในเครื่องนี้',
   'Account data syncs to the server for access from another device. Optional manual backups use a separate code and browser-side encryption.':
     'ข้อมูลบัญชีซิงก์ขึ้นเซิร์ฟเวอร์เพื่อใช้จากเครื่องอื่น สำรองเองใช้รหัสแยกและเข้ารหัสในเบราว์เซอร์',
   'There are no analytics, trackers or third-party pixels. The app works offline after an account has been opened and cached on this device.':
@@ -189,7 +189,7 @@ export default function About() {
             <p className="flex gap-2">
               <Lock size={14} className="mt-0.5 shrink-0 text-mute" />{' '}
               {t(
-                'All workouts, notes, nutrition and passes are cached separately for each account on this device.',
+                'All workouts, notes and nutrition are cached separately for each account on this device.',
               )}
             </p>
             <p className="flex gap-2">

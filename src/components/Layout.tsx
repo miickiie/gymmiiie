@@ -5,7 +5,6 @@ import {
   BookOpen,
   CalendarDays,
   CloudSun,
-  CreditCard,
   Download,
   Dumbbell,
   Flame,
@@ -38,7 +37,6 @@ const NAV = [
   { to: '/nutrition', label: 'Nutrition', icon: Salad },
   { to: '/notes', label: 'Journal', icon: NotebookPen },
   { to: '/tools', label: 'Tools', icon: Wrench },
-  { to: '/pass', label: 'Gym pass', icon: CreditCard },
   { to: '/settings', label: 'Settings', icon: Settings },
   { to: '/about', label: 'About', icon: Info },
 ];

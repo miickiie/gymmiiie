@@ -95,7 +95,6 @@ export const COMMON_TH: Record<string, string> = {
   Nutrition: 'อาหาร',
   Journal: 'บันทึก',
   Tools: 'เครื่องมือ',
-  'Gym pass': 'บัตรยิม',
   Settings: 'ตั้งค่า',
   About: 'เกี่ยวกับ',
   More: 'เพิ่มเติม',

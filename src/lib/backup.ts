@@ -146,6 +146,7 @@ export function parseBackup(input: unknown): AppData {
   array(raw.routines, 'routines');
   const defaults = defaultData();
   const data: Obj = { ...defaults, ...raw, version: 1 };
+  delete data.passes;
   delete data.__storageRevision;
   delete data.__storageCommit;
   delete data.__accountSync;
@@ -286,7 +287,6 @@ export function parseBackup(input: unknown): AppData {
     },
     bodyweights: { strings: [], numbers: ['kg'], dates: ['date'] },
     measures: { strings: ['id', 'key'], numbers: ['value'], dates: ['date'] },
-    passes: { strings: ['id', 'name', 'code'], numbers: ['hue'] },
   };
   for (const [key, fields] of Object.entries(simpleRows)) {
     array(data[key], key).forEach((v, i) => {
@@ -301,7 +301,6 @@ export function parseBackup(input: unknown): AppData {
         optional(row, 'pinned', path, boolean);
       }
       if (key === 'bodyweights') optional(row, 'note', path, text);
-      if (key === 'passes') optional(row, 'member', path, text);
     });
   }
   const nutrition = {

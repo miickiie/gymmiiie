@@ -5,7 +5,6 @@ import type {
   AppData,
   CustomFood,
   Exercise,
-  GymPass,
   LoggedSession,
   MealEntry,
   Note,
@@ -348,8 +347,6 @@ interface Store {
   addCustomFood: (food: Omit<CustomFood, 'id'>) => CustomFood;
   toggleDayOff: (day: string, reason: string | null) => void;
   toggleCheckin: (day: string) => void;
-  addPass: (pass: Omit<GymPass, 'id'>) => void;
-  deletePass: (id: string) => void;
   replaceData: (data: unknown) => Promise<void>;
   resetAll: () => Promise<void>;
 }
@@ -1245,17 +1242,6 @@ export const useStore = create<Store>((set, get) => ({
         d.checkins.push(day);
         delete d.daysOff[day];
       }
-    }),
-
-  addPass: (pass) =>
-    get().update((d) => {
-      if (!Number.isFinite(pass.hue) || pass.hue < 0) return;
-      d.passes.push({ ...pass, id: newId('p') });
-    }),
-
-  deletePass: (id) =>
-    get().update((d) => {
-      d.passes = d.passes.filter((p) => p.id !== id);
     }),
 
   replaceData: async (data) => {

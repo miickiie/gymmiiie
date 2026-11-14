@@ -223,14 +223,6 @@ export interface CustomFood {
   serving: number;
 }
 
-export interface GymPass {
-  id: string;
-  name: string;
-  code: string;
-  member?: string;
-  hue: number;
-}
-
 export interface NutritionData {
   goals: NutritionGoals;
   goalsSet: boolean;
@@ -257,7 +249,6 @@ export interface AppData {
   bodyweights: BodyweightEntry[];
   measures: BodyMeasure[];
   nutrition: NutritionData;
-  passes: GymPass[];
   bodyGoalKg?: number;
 }
 

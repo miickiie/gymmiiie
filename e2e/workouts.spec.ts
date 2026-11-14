@@ -151,7 +151,6 @@ test('all route chunks remain available after going offline', async ({
     '/nutrition',
     '/notes',
     '/tools',
-    '/pass',
     '/settings',
     '/about',
     '/session',

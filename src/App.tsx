@@ -39,7 +39,6 @@ const Notes = lazy(() => import('./pages/Notes'));
 const Tools = lazy(() => import('./pages/Tools'));
 const Settings = lazy(() => import('./pages/Settings'));
 const About = lazy(() => import('./pages/About'));
-const PassPage = lazy(() => import('./pages/Pass'));
 
 const TH = {
   'Loading your log': 'กำลังโหลดบันทึกของคุณ',
@@ -297,7 +296,6 @@ export default function App() {
               <Route path="/nutrition" element={<Nutrition />} />
               <Route path="/notes" element={<Notes />} />
               <Route path="/tools" element={<Tools />} />
-              <Route path="/pass" element={<PassPage />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/about" element={<About />} />
               <Route path="*" element={<Navigate to="/" replace />} />

@@ -80,8 +80,6 @@ const TH: Record<string, string> = {
   'Set up later': 'ตั้งค่าทีหลัง',
   'Get started': 'เริ่มเลย',
   'Enter Gymmiie': 'เข้าสู่ Gymmiie',
-  'Based on GymMane by InlitX · GPL-3.0 · Offline logging with account sync':
-    'สร้างจาก GymMane โดย InlitX · GPL-3.0 · บันทึกออฟไลน์พร้อมซิงก์บัญชี',
 };
 
 export default function Onboarding() {
@@ -419,12 +417,6 @@ export default function Onboarding() {
           </div>
           <CatDock />
         </div>
-
-        <p className="mt-2 text-center text-[10px] font-bold text-mute">
-          {t(
-            'Based on GymMane by InlitX · GPL-3.0 · Offline logging with account sync',
-          )}
-        </p>
       </div>
     </div>
   );

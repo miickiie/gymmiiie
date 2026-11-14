@@ -178,7 +178,6 @@ function meaningfulLegacy(data: AppData) {
       data.notes,
       data.bodyweights,
       data.measures,
-      data.passes,
       data.customExercises,
       data.checkins,
       data.archived,

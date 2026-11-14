@@ -87,36 +87,28 @@ test('speech expires after a previous bubble is dismissed and respects reduced m
 });
 
 test('notifications stay accessible inside dialogs and errors take priority', async ({ page }, testInfo) => {
-  await seed(page, (fixture) => {
-    fixture.passes = [{ id: 'test-pass', name: 'Test Gym', code: 'MEMBER-48271', hue: 24 }];
-  });
-  await page.goto('/pass');
+  await page.goto('/notes');
   await dismissSyncNotices(page);
-  await page.getByRole('button', { name: 'Show Test Gym pass', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'Test Gym', exact: true });
-  await page.evaluate(() => {
-    Object.defineProperty(navigator.clipboard, 'writeText', {
-      configurable: true,
-      value: async () => {},
-    });
-  });
-  await dialog.getByRole('button', { name: 'Copy code', exact: true }).click();
+  await page.getByRole('button', { name: 'New note', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'New note', exact: true });
   const cat = dialog.getByRole('complementary', { name: 'Mochi, your workout cat' });
-  await expect(cat.getByRole('status')).toHaveText('Code copied');
-  await page.evaluate(() => {
-    Object.defineProperty(navigator.clipboard, 'writeText', {
-      configurable: true,
-      value: async () => { throw new Error('Synthetic clipboard failure'); },
-    });
-  });
-  await dialog.getByRole('button', { name: 'Copy code', exact: true }).click();
-  await expect(cat.getByRole('alert')).toHaveText('Could not copy');
+  await dialog.getByRole('button', { name: 'Save note', exact: true }).click();
+  await expect(cat.getByRole('alert')).toHaveText('Write something first');
   await page.screenshot({ path: testInfo.outputPath('mochi-dialog.png'), animations: 'disabled' });
-  await cat.getByRole('button', { name: /Next message/ }).press('Enter');
-  await expect(cat.getByRole('button', { name: 'Pet Mochi for workout encouragement' })).toBeFocused();
-  await expect(cat.getByRole('status')).toHaveText('Code copied');
   await cat.getByRole('button', { name: 'Dismiss Mochi’s message' }).click();
   await expect(dialog).toBeFocused();
+  await dialog.getByRole('button', { name: 'Save note', exact: true }).click();
+  await expect(cat.getByRole('alert')).toHaveText('Write something first');
+  await dialog
+    .getByRole('textbox', { name: 'Note', exact: true })
+    .fill('Focus on form');
+  await dialog.getByRole('button', { name: 'Save note', exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  const pageCat = page.getByRole('complementary', { name: 'Mochi, your workout cat' });
+  await expect(pageCat.getByRole('alert')).toHaveText('Write something first');
+  await pageCat.getByRole('button', { name: /Next message/ }).press('Enter');
+  await expect(pageCat.getByRole('button', { name: 'Pet Mochi for workout encouragement' })).toBeFocused();
+  await expect(pageCat.getByRole('status')).toHaveText('Note saved');
 });
 
 test('Mochi announces the end of a rest timer', async ({ page }) => {
