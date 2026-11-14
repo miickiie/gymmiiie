@@ -1,9 +1,29 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#0b0a09" />
+    <meta name="theme-color" content="#090b0e" />
+    <script>
+      // Apply the last theme before the first paint to avoid a dark/light flash.
+      (() => {
+        try {
+          const theme = localStorage.getItem('gymmiie:theme');
+          if (theme !== 'dark' && theme !== 'light' && theme !== 'solar') return;
+          const root = document.documentElement;
+          root.dataset.theme = theme;
+          root.classList.toggle('light', theme === 'light');
+          root.classList.toggle('dark', theme !== 'light');
+          const color =
+            theme === 'light' ? '#f1f5f9' : theme === 'solar' ? '#120f0d' : '#090b0e';
+          document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute('content', color);
+        } catch {
+          /* Keep the default dark theme when storage is unavailable. */
+        }
+      })();
+    </script>
     <meta name="description" content="Gymmiie — an offline-first gym log for the web. Tap muscles, log sets, watch the numbers go up." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

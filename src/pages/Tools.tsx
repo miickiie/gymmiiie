@@ -257,7 +257,7 @@ export default function Tools() {
             onClick={() => setTool(item.id)}
             className="card p-4 text-left transition hover:border-strong active:scale-[.98]"
           >
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)]">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand/15 text-brand">
               {item.icon}
             </span>
             <p className="mt-3 text-sm font-black">{t(item.name)}</p>
@@ -340,10 +340,10 @@ function Result({
   accent?: boolean;
 }) {
   return (
-    <div className="rounded-2xl bg-[var(--surface-2)] p-4 text-center">
+    <div className="rounded-2xl bg-elevated p-4 text-center">
       <p className="label">{label}</p>
       <p
-        className={`num mt-1 text-3xl font-black ${accent ? 'text-[var(--accent)]' : ''}`}
+        className={`num mt-1 text-3xl font-black ${accent ? 'text-brand' : ''}`}
       >
         {value}
       </p>
@@ -469,10 +469,10 @@ function Bmi() {
       />
       <div className="rounded-2xl border border-line p-3">
         <div className="flex h-2 overflow-hidden rounded-full">
-          <span className="flex-[18.5] bg-[var(--warn)]/50" />
-          <span className="flex-[6.5] bg-[var(--good)]" />
-          <span className="flex-[5] bg-[var(--warn)]/70" />
-          <span className="flex-[10] bg-[var(--bad)]/70" />
+          <span className="flex-[18.5] bg-warn/50" />
+          <span className="flex-[6.5] bg-success" />
+          <span className="flex-[5] bg-warn/70" />
+          <span className="flex-[10] bg-danger/70" />
         </div>
         <div className="mt-2 flex justify-between text-[9px] font-black text-mute">
           <span>18.5</span>
@@ -791,7 +791,7 @@ function Plates() {
           {t('Loadout')}
         </p>
         <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
-          <span className="rounded-lg bg-[var(--surface-3)] px-2.5 py-3 text-[10px] font-black text-dim">
+          <span className="rounded-lg bg-inset px-2.5 py-3 text-[10px] font-black text-dim">
             {t('{n} {unit} bar', { n: bar, unit })}
           </span>
           <span className="text-mute">|</span>
@@ -799,7 +799,7 @@ function Plates() {
             result.perSide.map((p) => (
               <span
                 key={p.plate}
-                className="rounded-lg bg-[var(--accent)]/20 px-2 py-3 text-[10px] font-black text-[var(--accent)]"
+                className="rounded-lg bg-brand/20 px-2 py-3 text-[10px] font-black text-brand"
               >
                 {p.plate} ×{p.count}
               </span>
@@ -842,7 +842,7 @@ function Warmup() {
         {ramp.map((r, i) => (
           <div
             key={i}
-            className={`flex items-center justify-between px-3 py-2.5 text-xs font-bold ${i === ramp.length - 1 ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : ''}`}
+            className={`flex items-center justify-between px-3 py-2.5 text-xs font-bold ${i === ramp.length - 1 ? 'bg-brand/15 text-brand' : ''}`}
           >
             <span>{Math.round(r.pct * 100)}%</span>
             <span className="num">

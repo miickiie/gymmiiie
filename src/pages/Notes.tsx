@@ -50,19 +50,19 @@ const KINDS: {
     id: 'plan',
     label: 'Plan',
     icon: <CalendarCheck size={14} />,
-    tone: 'text-[var(--accent)]',
+    tone: 'text-brand',
   },
   {
     id: 'done',
     label: 'Done',
     icon: <CheckCircle2 size={14} />,
-    tone: 'text-[var(--good)]',
+    tone: 'text-success',
   },
   {
     id: 'pain',
     label: 'Pain',
     icon: <AlertTriangle size={14} />,
-    tone: 'text-[var(--bad)]',
+    tone: 'text-danger',
   },
 ];
 
@@ -238,7 +238,7 @@ export default function Notes() {
             <button
               key={k.id}
               onClick={() => setFilter(filter === k.id ? 'all' : k.id)}
-              className={`card p-3 text-left transition hover:border-strong ${filter === k.id ? 'border-[var(--accent-line)] bg-[var(--accent-soft)]' : ''}`}
+              className={`card p-3 text-left transition hover:border-strong ${filter === k.id ? 'border-brand/35 bg-brand/15' : ''}`}
             >
               <span className={k.tone}>{k.icon}</span>
               <p className="mt-1 text-sm font-black">{count}</p>
@@ -306,11 +306,11 @@ export default function Notes() {
             return (
               <Card
                 key={n.id}
-                className={`p-4 ${n.pinned ? 'border-[var(--accent-line)]' : ''}`}
+                className={`p-4 ${n.pinned ? 'border-brand/35' : ''}`}
               >
                 <div className="flex items-start gap-3">
                   <div
-                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface-2)] ${k.tone}`}
+                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-elevated ${k.tone}`}
                   >
                     {k.icon}
                   </div>
@@ -327,12 +327,12 @@ export default function Notes() {
                       {n.pinned && (
                         <Pin
                           size={11}
-                          className="text-[var(--accent)]"
+                          className="text-brand"
                           fill="currentColor"
                         />
                       )}
                       {n.folder && (
-                        <span className="flex items-center gap-0.5 rounded-full bg-[var(--surface-2)] px-1.5 py-0.5 text-[9px] font-black text-mute">
+                        <span className="flex items-center gap-0.5 rounded-full bg-elevated px-1.5 py-0.5 text-[9px] font-black text-mute">
                           <Folder size={9} /> {n.folder}
                         </span>
                       )}
@@ -343,7 +343,7 @@ export default function Notes() {
                     {exName && (
                       <Link
                         to={`/library/${n.exerciseId}`}
-                        className="mt-2 inline-flex items-center gap-1 rounded-full bg-[var(--surface-2)] px-2 py-1 text-[10px] font-black text-[var(--accent)]"
+                        className="mt-2 inline-flex items-center gap-1 rounded-full bg-elevated px-2 py-1 text-[10px] font-black text-brand"
                       >
                         <Dumbbell size={10} /> {exName}{' '}
                         <ChevronRight size={9} />
@@ -363,21 +363,21 @@ export default function Notes() {
                   <div className="flex gap-0.5">
                     <button
                       onClick={() => togglePin(n)}
-                      className={`grid h-7 w-7 place-items-center rounded-full hover:bg-[var(--surface-2)] ${n.pinned ? 'text-[var(--accent)]' : 'text-mute'}`}
+                      className={`grid h-7 w-7 place-items-center rounded-full hover:bg-elevated ${n.pinned ? 'text-brand' : 'text-mute'}`}
                       title={t('Pin')}
                     >
                       <Pin size={13} />
                     </button>
                     <button
                       onClick={() => openEdit(n)}
-                      className="grid h-7 w-7 place-items-center rounded-full text-mute hover:bg-[var(--surface-2)]"
+                      className="grid h-7 w-7 place-items-center rounded-full text-mute hover:bg-elevated"
                       title={t('Edit')}
                     >
                       <Pencil size={13} />
                     </button>
                     <button
                       onClick={() => setConfirmDelete(n)}
-                      className="grid h-7 w-7 place-items-center rounded-full text-mute hover:bg-[var(--surface-2)] hover:text-[var(--bad)]"
+                      className="grid h-7 w-7 place-items-center rounded-full text-mute hover:bg-elevated hover:text-danger"
                       title={t('Delete')}
                     >
                       <Trash2 size={13} />
@@ -438,7 +438,7 @@ export default function Notes() {
                 <button
                   key={k.id}
                   onClick={() => setKind(k.id)}
-                  className={`flex flex-col items-center gap-1 rounded-xl border py-2 text-[10px] font-black ${kind === k.id ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]' : 'border-line bg-[var(--surface-2)] text-mute'}`}
+                  className={`flex flex-col items-center gap-1 rounded-xl border py-2 text-[10px] font-black ${kind === k.id ? 'border-brand/35 bg-brand/15 text-brand' : 'border-line bg-elevated text-mute'}`}
                 >
                   {k.icon} {t(k.label)}
                 </button>
@@ -482,7 +482,7 @@ export default function Notes() {
             <p className="label mb-2">{t('Exercise (optional)')}</p>
             <div className="flex flex-wrap items-center gap-2">
               {exerciseId ? (
-                <span className="flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-3 py-1.5 text-xs font-black text-[var(--accent)]">
+                <span className="flex items-center gap-1 rounded-full bg-brand/15 px-3 py-1.5 text-xs font-black text-brand">
                   <Dumbbell size={12} /> {exerciseName(exerciseId)}
                   <button onClick={() => setExerciseId('')} className="ml-1">
                     <X size={12} />
@@ -502,7 +502,7 @@ export default function Notes() {
           </div>
           <button
             onClick={() => setPinned(!pinned)}
-            className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left ${pinned ? 'border-[var(--accent-line)] bg-[var(--accent-soft)]' : 'border-line bg-[var(--surface-2)]'}`}
+            className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left ${pinned ? 'border-brand/35 bg-brand/15' : 'border-line bg-elevated'}`}
           >
             <span>
               <span className="block text-sm font-extrabold">
@@ -513,7 +513,7 @@ export default function Notes() {
               </span>
             </span>
             <span
-              className={`grid h-6 w-6 place-items-center rounded-full ${pinned ? 'bg-[var(--accent)] text-[#1a0d07]' : 'bg-[var(--surface-3)] text-mute'}`}
+              className={`grid h-6 w-6 place-items-center rounded-full ${pinned ? 'bg-brand text-brand-fg' : 'bg-inset text-mute'}`}
             >
               <Pin size={12} fill={pinned ? 'currentColor' : 'none'} />
             </span>

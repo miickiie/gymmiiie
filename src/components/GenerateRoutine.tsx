@@ -48,7 +48,7 @@ export default function GenerateRoutine({ onClose, onSaved }: { onClose: () => v
         {!selected.length && <p className="text-sm text-mute">{t('Select at least one muscle.')}</p>}
       </>}
       {ai.loading && <p role="status">{t('AI is arranging your workout…')}</p>}
-      {ai.notice && <p role="status" className="text-sm text-[var(--warn)]">{t(ai.notice)}</p>}
+      {ai.notice && <p role="status" className="text-sm text-warn">{t(ai.notice)}</p>}
       {draft && <>
         <p className="text-xs text-dim">{t('Nothing is saved until you choose Save routine.')}</p>
         <WorkoutDraftReview draft={draft} selectedMuscles={selected} onChange={value => { if (!savingRef.current) setDraft(value); }} />

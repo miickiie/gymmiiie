@@ -36,10 +36,10 @@ export default function WorkoutDraftReview({ draft, selectedMuscles, onChange }:
   return <div className="space-y-3">
     <Card className="p-4">
       <div className="flex flex-wrap gap-2">{selectedMuscles.map(muscle => <Chip key={muscle} on>{tm(muscle, MUSCLE_LABEL[muscle] ?? muscle)}</Chip>)}</div>
-      {uncovered.length > 0 && <p role="status" className="mt-3 text-sm font-bold text-[var(--warn)]">{t('No primary movement for {muscles}. Add an exercise or change the focus.', { muscles: uncovered.map(muscle => tm(muscle, MUSCLE_LABEL[muscle] ?? muscle)).join(', ') })}</p>}
+      {uncovered.length > 0 && <p role="status" className="mt-3 text-sm font-bold text-warn">{t('No primary movement for {muscles}. Add an exercise or change the focus.', { muscles: uncovered.map(muscle => tm(muscle, MUSCLE_LABEL[muscle] ?? muscle)).join(', ') })}</p>}
       <p className="mt-3 text-xs text-dim">{t('Previous working sets; adjust when workout starts.')}</p>
     </Card>
-    {draft.mode === 'routine' && <label className="block text-sm font-bold">{t('Routine name')}<input className="mt-1 w-full rounded-xl border border-line bg-[var(--bg)] p-3" value={draft.name ?? ''} maxLength={AI_WORKOUT_LIMITS.name} onChange={event => onChange({ ...draft, name: event.target.value })} /></label>}
+    {draft.mode === 'routine' && <label className="block text-sm font-bold">{t('Routine name')}<input className="mt-1 w-full rounded-xl border border-line bg-canvas p-3" value={draft.name ?? ''} maxLength={AI_WORKOUT_LIMITS.name} onChange={event => onChange({ ...draft, name: event.target.value })} /></label>}
     <SectionHeader title={t('Exercises')} action={<Btn size="sm" icon={<Plus size={15} />} onClick={() => setPicker('add')}>{t('Add exercise')}</Btn>} />
     {!draft.items.length && <p role="status">{t('No exercises selected')}</p>}
     {draft.items.map((item, index) => {
@@ -51,15 +51,15 @@ export default function WorkoutDraftReview({ draft, selectedMuscles, onChange }:
         <div className="flex items-center gap-3">
           <span className="text-xs text-mute">{index + 1}</span>
           <ArtThumb slug={exercise.art} size={40} fallback={<ExerciseIcon ex={exercise} size={40} />} />
-          <div className="min-w-0 flex-1"><button type="button" className="text-left text-sm font-black" onClick={() => setGuide(exercise)}>{exercise.name}</button><p className="text-xs text-mute">{tm(exercise.primary, MUSCLE_LABEL[exercise.primary] ?? exercise.primary)} · {t(exercise.equipment)}</p>{isWarmup(exercise) && <span className="text-xs text-[var(--warn)]">{t('Warm-up / mobility')}</span>}</div>
+          <div className="min-w-0 flex-1"><button type="button" className="text-left text-sm font-black" onClick={() => setGuide(exercise)}>{exercise.name}</button><p className="text-xs text-mute">{tm(exercise.primary, MUSCLE_LABEL[exercise.primary] ?? exercise.primary)} · {t(exercise.equipment)}</p>{isWarmup(exercise) && <span className="text-xs text-warn">{t('Warm-up / mobility')}</span>}</div>
         </div>
         {item.reason && <p className="mt-2 text-sm text-dim">{item.reason}</p>}
         <p className="mt-2 text-xs text-mute" data-testid={`starting-sets-${exercise.id}`}>
           {hasHistory ? sets.map(set => exercise.mode === 'cardio' ? `${set.sec ?? 0}s / ${set.km ?? 0}km` : `${exercise.mode === 'time' ? `${set.sec ?? 0}s` : `${set.reps}${set.repsR !== undefined ? `/${set.repsR}` : ''}`} × ${Number(toDisplayWeight(set.weight, data.settings.unit).toFixed(2))} ${data.settings.unit}`).join(' · ') : t('No working-set history; existing defaults will be used.')}
         </p>
         {draft.mode === 'routine' && <div className="mt-3 grid grid-cols-2 gap-3">
-          <label className="text-xs font-bold">{t('Sets')}<input aria-label={`${t('Sets')} · ${exercise.name}`} type="number" min={1} max={12} step={1} value={item.sets ?? 3} className="mt-1 w-full rounded-lg border border-line bg-[var(--bg)] p-2" onChange={event => { const value = event.target.valueAsNumber; if (Number.isInteger(value) && value >= 1 && value <= 12) onChange({ ...draft, items: draft.items.map((other, i) => i === index ? { ...other, sets: value } : other) }); }} /></label>
-          <label className="text-xs font-bold">{t('Rest (seconds)')}<input aria-label={`${t('Rest (seconds)')} · ${exercise.name}`} type="number" min={0} max={600} step={15} value={item.restSeconds ?? 90} className="mt-1 w-full rounded-lg border border-line bg-[var(--bg)] p-2" onChange={event => { const value = event.target.valueAsNumber; if (Number.isInteger(value) && value >= 0 && value <= 600 && value % 15 === 0) onChange({ ...draft, items: draft.items.map((other, i) => i === index ? { ...other, restSeconds: value } : other) }); }} /></label>
+          <label className="text-xs font-bold">{t('Sets')}<input aria-label={`${t('Sets')} · ${exercise.name}`} type="number" min={1} max={12} step={1} value={item.sets ?? 3} className="mt-1 w-full rounded-lg border border-line bg-canvas p-2" onChange={event => { const value = event.target.valueAsNumber; if (Number.isInteger(value) && value >= 1 && value <= 12) onChange({ ...draft, items: draft.items.map((other, i) => i === index ? { ...other, sets: value } : other) }); }} /></label>
+          <label className="text-xs font-bold">{t('Rest (seconds)')}<input aria-label={`${t('Rest (seconds)')} · ${exercise.name}`} type="number" min={0} max={600} step={15} value={item.restSeconds ?? 90} className="mt-1 w-full rounded-lg border border-line bg-canvas p-2" onChange={event => { const value = event.target.valueAsNumber; if (Number.isInteger(value) && value >= 0 && value <= 600 && value % 15 === 0) onChange({ ...draft, items: draft.items.map((other, i) => i === index ? { ...other, restSeconds: value } : other) }); }} /></label>
         </div>}
         <div className="mt-2 flex flex-wrap justify-end gap-1">
           <Btn size="sm" icon={<BookOpen size={14} />} aria-label={t('Form guide · {name}', { name: exercise.name })} onClick={() => setGuide(exercise)}>{t('Form guide')}</Btn>

@@ -108,7 +108,7 @@ export function AccountSyncNotice() {
   const conflict = status === 'conflict';
   return (
     <section
-      className={`mb-4 rounded-2xl border p-4 ${conflict ? 'border-[var(--warn)]/40 bg-[var(--warn)]/10' : 'border-line bg-[var(--surface)]'}`}
+      className={`mb-4 rounded-2xl border p-4 ${conflict ? 'border-warn/40 bg-warn/10' : 'border-line bg-card'}`}
     >
       <p role={conflict ? 'alert' : 'status'} className="text-sm font-black">
         {t(accountSyncLabel(status))}
@@ -152,7 +152,7 @@ export function AccountSyncNotice() {
         </div>
       )}
       {actionError && (
-        <p role="alert" className="mt-3 text-xs font-bold text-[var(--bad)]">
+        <p role="alert" className="mt-3 text-xs font-bold text-danger">
           {t(actionError)}
         </p>
       )}
@@ -233,7 +233,7 @@ export function AccountSettingsCard() {
         )}
       </div>
       {(error || legacyError) && (
-        <p role="alert" className="mt-3 text-xs font-bold text-[var(--bad)]">
+        <p role="alert" className="mt-3 text-xs font-bold text-danger">
           {t(error || legacyError)}
         </p>
       )}

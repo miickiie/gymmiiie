@@ -22,6 +22,7 @@
     "patch:exercises": "node scripts/patch-exercises.mjs",
     "validate:exercises": "node scripts/validate-exercises.mjs",
     "measure:build": "node scripts/measure-build.mjs",
+    "verify:themes": "node scripts/verify-themes.mjs",
     "test:serve": "node scripts/test-server.mjs",
     "types:worker": "CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV=false WRANGLER_SEND_METRICS=false WRANGLER_LOG_PATH=/tmp/gymmiie-types.log wrangler types worker/worker-configuration.d.ts --include-runtime=false --env-file /dev/null"
   },

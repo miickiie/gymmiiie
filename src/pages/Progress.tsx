@@ -246,7 +246,7 @@ export default function Progress() {
           <button
             key={id}
             onClick={() => setTab(id)}
-            className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-black transition ${tab === id ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]' : 'border-line bg-[var(--surface)] text-dim hover:border-strong'}`}
+            className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-black transition ${tab === id ? 'border-brand/35 bg-brand/15 text-brand' : 'border-line bg-card text-dim hover:border-strong'}`}
           >
             {icon} {t(label)}
           </button>
@@ -289,12 +289,12 @@ export default function Progress() {
               title={t('Training load')}
               subtitle={t('Last 12 weeks')}
               action={
-                <div className="flex rounded-full border border-line bg-[var(--surface-2)] p-0.5">
+                <div className="flex rounded-full border border-line bg-elevated p-0.5">
                   {(['volume', 'sets'] as const).map((m) => (
                     <button
                       key={m}
                       onClick={() => setMetric(m)}
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-black capitalize ${metric === m ? 'bg-[var(--surface-3)] text-[var(--text)]' : 'text-mute'}`}
+                      className={`rounded-full px-2.5 py-1 text-[10px] font-black capitalize ${metric === m ? 'bg-inset text-fg' : 'text-mute'}`}
                     >
                       {t(m)}
                     </button>
@@ -331,7 +331,7 @@ export default function Progress() {
                         n: weeks.reduce((n, w) => n + w.sets, 0),
                       })}
                 </span>
-                <span className="flex items-center gap-1 text-[var(--good)]">
+                <span className="flex items-center gap-1 text-success">
                   <TrendingUp size={11} />{' '}
                   {weeks[weeks.length - 1]?.value >
                   weeks[weeks.length - 2]?.value
@@ -361,20 +361,20 @@ export default function Progress() {
               action={
                 <button
                   onClick={() => setTab('records')}
-                  className="text-[11px] font-black text-[var(--accent)]"
+                  className="text-[11px] font-black text-brand"
                 >
                   {t('All records')}
                 </button>
               }
             />
-            <Card className="divide-y divide-[var(--line)] overflow-hidden">
+            <Card className="divide-y divide-border overflow-hidden">
               {prs.slice(0, 6).map((p) => (
                 <Link
                   key={p.id}
                   to={`/library/${p.id}`}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-2)]"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-elevated"
                 >
-                  <Trophy size={16} className="text-[var(--warn)]" />
+                  <Trophy size={16} className="text-warn" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-extrabold">{p.name}</p>
                     <p className="text-[10px] font-bold text-mute">
@@ -415,9 +415,9 @@ export default function Progress() {
                   <p className="mt-0.5 text-[11px] font-semibold text-mute">
                     {t('{n} XP earned', { n: level.xp.toLocaleString() })}
                   </p>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-inset">
                     <div
-                      className="h-full rounded-full bg-[var(--accent)]"
+                      className="h-full rounded-full bg-brand"
                       style={{ width: `${level.progress}%` }}
                     />
                   </div>
@@ -446,9 +446,9 @@ export default function Progress() {
                           {t('{n} sets', { n: Math.round(v * 10) / 10 })}
                         </span>
                       </div>
-                      <div className="mt-0.5 h-1.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
+                      <div className="mt-0.5 h-1.5 overflow-hidden rounded-full bg-inset">
                         <div
-                          className="h-full rounded-full bg-[var(--accent)]"
+                          className="h-full rounded-full bg-brand"
                           style={{ width: `${(v / heatMax) * 100}%` }}
                         />
                       </div>
@@ -467,7 +467,7 @@ export default function Progress() {
               action={
                 <button
                   onClick={() => setTab('awards')}
-                  className="text-[11px] font-black text-[var(--accent)]"
+                  className="text-[11px] font-black text-brand"
                 >
                   {t('Awards')}
                 </button>
@@ -481,11 +481,11 @@ export default function Progress() {
                     total: awards.length,
                   })}
                 </p>
-                <Award size={17} className="text-[var(--warn)]" />
+                <Award size={17} className="text-warn" />
               </div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--surface-3)]">
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-inset">
                 <div
-                  className="h-full rounded-full bg-[var(--warn)]"
+                  className="h-full rounded-full bg-warn"
                   style={{ width: `${(earned / awards.length) * 100}%` }}
                 />
               </div>
@@ -494,7 +494,7 @@ export default function Progress() {
                   <div
                     key={a.id}
                     title={`${t(a.name)}: ${t(a.detail)}`}
-                    className={`grid aspect-square place-items-center rounded-xl ${a.earned ? 'bg-[var(--warn)]/15 text-[var(--warn)]' : 'bg-[var(--surface-2)] text-[var(--surface-3)]'}`}
+                    className={`grid aspect-square place-items-center rounded-xl ${a.earned ? 'bg-warn/15 text-warn' : 'bg-elevated text-fg-muted'}`}
                   >
                     <Star size={17} fill={a.earned ? 'currentColor' : 'none'} />
                   </div>
@@ -520,7 +520,7 @@ export default function Progress() {
             />
           </div>
           {filteredPrs.length ? (
-            <Card className="divide-y divide-[var(--line)] overflow-hidden">
+            <Card className="divide-y divide-border overflow-hidden">
               {filteredPrs.map((p) => (
                 <RecordRow key={p.id} pr={p} unit={unit} />
               ))}
@@ -600,11 +600,11 @@ export default function Progress() {
             {awards.map((a) => (
               <Card
                 key={a.id}
-                className={`p-4 ${a.earned ? 'border-[var(--warn)]/30' : ''}`}
+                className={`p-4 ${a.earned ? 'border-warn/30' : ''}`}
               >
                 <div className="flex items-start gap-3">
                   <div
-                    className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${a.earned ? 'bg-[var(--warn)]/15 text-[var(--warn)]' : 'bg-[var(--surface-2)] text-mute'}`}
+                    className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${a.earned ? 'bg-warn/15 text-warn' : 'bg-elevated text-mute'}`}
                   >
                     {a.earned ? <Medal size={20} /> : <Star size={19} />}
                   </div>
@@ -615,12 +615,12 @@ export default function Progress() {
                     </p>
                   </div>
                   {a.earned && (
-                    <Check size={16} className="text-[var(--good)]" />
+                    <Check size={16} className="text-success" />
                   )}
                 </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-inset">
                   <div
-                    className={`h-full rounded-full ${a.earned ? 'bg-[var(--warn)]' : 'bg-[var(--accent)]'}`}
+                    className={`h-full rounded-full ${a.earned ? 'bg-warn' : 'bg-brand'}`}
                     style={{ width: `${Math.round(a.progress * 100)}%` }}
                   />
                 </div>
@@ -642,9 +642,9 @@ function RecordRow({ pr, unit }: { pr: PR; unit: 'kg' | 'lb' }) {
   return (
     <Link
       to={`/library/${pr.id}`}
-      className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-2)]"
+      className="flex items-center gap-3 px-4 py-3 hover:bg-elevated"
     >
-      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface-2)] text-[var(--warn)]">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-elevated text-warn">
         <Trophy size={15} />
       </div>
       <div className="min-w-0 flex-1">
@@ -656,7 +656,7 @@ function RecordRow({ pr, unit }: { pr: PR; unit: 'kg' | 'lb' }) {
             : ''}
         </p>
       </div>
-      <span className="rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-[9px] font-black uppercase text-mute">
+      <span className="rounded-full bg-elevated px-2 py-0.5 text-[9px] font-black uppercase text-mute">
         {t(recordLabel(pr.kind))}
       </span>
       <ChevronRight size={14} className="text-mute" />
@@ -806,7 +806,7 @@ function BodyTab() {
             </div>
           )}
           {data.bodyGoalKg != null && latest != null && (
-            <div className="mt-3 rounded-xl bg-[var(--surface-2)] px-3 py-2 text-[11px] font-bold text-dim">
+            <div className="mt-3 rounded-xl bg-elevated px-3 py-2 text-[11px] font-bold text-dim">
               {t('{n} {unit} to goal · {goal}', {
                 n: Math.abs(
                   latest - toDisplayWeight(data.bodyGoalKg, unit),
@@ -826,7 +826,7 @@ function BodyTab() {
                 .map((b) => (
                   <div
                     key={b.date}
-                    className="flex items-center gap-2 rounded-lg bg-[var(--surface-2)] px-2.5 py-1.5"
+                    className="flex items-center gap-2 rounded-lg bg-elevated px-2.5 py-1.5"
                   >
                     <Scale size={12} className="text-mute" />
                     <span className="text-[11px] font-bold text-dim">
@@ -841,7 +841,7 @@ function BodyTab() {
                     </span>
                     <button
                       onClick={() => deleteBodyweight(b.date)}
-                      className="grid h-6 w-6 place-items-center rounded text-mute hover:text-[var(--bad)]"
+                      className="grid h-6 w-6 place-items-center rounded text-mute hover:text-danger"
                     >
                       <Trash2 size={12} />
                     </button>
@@ -894,7 +894,7 @@ function BodyTab() {
                 }}
               />
               {measureError && (
-                <span id="measurement-error" role="alert" className="mt-1 block text-xs font-bold text-bad">
+                <span id="measurement-error" role="alert" className="mt-1 block text-xs font-bold text-danger">
                   {measureError}
                 </span>
               )}
@@ -934,7 +934,7 @@ function BodyTab() {
               return (
                 <div
                   key={m.key}
-                  className="rounded-xl bg-[var(--surface-2)] px-2.5 py-2"
+                  className="rounded-xl bg-elevated px-2.5 py-2"
                 >
                   <p className="text-[9px] font-black uppercase text-mute">
                     {t(m.label)}
@@ -947,7 +947,7 @@ function BodyTab() {
                   {entries.length > 0 && (
                     <button
                       onClick={() => deleteMeasure(latestM!.id)}
-                      className="text-[9px] font-bold text-mute hover:text-[var(--bad)]"
+                      className="text-[9px] font-bold text-mute hover:text-danger"
                     >
                       {t('remove latest')}
                     </button>
@@ -964,23 +964,23 @@ function BodyTab() {
         <Card className="p-4">
           <BodyMap />
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="rounded-xl bg-[var(--surface-2)] p-2.5">
+            <div className="rounded-xl bg-elevated p-2.5">
               <p className="label">{t('Weight')}</p>
               <p className="num text-lg font-black">
                 {toDisplayWeight(data.profile.weightKg, unit).toFixed(1)} {unit}
               </p>
             </div>
-            <div className="rounded-xl bg-[var(--surface-2)] p-2.5">
+            <div className="rounded-xl bg-elevated p-2.5">
               <p className="label">{t('Height')}</p>
               <p className="num text-lg font-black">
                 {data.profile.heightCm} cm
               </p>
             </div>
-            <div className="rounded-xl bg-[var(--surface-2)] p-2.5">
+            <div className="rounded-xl bg-elevated p-2.5">
               <p className="label">{t('Entries')}</p>
               <p className="num text-lg font-black">{data.measures.length}</p>
             </div>
-            <div className="rounded-xl bg-[var(--surface-2)] p-2.5">
+            <div className="rounded-xl bg-elevated p-2.5">
               <p className="label">{t('Goal')}</p>
               <p className="num text-lg font-black">
                 {data.bodyGoalKg

@@ -168,7 +168,17 @@ export function parseBackup(input: unknown): AppData {
   enumeration(settings.unit, ['kg', 'lb'], 'settings.unit');
   enumeration(
     settings.theme,
-    ['dark', 'midnight', 'forest', 'light', 'mist', 'sage', 'system'],
+    [
+      'dark',
+      'light',
+      'solar',
+      // Legacy theme ids are accepted on import and normalised below.
+      'midnight',
+      'forest',
+      'mist',
+      'sage',
+      'system',
+    ],
     'settings.theme',
   );
   settings.theme = normalizeTheme(settings.theme, prefersLightMode());

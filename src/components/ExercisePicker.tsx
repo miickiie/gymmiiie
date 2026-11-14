@@ -60,7 +60,7 @@ export default function ExercisePicker({
 
   return (
     <Sheet open={open} onClose={onClose} title={t(title)} size="lg">
-      <div className="sticky top-0 z-10 -mx-5 -mt-4 mb-2 bg-[var(--surface)] px-5 pb-2 pt-4">
+      <div className="sticky top-0 z-10 -mx-5 -mt-4 mb-2 bg-card px-5 pb-2 pt-4">
         <div className="relative">
           <Search
             size={16}
@@ -127,7 +127,7 @@ export default function ExercisePicker({
               onClose();
             }}
             right={
-              <span className="rounded-full bg-[var(--surface-2)] px-2 py-1 text-[10px] font-black text-mute">
+              <span className="rounded-full bg-elevated px-2 py-1 text-[10px] font-black text-mute">
                 {t(ex.difficulty)}
               </span>
             }

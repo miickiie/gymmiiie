@@ -271,7 +271,7 @@ export default function ExerciseDetail() {
         <button
           onClick={() => navigate(-1)}
           aria-label={t('Back')}
-          className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
+          className="grid h-9 w-9 place-items-center rounded-full bg-elevated text-dim"
         >
           <ArrowLeft size={18} />
         </button>
@@ -279,7 +279,7 @@ export default function ExerciseDetail() {
         <div className="ml-auto flex gap-1">
           <button
             onClick={() => toggleFavorite(ex.id)}
-            className={`grid h-9 w-9 place-items-center rounded-full ${isFav ? 'bg-[var(--warn)]/10 text-[var(--warn)]' : 'bg-[var(--surface-2)] text-mute'}`}
+            className={`grid h-9 w-9 place-items-center rounded-full ${isFav ? 'bg-warn/10 text-warn' : 'bg-elevated text-mute'}`}
             title={t('Favourite')}
           >
             <Star size={17} fill={isFav ? 'currentColor' : 'none'} />
@@ -289,7 +289,7 @@ export default function ExerciseDetail() {
               toggleArchived(ex.id);
               toast.push(isArchived ? t('Unarchived') : t('Archived'));
             }}
-            className={`grid h-9 w-9 place-items-center rounded-full ${isArchived ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'bg-[var(--surface-2)] text-mute'}`}
+            className={`grid h-9 w-9 place-items-center rounded-full ${isArchived ? 'bg-brand/15 text-brand' : 'bg-elevated text-mute'}`}
             title={t('Archive')}
           >
             <Archive size={16} />
@@ -297,7 +297,7 @@ export default function ExerciseDetail() {
           {isCustom && (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-mute hover:text-[var(--bad)]"
+              className="grid h-9 w-9 place-items-center rounded-full bg-elevated text-mute hover:text-danger"
               title={t('Delete')}
             >
               <Trash2 size={16} />
@@ -307,7 +307,7 @@ export default function ExerciseDetail() {
       </div>
 
       <Card className="relative overflow-hidden p-5">
-        <div className="pointer-events-none absolute -right-8 -top-12 h-40 w-40 rounded-full bg-[var(--accent)] opacity-[0.08] blur-2xl" />
+        <div className="pointer-events-none absolute -right-8 -top-12 h-40 w-40 rounded-full bg-brand opacity-[0.08] blur-2xl" />
         <ExerciseArt
           slug={ex.art}
           height={230}
@@ -321,14 +321,14 @@ export default function ExerciseDetail() {
                 {ex.name}
               </h1>
               {isCustom && (
-                <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--accent)]">
+                <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-black text-brand">
                   {t('custom')}
                 </span>
               )}
               {isFav && (
                 <Star
                   size={15}
-                  className="text-[var(--warn)]"
+                  className="text-warn"
                   fill="currentColor"
                 />
               )}
@@ -337,7 +337,7 @@ export default function ExerciseDetail() {
               {muscleOptions.map((m) => (
                 <span
                   key={m.id}
-                  className="flex items-center gap-1 rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-[10px] font-black text-dim"
+                  className="flex items-center gap-1 rounded-full bg-elevated px-2 py-0.5 text-[10px] font-black text-dim"
                 >
                   <MuscleDot id={m.id} size={5} /> {tm(m.id, m.label)}
                   {m.id === ex.primary ? t(' · primary') : ''}
@@ -357,12 +357,12 @@ export default function ExerciseDetail() {
                 {t(ex.difficulty)}
               </span>
               {ex.unilateral && (
-                <span className="rounded-full border border-line px-2 py-0.5 text-[var(--accent)]">
+                <span className="rounded-full border border-line px-2 py-0.5 text-brand">
                   {t('One side at a time')}
                 </span>
               )}
               {modeFor(ex) && (
-                <span className="rounded-full border border-line px-2 py-0.5 text-[var(--accent)]">
+                <span className="rounded-full border border-line px-2 py-0.5 text-brand">
                   {t(modeFor(ex))}
                 </span>
               )}
@@ -416,7 +416,7 @@ export default function ExerciseDetail() {
               <ol className="space-y-3">
                 {steps.map((s, i) => (
                   <li key={i} className="flex gap-3">
-                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--accent-soft)] text-[11px] font-black text-[var(--accent)]">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand/15 text-[11px] font-black text-brand">
                       {i + 1}
                     </span>
                     <p className="text-sm font-semibold leading-relaxed text-dim">
@@ -426,7 +426,7 @@ export default function ExerciseDetail() {
                 ))}
               </ol>
               {tips.length > 0 && (
-                <div className="mt-4 rounded-2xl bg-[var(--surface-2)] p-3">
+                <div className="mt-4 rounded-2xl bg-elevated p-3">
                   <p className="text-[10px] font-black uppercase tracking-wider text-mute">
                     {t('Tips')}
                   </p>
@@ -436,7 +436,7 @@ export default function ExerciseDetail() {
                         key={i}
                         className="flex gap-2 text-xs font-semibold leading-relaxed text-dim"
                       >
-                        <span className="text-[var(--accent)]">•</span> {tip}
+                        <span className="text-brand">•</span> {tip}
                       </li>
                     ))}
                   </ul>
@@ -454,7 +454,7 @@ export default function ExerciseDetail() {
                       href={instr.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[var(--accent)] underline"
+                      className="text-brand underline"
                     >
                       {t('Reference')}
                     </a>
@@ -481,7 +481,7 @@ export default function ExerciseDetail() {
               last ? (
                 <Link
                   to={`/history/${last.session.id}`}
-                  className="text-[11px] font-black text-[var(--accent)]"
+                  className="text-[11px] font-black text-brand"
                 >
                   {t('Open session')}
                 </Link>
@@ -489,14 +489,14 @@ export default function ExerciseDetail() {
             }
           />
           {history.length ? (
-            <Card className="divide-y divide-[var(--line)] overflow-hidden">
+            <Card className="divide-y divide-border overflow-hidden">
               {history.map((h) => {
                 const sets = h.ex.sets.filter((s) => s.kind !== 'warmup');
                 return (
                   <Link
                     key={h.session.id}
                     to={`/history/${h.session.id}`}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-2)]"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-elevated"
                   >
                     <div className="w-12 shrink-0 text-center">
                       <p className="text-[9px] font-black uppercase text-mute">
@@ -550,13 +550,13 @@ export default function ExerciseDetail() {
                 action={
                   <Link
                     to="/notes"
-                    className="text-[11px] font-black text-[var(--accent)]"
+                    className="text-[11px] font-black text-brand"
                   >
                     {t('Journal')}
                   </Link>
                 }
               />
-              <Card className="divide-y divide-[var(--line)] overflow-hidden">
+              <Card className="divide-y divide-border overflow-hidden">
                 {notes.map((n) => (
                   <div key={n.id} className="px-4 py-3">
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase text-mute">
@@ -582,7 +582,7 @@ export default function ExerciseDetail() {
                   {record ? recordValue(record, unit) : '—'}
                 </p>
               </div>
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--warn)]/10 text-[var(--warn)]">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-warn/10 text-warn">
                 <Trophy size={20} />
               </div>
             </div>
@@ -596,16 +596,16 @@ export default function ExerciseDetail() {
             )}
             {best && record?.kind === 'weight' ? (
               <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-bold text-mute">
-                <span className="rounded-full bg-[var(--surface-2)] px-2 py-1">
+                <span className="rounded-full bg-elevated px-2 py-1">
                   {t('Best set {load}', {
                     load: `${toDisplayWeight(best.set.weight, unit).toFixed(1)} ${unit} × ${best.set.reps}`,
                   })}
                 </span>
-                <span className="rounded-full bg-[var(--surface-2)] px-2 py-1">
+                <span className="rounded-full bg-elevated px-2 py-1">
                   {relativeDay(dateKey(best.date))}
                 </span>
                 {best.set.rpe != null && (
-                  <span className="rounded-full bg-[var(--surface-2)] px-2 py-1">
+                  <span className="rounded-full bg-elevated px-2 py-1">
                     RPE {best.set.rpe}
                   </span>
                 )}
@@ -623,7 +623,7 @@ export default function ExerciseDetail() {
               <Card className="mt-3 p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-sm font-black">{t('Estimated 1RM')}</p>
-                  <span className="flex items-center gap-1 text-[10px] font-black text-[var(--good)]">
+                  <span className="flex items-center gap-1 text-[10px] font-black text-success">
                     <TrendingUp size={12} />{' '}
                     {t('{n} points', { n: series.length })}
                   </span>
@@ -658,12 +658,12 @@ export default function ExerciseDetail() {
           {related.length > 0 && (
             <>
               <SectionHeader title={t('Similar movements')} />
-              <Card className="divide-y divide-[var(--line)] overflow-hidden">
+              <Card className="divide-y divide-border overflow-hidden">
                 {related.map((r) => (
                   <Link
                     key={r.id}
                     to={`/library/${r.id}`}
-                    className="flex items-center gap-2.5 px-3 py-2.5 hover:bg-[var(--surface-2)]"
+                    className="flex items-center gap-2.5 px-3 py-2.5 hover:bg-elevated"
                   >
                     <ExerciseIcon ex={r} size={32} />
                     <span className="min-w-0 flex-1 truncate text-xs font-extrabold">

@@ -186,14 +186,14 @@ export default function RoutineEditor() {
       <div className="mb-3 flex items-center gap-2">
         <button
           onClick={() => navigate('/routines')}
-          className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
+          className="grid h-9 w-9 place-items-center rounded-full bg-elevated text-dim"
         >
           <ArrowLeft size={18} />
         </button>
         <p className="label">{t('Routine editor')}</p>
         <span
           role="status"
-          className={`ml-auto flex items-center gap-1 text-[10px] font-black ${persistenceStatus === 'idle' ? 'text-[var(--good)]' : 'text-[var(--warn)]'}`}
+          className={`ml-auto flex items-center gap-1 text-[10px] font-black ${persistenceStatus === 'idle' ? 'text-success' : 'text-warn'}`}
         >
           <Check size={12} />{' '}
           {persistenceStatus === 'idle'
@@ -227,13 +227,13 @@ export default function RoutineEditor() {
           </Field>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-[var(--surface-2)] px-2.5 py-1 text-[10px] font-black text-mute">
+          <span className="rounded-full bg-elevated px-2.5 py-1 text-[10px] font-black text-mute">
             {t('{n} exercises', { n: routine.exerciseIds.length })}
           </span>
-          <span className="rounded-full bg-[var(--surface-2)] px-2.5 py-1 text-[10px] font-black text-mute">
+          <span className="rounded-full bg-elevated px-2.5 py-1 text-[10px] font-black text-mute">
             {t('{n} sets', { n: totalSets })}
           </span>
-          <span className="rounded-full bg-[var(--surface-2)] px-2.5 py-1 text-[10px] font-black text-mute">
+          <span className="rounded-full bg-elevated px-2.5 py-1 text-[10px] font-black text-mute">
             ~{Math.round(totalSets * 3.2)} min
           </span>
           <div className="ml-auto flex gap-2">
@@ -285,7 +285,7 @@ export default function RoutineEditor() {
                 return (
                   <Card key={exId} className="p-3">
                     <div className="flex items-center gap-2.5">
-                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--surface-2)] text-[10px] font-black text-mute">
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-elevated text-[10px] font-black text-mute">
                         {i + 1}
                       </span>
                       <ArtThumb
@@ -323,7 +323,7 @@ export default function RoutineEditor() {
                         </button>
                         <button
                           onClick={() => remove(exId)}
-                          className="grid h-7 w-7 place-items-center rounded-lg text-mute hover:text-[var(--bad)]"
+                          className="grid h-7 w-7 place-items-center rounded-lg text-mute hover:text-danger"
                         >
                           <X size={14} />
                         </button>
@@ -400,7 +400,7 @@ export default function RoutineEditor() {
                   <button
                     key={d}
                     onClick={() => setWeekPlan(day, on ? null : routine.id)}
-                    className={`flex flex-col items-center gap-1 rounded-xl border px-1 py-2 text-[10px] font-black uppercase transition ${on ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]' : 'border-line bg-[var(--surface-2)] text-mute hover:border-strong'}`}
+                    className={`flex flex-col items-center gap-1 rounded-xl border px-1 py-2 text-[10px] font-black uppercase transition ${on ? 'border-brand/35 bg-brand/15 text-brand' : 'border-line bg-elevated text-mute hover:border-strong'}`}
                   >
                     {on ? <Check size={13} /> : <Moon size={13} />}
                     {t(d)}

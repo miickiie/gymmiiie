@@ -133,7 +133,7 @@ export function Card({
       className={clsx(
         'card',
         onClick &&
-          'cursor-pointer transition hover:border-[var(--line-strong)] active:scale-[.995]',
+          'cursor-pointer transition hover:border-border-strong active:scale-[.995]',
         className,
       )}
     >
@@ -311,13 +311,13 @@ export function Toggle({
         className={clsx(
           'relative h-7 w-12 shrink-0 rounded-full border transition',
           on
-            ? 'border-transparent bg-[var(--accent)]'
-            : 'border-line bg-[var(--surface-3)]',
+            ? 'border-transparent bg-brand'
+            : 'border-line bg-inset',
         )}
       >
         <span
           className={clsx(
-            'absolute top-0.5 h-5.5 w-5.5 rounded-full bg-white shadow transition-all',
+            'absolute top-0.5 h-5.5 w-5.5 rounded-full bg-fg shadow transition-all',
             on ? 'left-[26px]' : 'left-1',
           )}
           style={{ height: 22, width: 22 }}
@@ -341,7 +341,7 @@ export function Segmented<T extends string>({
   return (
     <div
       className={clsx(
-        'flex rounded-full border border-line bg-[var(--surface-2)] p-1',
+        'flex rounded-full border border-line bg-elevated p-1',
         className,
       )}
     >
@@ -354,7 +354,7 @@ export function Segmented<T extends string>({
           className={clsx(
             'flex-1 rounded-full px-3 py-1.5 text-xs font-extrabold transition',
             value === o.value
-              ? 'bg-[var(--surface-3)] text-[var(--text)] shadow-sm'
+              ? 'bg-inset text-fg shadow-sm'
               : 'text-mute hover:text-dim',
           )}
         >
@@ -555,12 +555,12 @@ export function Stepper({
   const set = (v: number) =>
     onChange(Math.max(min, Math.min(max, Math.round(v * 100) / 100)));
   return (
-    <div className="flex items-center gap-1.5 rounded-xl border border-line bg-[var(--surface-2)] p-1">
+    <div className="flex items-center gap-1.5 rounded-xl border border-line bg-elevated p-1">
       <button
         type="button"
         aria-label={unit ? t('Decrease {unit}', { unit }) : t('Decrease')}
         onClick={() => set(value - step)}
-        className="grid h-8 w-8 place-items-center rounded-lg text-dim hover:bg-[var(--surface-3)]"
+        className="grid h-8 w-8 place-items-center rounded-lg text-dim hover:bg-inset"
       >
         <Minus size={15} />
       </button>
@@ -574,7 +574,7 @@ export function Stepper({
         type="button"
         aria-label={unit ? t('Increase {unit}', { unit }) : t('Increase')}
         onClick={() => set(value + step)}
-        className="grid h-8 w-8 place-items-center rounded-lg text-dim hover:bg-[var(--surface-3)]"
+        className="grid h-8 w-8 place-items-center rounded-lg text-dim hover:bg-inset"
       >
         <Plus size={15} />
       </button>
@@ -752,7 +752,7 @@ export function Sheet({
         aria-labelledby={`${id}-title`}
         tabIndex={-1}
         className={clsx(
-          'animate-fadeUp relative flex max-h-[92dvh] w-full flex-col overflow-hidden border border-line bg-[var(--surface)] shadow-2xl',
+          'animate-fadeUp relative flex max-h-[92dvh] w-full flex-col overflow-hidden border border-line bg-card shadow-2xl',
           'rounded-t-[2rem]',
           placement === 'auto' && 'sm:rounded-[2rem]',
           size === 'md' ? 'sm:max-w-lg' : 'sm:max-w-2xl',
@@ -767,14 +767,14 @@ export function Sheet({
             aria-label={t('Close dialog')}
             disabled={!dismissible}
             onClick={onClose}
-            className="grid h-10 w-10 place-items-center rounded-full bg-[var(--surface-2)] text-dim hover:text-[var(--text)] disabled:opacity-40"
+            className="grid h-10 w-10 place-items-center rounded-full bg-elevated text-dim hover:text-fg disabled:opacity-40"
           >
             <X size={18} />
           </button>
         </div>
         <div className="thin-scroll overflow-y-auto px-5 py-4">{children}</div>
         {footer && (
-          <div className="border-t border-line bg-[var(--surface)] px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-3">
+          <div className="border-t border-line bg-card px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-3">
             {footer}
           </div>
         )}
@@ -849,7 +849,7 @@ export function Confirm({
     >
       <p className="text-sm font-semibold text-dim">{body}</p>
       {error && (
-        <p role="alert" className="mt-3 text-sm font-bold text-[var(--bad)]">
+        <p role="alert" className="mt-3 text-sm font-bold text-danger">
           {t(error)}
         </p>
       )}
@@ -918,7 +918,7 @@ export function Ring({
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="var(--surface-3)"
+          stroke="rgb(var(--inset))"
           strokeWidth={stroke}
         />
         <circle
@@ -926,7 +926,7 @@ export function Ring({
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="var(--accent)"
+          stroke="rgb(var(--brand))"
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={c}
@@ -965,14 +965,14 @@ export function Sparkline({
       <polyline
         points={pts.join(' ')}
         fill="none"
-        stroke="var(--accent)"
+        stroke="rgb(var(--brand))"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <polygon
         points={`0,${height} ${pts.join(' ')} ${w},${height}`}
-        fill="var(--accent)"
+        fill="rgb(var(--brand))"
         opacity="0.12"
       />
     </svg>
@@ -998,21 +998,30 @@ export function BarChart({
   return (
     <div>
       <div className="flex items-end gap-1.5" style={{ height }}>
-        {data.map((d, i) => (
-          <div
-            key={i}
-            className="group flex h-full flex-1 flex-col justify-end gap-1"
-          >
+        {data.map((d, i) => {
+          const level =
+            d.value <= 0
+              ? 0
+              : Math.min(4, Math.max(1, Math.ceil((d.value / max) * 4)));
+          return (
             <div
-              className="relative w-full rounded-t-md bg-[var(--accent)] transition-all"
-              style={{ height: `${Math.max(2, (d.value / max) * 100)}%` }}
-              title={`${d.label}: ${fmt(d.value)}`}
-            />
-            <span className="truncate text-center text-[9px] font-bold text-mute">
-              {d.label}
-            </span>
-          </div>
-        ))}
+              key={i}
+              className="group flex h-full flex-1 flex-col justify-end gap-1"
+            >
+              <div
+                className="relative w-full rounded-t-md transition-all"
+                style={{
+                  height: `${Math.max(2, (d.value / max) * 100)}%`,
+                  background: `rgb(var(--heat-${level}))`,
+                }}
+                title={`${d.label}: ${fmt(d.value)}`}
+              />
+              <span className="truncate text-center text-[9px] font-bold text-mute">
+                {d.label}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -1049,8 +1058,8 @@ export function LineChart({
     >
       <defs>
         <linearGradient id="lineFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+          <stop offset="0%" stopColor="rgb(var(--brand))" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="rgb(var(--brand))" stopOpacity="0" />
         </linearGradient>
       </defs>
       {data.length > 1 && (
@@ -1062,7 +1071,7 @@ export function LineChart({
           <polyline
             points={pts.join(' ')}
             fill="none"
-            stroke="var(--accent)"
+            stroke="rgb(var(--brand))"
             strokeWidth="2.5"
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -1075,14 +1084,14 @@ export function LineChart({
           cx={x(i)}
           cy={y(d.value)}
           r={data.length > 20 ? 1.2 : 2.4}
-          fill="var(--accent)"
+          fill="rgb(var(--brand))"
         />
       ))}
       <text
         x={pad.l}
         y={h - 3}
         fontSize="8"
-        fill="var(--text-mute)"
+        fill="rgb(var(--fg-muted))"
         fontWeight="700"
       >
         {data[0]?.date?.slice(5)}
@@ -1091,7 +1100,7 @@ export function LineChart({
         x={w - pad.r}
         y={h - 3}
         fontSize="8"
-        fill="var(--text-mute)"
+        fill="rgb(var(--fg-muted))"
         fontWeight="700"
         textAnchor="end"
       >
@@ -1101,7 +1110,7 @@ export function LineChart({
         x={pad.l}
         y={9}
         fontSize="8"
-        fill="var(--text-mute)"
+        fill="rgb(var(--fg-muted))"
         fontWeight="700"
       >
         {fmt(max)}
@@ -1125,7 +1134,7 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-line px-6 py-12 text-center">
       {icon && (
-        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[var(--surface-2)] text-mute">
+        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-elevated text-mute">
           {icon}
         </div>
       )}
@@ -1152,7 +1161,7 @@ export function Avatar({ name, size = 36 }: { name: string; size?: number }) {
     .toUpperCase();
   return (
     <div
-      className="grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] font-black text-[#1a0d07]"
+      className="grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-brand-hover font-black text-brand-fg"
       style={{ width: size, height: size, fontSize: size * 0.4 }}
     >
       {initials}

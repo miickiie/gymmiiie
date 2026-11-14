@@ -27,10 +27,8 @@ import { useStore } from '../lib/store';
 import { manualSyncStorageKey } from '../lib/accounts';
 import { setLanguage, useI18n, type Language } from '../lib/i18n';
 import {
-  DARK_THEMES,
-  LIGHT_THEMES,
+  THEMES,
   themeMeta,
-  type ThemeOption,
 } from '../lib/theme';
 import { useAccount } from '../components/AccountGate';
 import { AccountSettingsCard } from '../components/AccountStatus';
@@ -106,6 +104,8 @@ const TH: Record<string, string> = {
   'Macro goals': 'เป้าหมายสารอาหาร',
   'Dark tones': 'โทนมืด',
   'Light tones': 'โทนสว่าง',
+  'Late night': 'กลางคืน',
+  'Low-blue-light palette for late sessions.': 'โทนแสงสีฟ้าต่ำสำหรับเล่นดึก',
   Kilograms: 'Kilograms',
   Pounds: 'Pounds',
   Off: 'ปิด',
@@ -495,7 +495,7 @@ export default function SettingsPage() {
           />
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] text-xl font-black text-[#1a0d07]">
+              <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-xl font-black text-brand-fg">
                 {(profile.name || 'G')
                   .trim()
                   .split(/\s+/)
@@ -583,14 +583,14 @@ export default function SettingsPage() {
             <div className="mt-3 grid grid-cols-2 gap-2">
               <Link
                 to="/progress"
-                className="flex items-center gap-2 rounded-xl bg-[var(--surface-2)] px-3 py-2 text-xs font-extrabold"
+                className="flex items-center gap-2 rounded-xl bg-elevated px-3 py-2 text-xs font-extrabold"
               >
                 <Ruler size={14} className="text-mute" /> {t("Measurements")}{' '}
                 <ChevronRight size={12} className="ml-auto text-mute" />
               </Link>
               <Link
                 to="/nutrition"
-                className="flex items-center gap-2 rounded-xl bg-[var(--surface-2)] px-3 py-2 text-xs font-extrabold"
+                className="flex items-center gap-2 rounded-xl bg-elevated px-3 py-2 text-xs font-extrabold"
               >
                 <Target size={14} className="text-mute" /> {t("Macro goals")}{' '}
                 <ChevronRight size={12} className="ml-auto text-mute" />
@@ -680,7 +680,7 @@ export default function SettingsPage() {
                 unit="×"
               />
             </div>
-            <div className="h-px bg-[var(--line)]" />
+            <div className="h-px bg-border" />
             <Toggle
               on={data.settings.autoRest}
               onChange={(v) => setSettings({ autoRest: v })}
@@ -852,7 +852,7 @@ export default function SettingsPage() {
                 }}
               />
             </div>
-            <div className="rounded-xl bg-[var(--surface-2)] px-3 py-2 text-[11px] font-semibold text-mute">
+            <div className="rounded-xl bg-elevated px-3 py-2 text-[11px] font-semibold text-mute">
               {t(
                 "{n} workouts · {n2} notes · {n3} routines · {n4} custom exercises",
                 {
@@ -863,12 +863,12 @@ export default function SettingsPage() {
                 },
               )}
             </div>
-            <div className="flex items-center justify-between rounded-xl border border-[var(--bad)]/25 bg-[var(--bad-soft)] px-3 py-2">
+            <div className="flex items-center justify-between rounded-xl border border-danger/25 bg-danger/15 px-3 py-2">
               <div>
-                <p className="text-xs font-black text-[var(--bad)]">
+                <p className="text-xs font-black text-danger">
                   {t("Reset all data")}
                 </p>
-                <p className="text-[10px] font-semibold text-[var(--bad)]/80">
+                <p className="text-[10px] font-semibold text-danger/80">
                   {t("Clears this account’s tracking data")}
                 </p>
               </div>
@@ -881,7 +881,7 @@ export default function SettingsPage() {
                 {t("Reset")}
               </Btn>
             </div>
-            <div className="flex items-center justify-between rounded-xl bg-[var(--surface-2)] px-3 py-2">
+            <div className="flex items-center justify-between rounded-xl bg-elevated px-3 py-2">
               <div>
                 <p className="text-xs font-black">{t("Persistent storage")}</p>
                 <p className="text-[10px] font-semibold text-mute">
@@ -912,9 +912,9 @@ export default function SettingsPage() {
             {installReady && (
               <button
                 onClick={install}
-                className="flex w-full items-center gap-3 rounded-xl bg-[var(--accent-soft)] px-3 py-2.5 text-left"
+                className="flex w-full items-center gap-3 rounded-xl bg-brand/15 px-3 py-2.5 text-left"
               >
-                <Smartphone size={17} className="text-[var(--accent)]" />
+                <Smartphone size={17} className="text-brand" />
                 <span className="flex-1">
                   <span className="block text-sm font-extrabold">
                     {t("Install Gymmiie")}
@@ -928,7 +928,7 @@ export default function SettingsPage() {
             )}
             <Link
               to="/about"
-              className="flex items-center gap-3 rounded-xl bg-[var(--surface-2)] px-3 py-2.5"
+              className="flex items-center gap-3 rounded-xl bg-elevated px-3 py-2.5"
             >
               <Info size={17} className="text-mute" />
               <span className="flex-1 text-sm font-extrabold">
@@ -938,7 +938,7 @@ export default function SettingsPage() {
             </Link>
             <Link
               to="/tools"
-              className="flex items-center gap-3 rounded-xl bg-[var(--surface-2)] px-3 py-2.5"
+              className="flex items-center gap-3 rounded-xl bg-elevated px-3 py-2.5"
             >
               <Sparkles size={17} className="text-mute" />
               <span className="flex-1 text-sm font-extrabold">{t("Calculators")}</span>
@@ -1054,7 +1054,7 @@ export default function SettingsPage() {
 function BackupSummary({ data }: { data: AppData }) {
   const { t } = useI18n(TH);
   return (
-    <div className="rounded-xl bg-[var(--surface-2)] p-3 text-sm font-semibold">
+    <div className="rounded-xl bg-elevated p-3 text-sm font-semibold">
       {t("{n} workouts · {n2} routines · {n3} notes · {n4} meals", {
         n: data.sessions.length,
         n2: data.routines.length,
@@ -1074,59 +1074,49 @@ function ThemePicker({
   onChange: (value: ThemePref) => void;
 }) {
   const { t } = useI18n(TH);
-  const groups: { label: string; options: readonly ThemeOption[] }[] = [
-    { label: 'Dark tones', options: DARK_THEMES },
-    { label: 'Light tones', options: LIGHT_THEMES },
-  ];
   return (
-    <div className="space-y-3">
-      {groups.map((group) => (
-        <div key={group.label}>
-          <p className="mb-1.5 text-[10px] font-extrabold uppercase tracking-[0.08em] text-mute">
-            {t(group.label)}
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {group.options.map((theme) => {
-              const active = value === theme.value;
-              return (
-                <button
-                  key={theme.value}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => onChange(theme.value)}
-                  className={clsx(
-                    'flex flex-col gap-2 rounded-xl border p-2 text-left transition',
-                    active
-                      ? 'border-[var(--accent-line)] bg-[var(--accent-soft)]'
-                      : 'border-line bg-[var(--surface-2)] hover:border-strong',
-                  )}
-                >
-                  <span
-                    className="flex h-8 items-center gap-1 rounded-lg p-1.5"
-                    style={{ background: theme.swatch.bg }}
-                    aria-hidden="true"
-                  >
-                    <span
-                      className="h-5 w-5 rounded-md"
-                      style={{ background: theme.swatch.surface }}
-                    />
-                    <span
-                      className="h-5 flex-1 rounded-md"
-                      style={{ background: theme.swatch.accent }}
-                    />
-                  </span>
-                  <span className="flex items-center justify-between gap-1 text-[11px] font-extrabold">
-                    {theme.label}
-                    {active && (
-                      <Check size={12} className="shrink-0 text-accent" />
-                    )}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+    <div>
+      <div className="grid grid-cols-3 gap-2">
+        {THEMES.map((theme) => {
+          const active = value === theme.value;
+          return (
+            <button
+              key={theme.value}
+              type="button"
+              aria-pressed={active}
+              onClick={() => onChange(theme.value)}
+              className={clsx(
+                'flex flex-col gap-2 rounded-xl border p-2 text-left transition',
+                active
+                  ? 'border-brand/35 bg-brand/15'
+                  : 'border-line bg-elevated hover:border-strong',
+              )}
+            >
+              <span
+                className="flex h-8 items-center gap-1 rounded-lg p-1.5"
+                style={{ background: theme.swatch.bg }}
+                aria-hidden="true"
+              >
+                <span
+                  className="h-5 w-5 rounded-md"
+                  style={{ background: theme.swatch.surface }}
+                />
+                <span
+                  className="h-5 flex-1 rounded-md"
+                  style={{ background: theme.swatch.accent }}
+                />
+              </span>
+              <span className="flex items-center justify-between gap-1 text-[11px] font-extrabold">
+                {theme.label}
+                {active && <Check size={12} className="shrink-0 text-accent" />}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-[10px] font-semibold text-mute">
+        {t('Low-blue-light palette for late sessions.')}
+      </p>
     </div>
   );
 }
@@ -1290,7 +1280,7 @@ function CloudSyncCard() {
         <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
           <div>
             <div className="flex items-center gap-2">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand/15 text-brand">
                 <Cloud size={18} />
               </div>
               <div>
@@ -1413,12 +1403,12 @@ function CloudSyncCard() {
               </Btn>
             </div>
             {status && (
-              <p className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[var(--good)]">
+              <p className="mt-2 flex items-center gap-1 text-[10px] font-bold text-success">
                 <Check size={11} /> {status}
               </p>
             )}
           </div>
-          <div className="rounded-2xl border border-line bg-[var(--surface-2)] p-3 text-[11px] font-semibold leading-relaxed text-mute">
+          <div className="rounded-2xl border border-line bg-elevated p-3 text-[11px] font-semibold leading-relaxed text-mute">
             <p className="mb-1 flex items-center gap-1 font-black text-dim">
               <Shield size={12} /> {t('Privacy by design')}
             </p>

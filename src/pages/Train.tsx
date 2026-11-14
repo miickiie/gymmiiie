@@ -170,8 +170,8 @@ export default function Train() {
         }
       />
       {data.active && (
-        <Card className="mb-4 flex flex-wrap items-center gap-3 border-[var(--accent-line)] bg-[var(--accent-soft)] p-4">
-          <Flame size={20} className="text-[var(--accent)]" />
+        <Card className="mb-4 flex flex-wrap items-center gap-3 border-brand/35 bg-brand/15 p-4">
+          <Flame size={20} className="text-brand" />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-black">{t('Workout in progress')}</p>
             <p className="text-xs font-semibold text-dim">
@@ -193,7 +193,7 @@ export default function Train() {
               aria-label={t('Use a routine')}
               className="card flex items-center gap-4 p-5 transition hover:border-strong"
             >
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)]">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
                 <CalendarDays size={24} />
               </span>
               <div>
@@ -211,7 +211,7 @@ export default function Train() {
               }
               className="card flex items-center gap-4 p-5 text-left transition hover:border-strong"
             >
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)]">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
                 <Plus size={24} />
               </span>
               <div>
@@ -228,7 +228,7 @@ export default function Train() {
               action={
                 <Link
                   to="/routines"
-                  className="text-xs font-black text-[var(--accent)]"
+                  className="text-xs font-black text-brand"
                 >
                   {t('Manage routines')}
                 </Link>
@@ -304,7 +304,7 @@ export default function Train() {
               onClick={() => setFocusOpen((value) => !value)}
               className="card flex w-full items-center gap-3 p-4 text-left"
             >
-              <Sparkles size={22} className="text-[var(--accent)]" />
+              <Sparkles size={22} className="text-brand" />
               <div className="flex-1">
                 <h2 className="text-base font-black">
                   {t('Suggest by muscle')}
@@ -373,15 +373,15 @@ export default function Train() {
       ) : (
         <>
           {ai.loading ? <Card className="mb-4 space-y-3 p-4"><p role="status">{t('AI is arranging your workout…')}</p><Btn onClick={ai.cancel}>{t('Use basic suggestions')}</Btn></Card> : <>
-            {ai.notice && <p role="status" className="mb-3 text-sm text-[var(--warn)]">{t(ai.notice)}</p>}
+            {ai.notice && <p role="status" className="mb-3 text-sm text-warn">{t(ai.notice)}</p>}
             <WorkoutDraftReview selectedMuscles={selected} draft={{ mode: 'suggest', items: picks.map(exercise => ({ exerciseId: exercise.id, reason: reasons[exercise.id] ?? '' })) }} onChange={draft => {
               ai.cancel();
               setPicks(draft.items.flatMap(item => all.filter(exercise => exercise.id === item.exerciseId)));
               setReasons(Object.fromEntries(draft.items.map(item => [item.exerciseId, item.reason])));
             }} />
           </>}
-          <div className="floating-actions sticky z-10 mt-4 flex items-end gap-1 rounded-2xl bg-[var(--bg)]">
-            <div className="flex min-w-0 flex-1 gap-2 rounded-2xl border border-line bg-[var(--bg)]/95 p-2 backdrop-blur">
+          <div className="floating-actions sticky z-10 mt-4 flex items-end gap-1 rounded-2xl bg-canvas">
+            <div className="flex min-w-0 flex-1 gap-2 rounded-2xl border border-border bg-elevated/95 p-2 backdrop-blur-md">
             <Btn
               className="min-h-11 min-w-11 shrink-0"
               aria-label={t('Change focus')}

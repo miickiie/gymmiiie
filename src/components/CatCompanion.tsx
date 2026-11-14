@@ -65,7 +65,7 @@ function CatFace({ happy, worried, faceRef, eyesRef }: {
       <path d="M2 0H4V1H5V2H11V1H12V0H14V1H15V4H16V9H15V10H14V11H13V12H3V11H2V10H1V9H0V4H1V1H2Z" fill="#5d6570" />
       <path d="M2 1H3V3H13V1H14V4H15V9H14V10H13V11H3V10H2V9H1V4H2Z" fill="#f6f3eb" />
       <path d="M3 1H4V2H5V3H3Z M12 1H13V3H11V2H12Z" fill="#f0bcc6" />
-      <path d="M2 3H14V4H2Z" fill="#df7f4a" />
+      <path d="M2 3H14V4H2Z" fill="rgb(var(--brand))" />
       <path d="M7 3H9V4H7Z" fill="#f9d7a5" />
       <g ref={eyesRef} className="gym-cat-gaze">
         <g className={happy ? 'gym-cat-eyes is-happy' : 'gym-cat-eyes'} fill="#383e48">

@@ -109,7 +109,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       {/* desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r border-line bg-[var(--bg-2)]/80 px-4 py-5 backdrop-blur lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r border-line bg-canvas/80 px-4 py-5 backdrop-blur lg:flex">
         <Link to="/" className="mb-7 flex items-center gap-3 px-2">
           <span className="logo-tile grid h-11 w-11 shrink-0 place-items-center rounded-2xl p-1">
             <img
@@ -139,14 +139,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               className={clsx(
                 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-extrabold transition',
                 isActive(to)
-                  ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
-                  : 'text-dim hover:bg-[var(--surface-2)] hover:text-[var(--text)]',
+                  ? 'bg-brand/15 text-brand'
+                  : 'text-dim hover:bg-elevated hover:text-fg',
               )}
             >
               <Icon size={18} strokeWidth={2.4} />
               {t(label)}
               {to === '/progress' && streak > 0 && (
-                <span className="ml-auto flex items-center gap-1 text-[11px] font-black text-[var(--warn)]">
+                <span className="ml-auto flex items-center gap-1 text-[11px] font-black text-warn">
                   <Flame size={12} />
                   {streak}
                 </span>
@@ -162,8 +162,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               className={clsx(
                 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-extrabold transition',
                 isActive(to)
-                  ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
-                  : 'text-dim hover:bg-[var(--surface-2)] hover:text-[var(--text)]',
+                  ? 'bg-brand/15 text-brand'
+                  : 'text-dim hover:bg-elevated hover:text-fg',
               )}
             >
               <Icon size={18} strokeWidth={2.4} />
@@ -176,10 +176,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {active ? (
             <button
               onClick={() => navigate('/session')}
-              className="w-full rounded-2xl border border-[var(--accent-line)] bg-[var(--accent-soft)] p-3 text-left"
+              className="w-full rounded-2xl border border-brand/35 bg-brand/15 p-3 text-left"
             >
-              <div className="flex items-center gap-2 text-xs font-black text-[var(--accent)]">
-                <span className="h-2 w-2 animate-pulseSoft rounded-full bg-[var(--accent)]" />{' '}
+              <div className="flex items-center gap-2 text-xs font-black text-brand">
+                <span className="h-2 w-2 animate-pulseSoft rounded-full bg-brand" />{' '}
                 {t('Live workout')}
               </div>
               <p className="mt-1 num text-lg font-black">
@@ -190,8 +190,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </p>
             </button>
           ) : (
-            <div className="rounded-2xl border border-line bg-[var(--surface)] p-3">
-              <div className="flex items-center gap-2 text-xs font-black text-[var(--warn)]">
+            <div className="rounded-2xl border border-line bg-card p-3">
+              <div className="flex items-center gap-2 text-xs font-black text-warn">
                 <Flame size={14} /> {t('{n} day streak', { n: streak })}
               </div>
               <p className="mt-1 text-[11px] font-semibold text-mute">
@@ -211,7 +211,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             type="button"
             aria-label={t('Account menu')}
             onClick={() => setAccountMenu(true)}
-            className="mt-3 flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left hover:bg-[var(--surface-2)]"
+            className="mt-3 flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left hover:bg-elevated"
           >
             <Avatar name={account.name} size={32} />
             <div className="min-w-0">
@@ -226,7 +226,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* mobile top bar */}
-      <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-line bg-[var(--bg)]/85 px-4 py-2.5 backdrop-blur-xl lg:hidden">
+      <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-border bg-elevated/95 px-4 py-2.5 backdrop-blur-md lg:hidden">
         <Link to="/" className="flex items-center gap-2">
           <span className="logo-tile grid h-8 w-8 shrink-0 place-items-center rounded-xl p-0.5">
             <img
@@ -240,14 +240,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <span className="text-[15px] font-black tracking-tight">Gymmiie</span>
         </Link>
         <div className="ml-auto flex items-center gap-1.5">
-          <span className="flex items-center gap-1 rounded-full bg-[var(--surface-2)] px-2 py-1 text-[11px] font-black text-[var(--warn)]">
+          <span className="flex items-center gap-1 rounded-full bg-elevated px-2 py-1 text-[11px] font-black text-warn">
             <Flame size={12} />
             {streak}
           </span>
           <button
             aria-label={t('Open menu')}
             onClick={() => setMore(true)}
-            className="grid h-10 w-10 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
+            className="grid h-10 w-10 place-items-center rounded-full bg-elevated text-dim"
           >
             <Menu size={18} />
           </button>
@@ -262,12 +262,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {active && !onSession && (
-        <div className="sticky top-[57px] z-20 border-b border-[var(--accent-line)] bg-[var(--accent-soft)] px-4 py-2 backdrop-blur lg:hidden">
+        <div className="sticky top-[57px] z-20 border-b border-brand/35 bg-brand/15 px-4 py-2 backdrop-blur lg:hidden">
           <button
             onClick={() => navigate('/session')}
-            className="flex w-full items-center gap-2 text-xs font-black text-[var(--accent)]"
+            className="flex w-full items-center gap-2 text-xs font-black text-brand"
           >
-            <span className="h-2 w-2 animate-pulseSoft rounded-full bg-[var(--accent)]" />
+            <span className="h-2 w-2 animate-pulseSoft rounded-full bg-brand" />
             {t('Workout in progress')} ·{' '}
             <span className="num">
               <LiveElapsed active={active} />
@@ -287,7 +287,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-[var(--bg)]/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-elevated/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden">
         <div className="mx-auto flex max-w-lg items-stretch">
           {MOBILE_NAV.map(({ to, label, icon: Icon }) => {
             const on = isActive(to);
@@ -298,11 +298,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 to={to}
                 className={clsx(
                   'relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-extrabold',
-                  on ? 'text-[var(--accent)]' : 'text-mute',
+                  on ? 'text-brand' : 'text-mute',
                 )}
               >
                 {on && (
-                  <span className="absolute -top-px h-0.5 w-8 rounded-full bg-[var(--accent)]" />
+                  <span className="absolute -top-px h-0.5 w-8 rounded-full bg-brand" />
                 )}
                 <Icon size={20} strokeWidth={on ? 2.7 : 2.1} />
                 {t(label)}
@@ -334,8 +334,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               className={clsx(
                 'flex items-center gap-2.5 rounded-2xl border p-3 text-left text-sm font-extrabold',
                 isActive(to)
-                  ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]'
-                  : 'border-line bg-[var(--surface-2)] text-dim',
+                  ? 'border-brand/35 bg-brand/15 text-brand'
+                  : 'border-line bg-elevated text-dim',
               )}
             >
               <Icon size={18} /> {t(label)}

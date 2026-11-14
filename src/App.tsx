@@ -16,7 +16,7 @@ import {
 } from 'react-router-dom';
 import { useStore } from './lib/store';
 import { getLibraryView } from './lib/libraryView';
-import { isLightTheme, themeMeta } from './lib/theme';
+import { isLightTheme, themeMeta, THEME_STORAGE_KEY } from './lib/theme';
 import { setLanguage, useI18n } from './lib/i18n';
 import Layout from './components/Layout';
 import { Btn, Confirm } from './components/ui';
@@ -88,7 +88,7 @@ function Loading({
       className="grid min-h-[45vh] place-items-center"
     >
       <div className="flex flex-col items-center gap-4">
-        <div className="grid h-16 w-16 animate-pulseSoft place-items-center rounded-3xl bg-[var(--accent)] text-3xl font-black text-[#1a0d07]">
+        <div className="grid h-16 w-16 animate-pulseSoft place-items-center rounded-3xl bg-brand text-3xl font-black text-brand-fg">
           G
         </div>
         <p className="label">{t(label)}</p>
@@ -125,7 +125,7 @@ function StorageRecovery({ blocking = false }: { blocking?: boolean }) {
     <div className={blocking ? 'mx-auto max-w-xl px-5 py-16' : 'mb-5'}>
       <section
         role="alert"
-        className="rounded-2xl border border-[var(--bad)]/40 bg-[var(--bad-soft)] p-4"
+        className="rounded-2xl border border-danger/40 bg-danger/15 p-4"
       >
         <h1 className="text-base font-black">
           {blocking
@@ -172,7 +172,7 @@ function StorageRecovery({ blocking = false }: { blocking?: boolean }) {
           )}
         </div>
         {error && (
-          <p className="mt-3 text-sm font-bold text-[var(--bad)]">{t(error)}</p>
+          <p className="mt-3 text-sm font-bold text-danger">{t(error)}</p>
         )}
       </section>
       <Confirm
@@ -217,7 +217,7 @@ function RouteError() {
           {t('Reload app')}
         </Btn>
       </div>
-      {error && <p className="mt-3 text-sm text-[var(--bad)]">{error}</p>}
+      {error && <p className="mt-3 text-sm text-danger">{error}</p>}
     </div>
   );
 }
@@ -259,6 +259,11 @@ export default function App() {
     document
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute('content', themeOption.themeColor);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, themeOption.value);
+    } catch {
+      /* The boot script falls back to the default theme. */
+    }
   }, [theme]);
   if (!hydrated)
     return status === 'error' ? <StorageRecovery blocking /> : <Loading />;

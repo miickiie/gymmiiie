@@ -68,7 +68,7 @@ export function ExerciseGuide({
             <p className="mt-3 text-xs text-mute">
               {t('Reviewed form guide')}
               {guide.url && (
-                <>{' '}·{' '}<a href={guide.url} target="_blank" rel="noreferrer" className="text-[var(--accent)] underline">{t('Reference')}</a></>
+                <>{' '}·{' '}<a href={guide.url} target="_blank" rel="noreferrer" className="text-brand underline">{t('Reference')}</a></>
               )}
             </p>
           )}

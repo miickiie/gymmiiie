@@ -228,7 +228,7 @@ export default function Library() {
         }
       />
 
-      <div className="sticky top-[57px] z-20 -mx-4 mb-3 border-b border-line bg-[var(--bg)]/90 px-4 pb-2 pt-1 backdrop-blur lg:top-0 lg:mx-0 lg:rounded-2xl lg:border lg:px-2">
+      <div className="sticky top-[57px] z-20 -mx-4 mb-3 border-b border-border bg-elevated/95 px-4 pb-2 pt-1 backdrop-blur-md lg:top-0 lg:mx-0 lg:rounded-2xl lg:border lg:px-2">
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search
@@ -309,13 +309,13 @@ export default function Library() {
 
       {results.length ? (
         <>
-          <Card className="divide-y divide-[var(--line)] overflow-hidden">
+          <Card className="divide-y divide-border overflow-hidden">
             {results.slice(0, limit).map((ex) => {
               const isFav = !!data.favorites[ex.id];
               return (
                 <div
                   key={ex.id}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--surface-2)]"
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-elevated"
                 >
                   <button
                     onClick={() => navigate(`/library/${ex.id}`)}
@@ -331,12 +331,12 @@ export default function Library() {
                       <p className="flex items-center gap-1.5 truncate text-sm font-extrabold">
                         {ex.name}
                         {customIds.has(ex.id) && (
-                          <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-black text-[var(--accent)]">
+                          <span className="rounded-full bg-brand/15 px-1.5 py-0.5 text-[9px] font-black text-brand">
                             {t('custom')}
                           </span>
                         )}
                         {data.archived.includes(ex.id) && (
-                          <span className="rounded-full bg-[var(--surface-3)] px-1.5 py-0.5 text-[9px] font-black text-mute">
+                          <span className="rounded-full bg-inset px-1.5 py-0.5 text-[9px] font-black text-mute">
                             {t('archived')}
                           </span>
                         )}
@@ -362,7 +362,7 @@ export default function Library() {
                           : t('Added to favourites'),
                       );
                     }}
-                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${isFav ? 'text-[var(--warn)]' : 'text-mute hover:bg-[var(--surface-3)]'}`}
+                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${isFav ? 'text-warn' : 'text-mute hover:bg-inset'}`}
                     aria-label={
                       isFav ? t('Remove favourite') : t('Add favourite')
                     }
@@ -569,7 +569,7 @@ function CreateExercise({
           />
         </Field>
         {error && (
-          <p className="text-xs font-bold text-[var(--bad)]">{error}</p>
+          <p className="text-xs font-bold text-danger">{error}</p>
         )}
         <div>
           <p className="label mb-2">{t('Primary muscle')}</p>
@@ -679,7 +679,7 @@ function CreateExercise({
             onChange={(e) => setSteps(e.target.value)}
           />
         </Field>
-        <div className="flex items-center gap-2 rounded-xl border border-line bg-[var(--surface-2)] px-3 py-2 text-[11px] font-semibold text-mute">
+        <div className="flex items-center gap-2 rounded-xl border border-line bg-elevated px-3 py-2 text-[11px] font-semibold text-mute">
           <Filter size={13} />{' '}
           {t('Custom exercises save with your account and work offline.')}
         </div>

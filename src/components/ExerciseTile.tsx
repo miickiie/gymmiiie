@@ -52,7 +52,7 @@ export function ExerciseIcon({
   return (
     <div
       className={clsx(
-        'grid shrink-0 place-items-center rounded-xl bg-[var(--surface-2)] text-[var(--accent)]',
+        'grid shrink-0 place-items-center rounded-xl bg-elevated text-brand',
         className,
       )}
       style={{ width: size, height: size }}
@@ -86,7 +86,7 @@ export function MuscleDot({ id, size = 6 }: { id: string; size?: number }) {
       style={{
         width: size,
         height: size,
-        background: MUSCLE_COLOR[id] ?? 'var(--accent)',
+        background: MUSCLE_COLOR[id] ?? 'rgb(var(--brand))',
       }}
     />
   );
@@ -109,7 +109,7 @@ export function ExerciseRow({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-2xl px-2 py-2 text-left transition hover:bg-[var(--surface-2)]"
+      className="flex w-full items-center gap-3 rounded-2xl px-2 py-2 text-left transition hover:bg-elevated"
     >
       <ArtThumb
         slug={ex.art}

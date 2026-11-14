@@ -429,7 +429,7 @@ export default function Session() {
       {paused && (
         <div
           role="status"
-          className="mb-3 flex items-center gap-2 rounded-2xl bg-[var(--warn)]/10 px-4 py-3 text-xs font-black text-[var(--warn)]"
+          className="mb-3 flex items-center gap-2 rounded-2xl bg-warn/10 px-4 py-3 text-xs font-black text-warn"
         >
           <Pause size={15} />
           {t('Workout paused · resume to continue logging')}
@@ -454,8 +454,8 @@ export default function Session() {
               className={clsx(
                 'shrink-0 rounded-full border px-3 py-2 text-xs font-black disabled:opacity-60',
                 index === active.currentIndex
-                  ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]'
-                  : 'border-line bg-[var(--surface)] text-dim',
+                  ? 'border-brand/35 bg-brand/15 text-brand'
+                  : 'border-line bg-card text-dim',
               )}
             >
               {ex.sets.every((set) => set.done) && ex.sets.length > 0
@@ -477,7 +477,7 @@ export default function Session() {
       {allDone && (
         <p
           role="status"
-          className="mb-3 rounded-xl bg-[var(--good-soft)] p-3 text-sm font-bold text-[var(--good)]"
+          className="mb-3 rounded-xl bg-success/15 p-3 text-sm font-bold text-success"
         >
           {t('All sets completed. Finish when the workout is ready to save.')}
         </p>
@@ -507,7 +507,7 @@ export default function Session() {
                 {catalog?.unilateral ? ` · ${t('One side at a time')}` : ''}
               </p>
               {record && (
-                <p className="mt-1 text-[10px] font-bold text-[var(--warn)]">
+                <p className="mt-1 inline-flex rounded-full badge-pr px-2 py-0.5 text-[10px] font-black">
                   {t(recordLabel(record.kind))} {recordValue(record, weightUnit)}
                   {record.kind === 'weight' && record.oneRm > 0
                     ? t(' · e1RM {n} {unit}', {
@@ -527,7 +527,7 @@ export default function Session() {
             </Btn>
           </div>
           {previousSets.length > 0 && (
-            <div className="border-b border-line bg-[var(--surface-2)] px-4 py-2">
+            <div className="border-b border-line bg-elevated px-4 py-2">
               <p className="label">{t('Last time')}</p>
               <p className="mt-1 text-xs font-semibold text-dim">
                 {previousSets
@@ -592,16 +592,26 @@ export default function Session() {
                 <div
                   key={index}
                   className={clsx(
-                    'rounded-xl p-1',
-                    set.done && 'bg-[var(--good-soft)]/50',
+                    'set-row rounded-xl p-1',
+                    set.done && 'bg-success/10',
                   )}
+                  data-done={set.done}
                 >
                   <div className="grid grid-cols-[40px_1fr_1fr_44px] items-center gap-2">
                     <button
                       type="button"
                       aria-label={t('Set {n} details', { n: index + 1 })}
                       onClick={() => setDetail({ uid: current.uid, index })}
-                      className="grid min-h-11 place-items-center rounded-lg bg-[var(--surface-2)] text-[10px] font-black"
+                      className={clsx(
+                        'grid min-h-11 place-items-center rounded-lg text-[10px] font-black',
+                        set.kind === 'warmup'
+                          ? 'badge-warmup'
+                          : set.kind === 'drop'
+                            ? 'badge-drop'
+                            : set.kind === 'failure'
+                              ? 'badge-failure'
+                              : 'bg-elevated text-fg',
+                      )}
                     >
                       {index + 1}
                       <span>{KIND_SHORT[set.kind]}</span>
@@ -706,8 +716,8 @@ export default function Session() {
                       className={clsx(
                         'grid h-11 w-11 place-items-center rounded-xl',
                         set.done
-                          ? 'bg-[var(--good)] text-black'
-                          : 'border border-strong bg-[var(--surface-2)] text-mute',
+                          ? 'bg-success text-success-fg'
+                          : 'border border-strong bg-elevated text-mute',
                       )}
                     >
                       <Check size={18} />
@@ -816,8 +826,8 @@ export default function Session() {
           }
         />
       )}
-      <div className="session-actions z-40 flex items-end gap-1 rounded-2xl bg-[var(--bg)]">
-        <div className="flex min-w-0 flex-1 gap-2 rounded-2xl border border-line bg-[var(--bg)]/95 p-2 backdrop-blur">
+      <div className="session-actions z-40 flex items-end gap-1 rounded-2xl bg-canvas">
+        <div className="flex min-w-0 flex-1 gap-2 rounded-2xl border border-border bg-elevated/95 p-2 backdrop-blur-md">
         <Btn
           size="sm"
           className="min-h-11 min-w-11 shrink-0 sm:flex-1 sm:text-sm"
@@ -989,7 +999,7 @@ export default function Session() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl bg-[var(--surface-2)] p-3"
+              className="rounded-xl bg-elevated p-3"
             >
               <p className="label">{t(stat.label)}</p>
               <p className="mt-1 font-black">{stat.value}</p>
@@ -1002,12 +1012,12 @@ export default function Session() {
           )}
         </p>
         {doneSets === 0 && (
-          <p className="mt-3 text-sm font-bold text-[var(--warn)]">
+          <p className="mt-3 text-sm font-bold text-warn">
             {t('No sets have been completed. This empty workout will be discarded.')}
           </p>
         )}
         {finishError && (
-          <p role="alert" className="mt-3 text-sm font-bold text-[var(--bad)]">
+          <p role="alert" className="mt-3 text-sm font-bold text-danger">
             {finishError}
           </p>
         )}
@@ -1108,7 +1118,7 @@ export default function Session() {
           {active.exercises.map((ex, index) => (
             <div
               key={ex.uid}
-              className="flex items-center gap-2 rounded-xl bg-[var(--surface-2)] p-2"
+              className="flex items-center gap-2 rounded-xl bg-elevated p-2"
             >
               <span className="min-w-0 flex-1 text-xs font-black">
                 {index + 1}. {ex.name}
@@ -1190,14 +1200,14 @@ function RestTimer({
   }, [restLeft, active.restEndsAt, now, sound, vibration, toast.push, t]);
   if (restLeft <= 0 || paused) return null;
   return (
-    <Card className="mb-3 flex items-center gap-2 border-[var(--accent-line)] bg-[var(--accent-soft)] p-3">
-      <Timer size={20} className="text-[var(--accent)]" />
+    <Card className="mb-3 flex items-center gap-2 border-brand/35 bg-brand/15 p-3">
+      <Timer size={20} className="text-brand" />
       <div className="flex-1">
         <p className="text-xs font-black">{t('Rest timer')}</p>
         <p
           role="timer"
           aria-live="off"
-          className="num text-xl font-black text-[var(--accent)]"
+          className="num text-xl font-black text-brand"
         >
           {fmtClock(restLeft)}
         </p>

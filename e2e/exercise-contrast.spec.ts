@@ -12,7 +12,7 @@ const luminance = (rgb: number[]) => {
   return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
 };
 
-for (const theme of ['dark', 'light'] as const) {
+for (const theme of ['dark', 'light', 'solar'] as const) {
   test(`Band Chest Fly has a visible figure against its canvas in ${theme} mode`, async ({
     page,
   }, testInfo) => {

@@ -122,9 +122,9 @@ export default function About() {
       />
 
       <Card className="relative overflow-hidden p-6">
-        <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[var(--accent)] opacity-[0.1] blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-brand opacity-[0.1] blur-3xl" />
         <div className="flex flex-wrap items-center gap-4">
-          <div className="grid h-16 w-16 place-items-center rounded-3xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] text-3xl font-black text-[#1a0d07] shadow-glow">
+          <div className="grid h-16 w-16 place-items-center rounded-3xl bg-gradient-to-br from-brand to-brand-hover text-3xl font-black text-brand-fg shadow-glow">
             G
           </div>
           <div>
@@ -167,7 +167,7 @@ export default function About() {
       <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {FEATURES.map((f) => (
           <Card key={f.title} className="p-4">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand/15 text-brand">
               {f.icon}
             </span>
             <p className="mt-3 text-sm font-black">{t(f.title)}</p>
@@ -182,7 +182,7 @@ export default function About() {
 
         <Card className="p-5">
           <div className="flex items-center gap-2">
-            <Shield size={18} className="text-[var(--good)]" />
+            <Shield size={18} className="text-success" />
             <h3 className="text-base font-black">{t('Privacy')}</h3>
           </div>
           <div className="mt-3 space-y-2.5 text-xs font-semibold leading-relaxed text-dim">
@@ -215,7 +215,7 @@ export default function About() {
       </div>
 
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-[var(--surface)] px-4 py-4">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-card px-4 py-4">
         <div>
           <p className="text-sm font-black">
             {t('Train hard. Log honestly. Recover well.')}
@@ -240,7 +240,7 @@ export default function About() {
           href="https://www.instagram.com/miiickiie"
           target="_blank"
           rel="noreferrer"
-          className="text-[var(--accent)] underline"
+          className="text-brand underline"
         >
           Miickiie
         </a>

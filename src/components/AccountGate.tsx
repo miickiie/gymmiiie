@@ -483,7 +483,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
               { name: leaveAccount.current?.name ?? '' },
             )}
           </p>
-          <p role="alert" className="mt-3 text-sm text-[var(--bad)]">
+          <p role="alert" className="mt-3 text-sm text-danger">
             {t(error)}
           </p>
           <Btn
@@ -525,7 +525,7 @@ export default function AccountGate({ children }: { children: ReactNode }) {
         <h1 className="text-2xl font-black">
           {t('Keep this log before signing out')}
         </h1>
-        <p role="alert" className="mt-3 text-sm text-[var(--bad)]">
+        <p role="alert" className="mt-3 text-sm text-danger">
           {t(error)}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
@@ -618,7 +618,7 @@ function PublicShell({ children }: { children: ReactNode }) {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center px-5 py-10">
       <div className="mb-7 flex flex-wrap items-center gap-3">
-        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--accent)] text-xl font-black text-[#1a0d07]">
+        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-brand text-xl font-black text-brand-fg">
           G
         </div>
         <div>
@@ -725,7 +725,7 @@ function AccountForm({
       {notice && (
         <p
           role="status"
-          className="mt-3 rounded-xl bg-[var(--accent-soft)] p-3 text-sm font-semibold"
+          className="mt-3 rounded-xl bg-brand/15 p-3 text-sm font-semibold"
         >
           {t(notice.key, notice.vars)}
           {notice.suffix ? ` ${t(notice.suffix)}` : ''}
@@ -751,7 +751,7 @@ function AccountForm({
           <p
             role="alert"
             id="account-name-error"
-            className="text-xs font-bold text-[var(--bad)]"
+            className="text-xs font-bold text-danger"
           >
             {t(fields.name)}
           </p>
@@ -776,7 +776,7 @@ function AccountForm({
           />
         </Field>
         {fields.pin && (
-          <p role="alert" id="account-pin-error" className="text-xs font-bold text-[var(--bad)]">
+          <p role="alert" id="account-pin-error" className="text-xs font-bold text-danger">
             {t(fields.pin)}
           </p>
         )}
@@ -795,7 +795,7 @@ function AccountForm({
         )}
       </div>
       {error && (
-        <p role="alert" className="mt-4 text-sm font-bold text-[var(--bad)]">
+        <p role="alert" className="mt-4 text-sm font-bold text-danger">
           {t(error)}
         </p>
       )}
@@ -842,7 +842,7 @@ export function LegacyDeviceNotice() {
   } = useAccount();
   if (legacyHidden || (!legacy && !legacyError)) return null;
   return (
-    <section className="mb-4 rounded-2xl border border-line bg-[var(--surface)] p-4">
+    <section className="mb-4 rounded-2xl border border-line bg-card p-4">
       <h2 className="text-sm font-black">
         {t('An older device log is kept separately')}
       </h2>

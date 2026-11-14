@@ -2,6 +2,9 @@ import type { ThemePref } from '../types';
 
 export type ThemeTone = 'dark' | 'light';
 
+/** Mirror of the persisted theme used by the zero-flash boot script in index.html. */
+export const THEME_STORAGE_KEY = 'gymmiie:theme';
+
 export interface ThemeOption {
   value: ThemePref;
   label: string;
@@ -17,50 +20,30 @@ export interface ThemeOption {
 export const THEMES: readonly ThemeOption[] = [
   {
     value: 'dark',
-    label: 'Ember',
+    label: 'Dark',
     tone: 'dark',
-    themeColor: '#0b0a09',
-    swatch: { bg: '#0b0a09', surface: '#1f1b17', accent: '#df7f4a' },
-  },
-  {
-    value: 'midnight',
-    label: 'Midnight',
-    tone: 'dark',
-    themeColor: '#080b14',
-    swatch: { bg: '#080b14', surface: '#182338', accent: '#6ea8fe' },
-  },
-  {
-    value: 'forest',
-    label: 'Royal Amethyst',
-    tone: 'dark',
-    themeColor: '#0d0817',
-    swatch: { bg: '#0d0817', surface: '#211640', accent: '#b78cff' },
+    themeColor: '#090b0e',
+    swatch: { bg: '#090b0e', surface: '#1a202a', accent: '#10b981' },
   },
   {
     value: 'light',
-    label: 'Rose Quartz',
+    label: 'Light',
     tone: 'light',
-    themeColor: '#fbf1f3',
-    swatch: { bg: '#fbf1f3', surface: '#f3e4e9', accent: '#b95a7d' },
+    themeColor: '#f1f5f9',
+    swatch: { bg: '#f1f5f9', surface: '#e8eef5', accent: '#047857' },
   },
   {
-    value: 'mist',
-    label: 'Mist',
-    tone: 'light',
-    themeColor: '#f2f5f9',
-    swatch: { bg: '#f2f5f9', surface: '#e9eef5', accent: '#4a7fb5' },
-  },
-  {
-    value: 'sage',
-    label: 'Sage',
-    tone: 'light',
-    themeColor: '#f2f6f0',
-    swatch: { bg: '#f2f6f0', surface: '#e9f0e5', accent: '#4f8a5b' },
+    value: 'solar',
+    label: 'Solar',
+    tone: 'dark',
+    themeColor: '#120f0d',
+    swatch: { bg: '#120f0d', surface: '#261f1b', accent: '#f59e0b' },
   },
 ];
 
 export const DARK_THEMES = THEMES.filter((theme) => theme.tone === 'dark');
 export const LIGHT_THEMES = THEMES.filter((theme) => theme.tone === 'light');
+export const SOLAR_THEMES = THEMES.filter((theme) => theme.value === 'solar');
 
 export function themeMeta(theme: ThemePref): ThemeOption {
   return THEMES.find((option) => option.value === theme) ?? THEMES[0];
@@ -77,11 +60,26 @@ export function isThemePref(value: unknown): value is ThemePref {
   );
 }
 
+/**
+ * Map the pre-1.1 theme palette onto the three current themes so saved
+ * profiles keep a sensible appearance after upgrading.
+ */
+const LEGACY_THEMES: Record<string, ThemePref> = {
+  midnight: 'dark',
+  forest: 'dark',
+  mist: 'light',
+  sage: 'light',
+};
+
 /** Resolve pre-v1.1 `system` preferences and unknown values to a concrete theme. */
 export function normalizeTheme(
   value: unknown,
   prefersLight = false,
 ): ThemePref {
   if (value === 'system') return prefersLight ? 'light' : 'dark';
-  return isThemePref(value) ? value : 'dark';
+  if (isThemePref(value)) return value;
+  if (typeof value === 'string' && value in LEGACY_THEMES) {
+    return LEGACY_THEMES[value];
+  }
+  return 'dark';
 }

@@ -228,7 +228,7 @@ export default function Dashboard() {
         }
         action={
           <Link to="/settings">
-            <div className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] text-base font-black text-[#1a0d07] shadow-glow">
+            <div className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-brand to-brand-hover text-base font-black text-brand-fg shadow-glow">
               {(data.profile.name || 'G').trim().slice(0, 2).toUpperCase()}
             </div>
           </Link>
@@ -236,13 +236,13 @@ export default function Dashboard() {
       />
 
       {active && (
-        <Card className="mb-4 overflow-hidden border-[var(--accent-line)] bg-gradient-to-r from-[var(--accent-soft)] to-transparent">
+        <Card className="mb-4 overflow-hidden border-brand/35 bg-gradient-to-r from-brand/15 to-transparent">
           <div className="flex flex-wrap items-center gap-4 p-4">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--accent)] text-[#1a0d07]">
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-brand text-brand-fg">
               <Activity size={22} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="label text-[var(--accent)]">
+              <p className="label text-brand">
                 {t('Workout in progress')}
               </p>
               <p className="mt-0.5 truncate text-sm font-black">
@@ -256,7 +256,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="num text-xl font-black text-[var(--accent)]">
+              <span className="num text-xl font-black text-brand">
                 {fmtDuration(activeElapsed(active))}
               </span>
             </div>
@@ -266,7 +266,7 @@ export default function Dashboard() {
 
       <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Card className="relative overflow-hidden p-5">
-          <div className="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full bg-[var(--accent)] opacity-[0.09] blur-2xl" />
+          <div className="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full bg-brand opacity-[0.09] blur-2xl" />
           <div className="flex flex-wrap items-center gap-5">
             <Ring
               value={Math.min(100, (week / Math.max(1, goal)) * 100)}
@@ -282,11 +282,11 @@ export default function Dashboard() {
             </Ring>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 rounded-full bg-[var(--warn)]/10 px-2 py-1 text-[11px] font-black text-[var(--warn)]">
+                <span className="flex items-center gap-1 rounded-full bg-warn/10 px-2 py-1 text-[11px] font-black text-warn">
                   <Flame size={13} />{' '}
                   {t('{n} day streak', { n: streak })}
                 </span>
-                <span className="rounded-full bg-[var(--surface-2)] px-2 py-1 text-[11px] font-black text-mute">
+                <span className="rounded-full bg-elevated px-2 py-1 text-[11px] font-black text-mute">
                   {t('Lv {n}', { n: level.level })}
                 </span>
               </div>
@@ -307,9 +307,9 @@ export default function Dashboard() {
                     ? t('You marked today as a rest day.')
                     : t('No plan set for today. Train by muscle instead.')}
               </p>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-inset">
                 <div
-                  className="h-full rounded-full bg-[var(--accent)] transition-all"
+                  className="h-full rounded-full bg-brand transition-all"
                   style={{ width: `${Math.min(100, level.progress)}%` }}
                 />
               </div>
@@ -351,7 +351,7 @@ export default function Dashboard() {
             action={
               <Link
                 to="/progress"
-                className="text-[11px] font-black text-[var(--accent)]"
+                className="text-[11px] font-black text-brand"
               >
                 {t('Progress')}
               </Link>
@@ -373,7 +373,7 @@ export default function Dashboard() {
                       : DAY_KEYS[d.getDay()][0]}
                   </span>
                   <div
-                    className={`grid aspect-square w-full max-w-9 place-items-center rounded-xl border text-xs font-black transition ${done ? 'border-transparent bg-[var(--good)] text-black' : off ? 'border-line bg-[var(--surface-2)] text-mute' : planned ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-[var(--accent)]' : isToday ? 'border-strong bg-[var(--surface-2)]' : 'border-line bg-[var(--surface-2)] text-dim'}`}
+                    className={`grid aspect-square w-full max-w-9 place-items-center rounded-xl border text-xs font-black transition ${done ? 'border-transparent bg-success text-success-fg' : off ? 'border-line bg-elevated text-mute' : planned ? 'border-brand/35 bg-brand/15 text-brand' : isToday ? 'border-strong bg-elevated' : 'border-line bg-elevated text-dim'}`}
                   >
                     {done ? (
                       <Check size={15} strokeWidth={3} />
@@ -384,7 +384,7 @@ export default function Dashboard() {
                     )}
                   </div>
                   <span
-                    className={`h-1 w-1 rounded-full ${isToday ? 'bg-[var(--accent)]' : 'bg-transparent'}`}
+                    className={`h-1 w-1 rounded-full ${isToday ? 'bg-brand' : 'bg-transparent'}`}
                   />
                 </div>
               );
@@ -393,7 +393,7 @@ export default function Dashboard() {
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={() => toggleCheckin(today)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-[11px] font-black transition ${isCheckin || trainedDays.has(today) ? 'border-transparent bg-[var(--good-soft)] text-[var(--good)]' : 'border-line bg-[var(--surface-2)] text-dim hover:border-strong'}`}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-[11px] font-black transition ${isCheckin || trainedDays.has(today) ? 'border-transparent bg-success/15 text-success' : 'border-line bg-elevated text-dim hover:border-strong'}`}
             >
               <Check size={13} />{' '}
               {trainedDays.has(today)
@@ -406,7 +406,7 @@ export default function Dashboard() {
               onClick={() =>
                 toggleDayOff(today, isOff ? null : t('Rest day'))
               }
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-[11px] font-black transition ${isOff ? 'border-transparent bg-[var(--surface-3)] text-[var(--text)]' : 'border-line bg-[var(--surface-2)] text-dim hover:border-strong'}`}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-[11px] font-black transition ${isOff ? 'border-transparent bg-inset text-fg' : 'border-line bg-elevated text-dim hover:border-strong'}`}
             >
               <Moon size={13} /> {isOff ? t('Rest day') : t('Mark rest')}
             </button>
@@ -463,7 +463,7 @@ export default function Dashboard() {
             action={
               <Link
                 to="/routines"
-                className="text-[11px] font-black text-[var(--accent)]"
+                className="text-[11px] font-black text-brand"
               >
                 {t('Edit plan')}
               </Link>
@@ -472,7 +472,7 @@ export default function Dashboard() {
           {todayRoutine ? (
             <Card className="overflow-hidden">
               <div className="flex items-center gap-3 border-b border-line p-4">
-                <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)]">
+                <div className="grid h-11 w-11 place-items-center rounded-2xl bg-brand/15 text-brand">
                   <CalendarDays size={20} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -493,7 +493,7 @@ export default function Dashboard() {
                   {t('Start routine')}
                 </Btn>
               </div>
-              <div className="divide-y divide-[var(--line)]">
+              <div className="divide-y divide-border">
                 {todayRoutine.exerciseIds.slice(0, 5).map((id) => {
                   const ex = allExercises().find((e) => e.id === id);
                   if (!ex) return null;
@@ -501,7 +501,7 @@ export default function Dashboard() {
                     <Link
                       key={id}
                       to={`/library/${id}`}
-                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--surface-2)]"
+                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-elevated"
                     >
                       <ArtThumb
                         slug={ex.art}
@@ -565,23 +565,23 @@ export default function Dashboard() {
             action={
               <Link
                 to="/history"
-                className="text-[11px] font-black text-[var(--accent)]"
+                className="text-[11px] font-black text-brand"
               >
                 {t('View all')}
               </Link>
             }
           />
           {recent.length ? (
-            <Card className="divide-y divide-[var(--line)] overflow-hidden">
+            <Card className="divide-y divide-border overflow-hidden">
               {recent.map((s) => {
                 const vol = sessionVolume(s);
                 return (
                   <Link
                     key={s.id}
                     to={`/history/${s.id}`}
-                    className="flex items-center gap-3 p-3.5 hover:bg-[var(--surface-2)]"
+                    className="flex items-center gap-3 p-3.5 hover:bg-elevated"
                   >
-                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--surface-2)] text-[var(--accent)]">
+                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-elevated text-brand">
                       <Dumbbell size={18} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -666,7 +666,7 @@ export default function Dashboard() {
                 to={q.to}
                 className="card p-4 transition hover:border-strong active:scale-[.99]"
               >
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-[var(--surface-2)] text-[var(--accent)]">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-elevated text-brand">
                   {q.icon}
                 </span>
                 <p className="mt-3 text-sm font-black">{q.title}</p>
@@ -682,20 +682,20 @@ export default function Dashboard() {
                 action={
                   <Link
                     to="/progress"
-                    className="text-[11px] font-black text-[var(--accent)]"
+                    className="text-[11px] font-black text-brand"
                   >
                     {t('All PRs')}
                   </Link>
                 }
               />
-              <Card className="divide-y divide-[var(--line)] overflow-hidden">
+              <Card className="divide-y divide-border overflow-hidden">
                 {prs.map((p) => (
                   <Link
                     key={p.id}
                     to={`/library/${p.id}`}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-2)]"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-elevated"
                   >
-                    <Trophy size={17} className="text-[var(--warn)]" />
+                    <Trophy size={17} className="text-warn" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-extrabold">
                         {p.name}
@@ -724,7 +724,7 @@ export default function Dashboard() {
             action={
               <Link
                 to="/progress"
-                className="text-[11px] font-black text-[var(--accent)]"
+                className="text-[11px] font-black text-brand"
               >
                 {t('Log')}
               </Link>
@@ -764,7 +764,7 @@ export default function Dashboard() {
             action={
               <Link
                 to="/notes"
-                className="text-[11px] font-black text-[var(--accent)]"
+                className="text-[11px] font-black text-brand"
               >
                 {t('Open')}
               </Link>
@@ -774,7 +774,7 @@ export default function Dashboard() {
             to="/notes"
             className="card flex items-start gap-3 p-4 transition hover:border-strong"
           >
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface-2)] text-[var(--accent)]">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-elevated text-brand">
               <Sparkles size={17} />
             </div>
             <div className="min-w-0">
@@ -793,7 +793,7 @@ export default function Dashboard() {
       </div>
 
       {dialogs}
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-[var(--surface)] px-4 py-3">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-card px-4 py-3">
         <div className="flex items-center gap-2 text-[11px] font-bold text-mute">
           <Scale size={14} />{' '}
           {t('Offline logging · account sync when connected')}

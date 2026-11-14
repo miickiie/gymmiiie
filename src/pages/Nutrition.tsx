@@ -223,7 +223,7 @@ export default function Nutrition() {
       <Card className="mb-4 flex flex-wrap items-center gap-2 p-3">
         <button
           onClick={() => setDay(addDaysKey(day, -1))}
-          className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
+          className="grid h-9 w-9 place-items-center rounded-full bg-elevated text-dim"
         >
           <ChevronLeft size={17} />
         </button>
@@ -243,7 +243,7 @@ export default function Nutrition() {
         </div>
         <button
           onClick={() => setDay(addDaysKey(day, 1))}
-          className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
+          className="grid h-9 w-9 place-items-center rounded-full bg-elevated text-dim"
         >
           <ChevronRight size={17} />
         </button>
@@ -291,19 +291,19 @@ export default function Nutrition() {
                     label={t('Protein')}
                     value={totals.protein}
                     goal={goals.protein}
-                    tone="var(--accent)"
+                    tone="rgb(var(--brand))"
                   />
                   <MacroBar
                     label={t('Carbs')}
                     value={totals.carbs}
                     goal={goals.carbs}
-                    tone="var(--good)"
+                    tone="rgb(var(--success))"
                   />
                   <MacroBar
                     label={t('Fat')}
                     value={totals.fat}
                     goal={goals.fat}
-                    tone="var(--warn)"
+                    tone="rgb(var(--warn))"
                   />
                 </div>
               </div>
@@ -321,7 +321,7 @@ export default function Nutrition() {
               ].map((m) => (
                 <div
                   key={m.label}
-                  className="rounded-xl bg-[var(--surface-2)] p-2.5"
+                  className="rounded-xl bg-elevated p-2.5"
                 >
                   <p className="label">{t(m.label)}</p>
                   <p className="num mt-0.5 text-base font-black">
@@ -378,7 +378,7 @@ export default function Nutrition() {
                         .getState()
                         .setWater(next <= water ? i * glass : next, day);
                     }}
-                    className={`grid h-9 flex-1 place-items-center rounded-lg border transition ${i < glasses ? 'border-transparent bg-[var(--accent)]/20 text-[var(--accent)]' : 'border-line bg-[var(--surface-2)] text-mute'}`}
+                    className={`grid h-9 flex-1 place-items-center rounded-lg border transition ${i < glasses ? 'border-transparent bg-brand/20 text-brand' : 'border-line bg-elevated text-mute'}`}
                     title={`${(i + 1) * glass} ml`}
                   >
                     <Droplets
@@ -389,9 +389,9 @@ export default function Nutrition() {
                 ),
               )}
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-inset">
               <div
-                className="h-full rounded-full bg-[var(--accent)]"
+                className="h-full rounded-full bg-brand"
                 style={{
                   width: `${Math.min(100, (water / Math.max(1, goals.waterMl)) * 100)}%`,
                 }}
@@ -408,7 +408,7 @@ export default function Nutrition() {
             return (
               <div key={m.id} className="mt-4">
                 <div className="mb-2 flex items-center gap-2">
-                  <span className="grid h-8 w-8 place-items-center rounded-xl bg-[var(--surface-2)] text-[var(--accent)]">
+                  <span className="grid h-8 w-8 place-items-center rounded-xl bg-elevated text-brand">
                     {m.icon}
                   </span>
                   <div className="flex-1">
@@ -429,7 +429,7 @@ export default function Nutrition() {
                   </Btn>
                 </div>
                 {list.length > 0 && (
-                  <Card className="divide-y divide-[var(--line)] overflow-hidden">
+                  <Card className="divide-y divide-border overflow-hidden">
                     {list.map((e) => (
                       <div
                         key={e.id}
@@ -450,7 +450,7 @@ export default function Nutrition() {
                         </span>
                         <button
                           onClick={() => deleteMealEntry(e.id)}
-                          className="grid h-7 w-7 place-items-center rounded-full text-mute hover:text-[var(--bad)]"
+                          className="grid h-7 w-7 place-items-center rounded-full text-mute hover:text-danger"
                         >
                           <Trash2 size={13} />
                         </button>
@@ -470,7 +470,7 @@ export default function Nutrition() {
             action={
               <button
                 onClick={() => setGoalsOpen(true)}
-                className="text-[11px] font-black text-[var(--accent)]"
+                className="text-[11px] font-black text-brand"
               >
                 {t('Edit')}
               </button>
@@ -483,30 +483,30 @@ export default function Nutrition() {
                   label: 'Calories',
                   value: goals.kcal,
                   unit: 'kcal',
-                  tone: 'var(--accent)',
+                  tone: 'rgb(var(--brand))',
                 },
                 {
                   label: 'Protein',
                   value: goals.protein,
                   unit: 'g',
-                  tone: 'var(--good)',
+                  tone: 'rgb(var(--success))',
                 },
                 {
                   label: 'Carbs',
                   value: goals.carbs,
                   unit: 'g',
-                  tone: 'var(--warn)',
+                  tone: 'rgb(var(--warn))',
                 },
                 {
                   label: 'Fat',
                   value: goals.fat,
                   unit: 'g',
-                  tone: 'var(--bad)',
+                  tone: 'rgb(var(--danger))',
                 },
               ].map((g) => (
                 <div
                   key={g.label}
-                  className="rounded-xl bg-[var(--surface-2)] p-3"
+                  className="rounded-xl bg-elevated p-3"
                 >
                   <span
                     className="block h-1 w-6 rounded-full"
@@ -523,7 +523,7 @@ export default function Nutrition() {
               ))}
             </div>
             {!data.nutrition.goalsSet && (
-              <p className="mt-2 text-[10px] font-bold text-[var(--warn)]">
+              <p className="mt-2 text-[10px] font-bold text-warn">
                 {t(
                   'These are starter targets. Set your own to make them meaningful.',
                 )}
@@ -547,10 +547,10 @@ export default function Nutrition() {
                 {
                   label: 'Protein',
                   v: totals.protein * 4,
-                  color: 'var(--accent)',
+                  color: 'rgb(var(--brand))',
                 },
-                { label: 'Carbs', v: totals.carbs * 4, color: 'var(--good)' },
-                { label: 'Fat', v: totals.fat * 9, color: 'var(--warn)' },
+                { label: 'Carbs', v: totals.carbs * 4, color: 'rgb(var(--success))' },
+                { label: 'Fat', v: totals.fat * 9, color: 'rgb(var(--warn))' },
               ].map((x) => {
                 const all =
                   totals.protein * 4 + totals.carbs * 4 + totals.fat * 9 || 1;
@@ -578,7 +578,7 @@ export default function Nutrition() {
                 onClick={() => openAdd(m.id)}
                 className="card flex items-center gap-2 p-3 text-left transition hover:border-strong"
               >
-                <span className="text-[var(--accent)]">{m.icon}</span>
+                <span className="text-brand">{m.icon}</span>
                 <span className="text-xs font-extrabold">{t(m.label)}</span>
                 <Plus size={13} className="ml-auto text-mute" />
               </button>
@@ -586,7 +586,7 @@ export default function Nutrition() {
           </div>
 
           <SectionHeader title={t('Food library')} />
-          <Card className="divide-y divide-[var(--line)] overflow-hidden">
+          <Card className="divide-y divide-border overflow-hidden">
             {FOODS.slice(0, 5).map((f) => (
               <button
                 key={f.id}
@@ -596,9 +596,9 @@ export default function Nutrition() {
                   setMeal('snacks');
                   setAddOpen(true);
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-[var(--surface-2)]"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-elevated"
               >
-                <Apple size={13} className="text-[var(--good)]" />
+                <Apple size={13} className="text-success" />
                 <span className="min-w-0 flex-1 truncate text-[11px] font-bold">
                   {f.name}
                 </span>
@@ -609,14 +609,14 @@ export default function Nutrition() {
             ))}
             <button
               onClick={() => openAdd('snacks')}
-              className="w-full px-3 py-2 text-center text-[11px] font-black text-[var(--accent)]"
+              className="w-full px-3 py-2 text-center text-[11px] font-black text-brand"
             >
               {t('Browse all {n} foods', { n: FOODS.length })}
             </button>
           </Card>
 
-          <div className="mt-4 rounded-2xl border border-line bg-[var(--surface)] p-4 text-[11px] font-semibold leading-relaxed text-mute">
-            <Salad size={14} className="mb-1 text-[var(--good)]" />
+          <div className="mt-4 rounded-2xl border border-line bg-card p-4 text-[11px] font-semibold leading-relaxed text-mute">
+            <Salad size={14} className="mb-1 text-success" />
             {t(
               'Nutrition data is approximate and sourced from common food databases. It is a guide, not medical advice.',
             )}
@@ -660,7 +660,7 @@ function MacroBar({
           {Math.round(value)} / {goal}g
         </span>
       </div>
-      <div className="mt-0.5 h-1.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
+      <div className="mt-0.5 h-1.5 overflow-hidden rounded-full bg-inset">
         <div
           className="h-full rounded-full"
           style={{
@@ -691,9 +691,9 @@ function MacroDonut({
   const r = 34;
   const circ = 2 * Math.PI * r;
   const segs = [
-    { v: p, color: 'var(--accent)' },
-    { v: c, color: 'var(--good)' },
-    { v: f, color: 'var(--warn)' },
+    { v: p, color: 'rgb(var(--brand))' },
+    { v: c, color: 'rgb(var(--success))' },
+    { v: f, color: 'rgb(var(--warn))' },
   ];
   let offset = 0;
   return (
@@ -704,7 +704,7 @@ function MacroDonut({
           cy="46"
           r={r}
           fill="none"
-          stroke="var(--surface-3)"
+          stroke="rgb(var(--inset))"
           strokeWidth="12"
         />
         {total > 0 &&
@@ -977,7 +977,7 @@ function AddFoodSheet({
       }
     >
       {error && (
-        <p role="alert" className="mb-3 text-sm font-bold text-[var(--bad)]">
+        <p role="alert" className="mb-3 text-sm font-bold text-danger">
           {error}
         </p>
       )}
@@ -1090,9 +1090,9 @@ function AddFoodSheet({
               <button
                 key={f.id}
                 onClick={() => selectFood(f)}
-                className={`flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition hover:bg-[var(--surface-2)] ${selected?.kind === 'food' && selected.food.id === f.id ? 'bg-[var(--accent-soft)]' : ''}`}
+                className={`flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition hover:bg-elevated ${selected?.kind === 'food' && selected.food.id === f.id ? 'bg-brand/15' : ''}`}
               >
-                <div className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--surface-2)] text-[var(--good)]">
+                <div className="grid h-8 w-8 place-items-center rounded-lg bg-elevated text-success">
                   <Apple size={14} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -1123,9 +1123,9 @@ function AddFoodSheet({
             <button
               key={d.id}
               onClick={() => selectDish(d)}
-              className={`flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition hover:bg-[var(--surface-2)] ${selected?.kind === 'dish' && selected.dish.id === d.id ? 'bg-[var(--accent-soft)]' : ''}`}
+              className={`flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition hover:bg-elevated ${selected?.kind === 'dish' && selected.dish.id === d.id ? 'bg-brand/15' : ''}`}
             >
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--surface-2)] text-[var(--accent)]">
+              <div className="grid h-8 w-8 place-items-center rounded-lg bg-elevated text-brand">
                 <Utensils size={14} />
               </div>
               <div className="min-w-0 flex-1">
@@ -1156,13 +1156,13 @@ function AddFoodSheet({
             data.nutrition.customFoods.map((f) => (
               <div
                 key={f.id}
-                className="flex items-center gap-2 rounded-xl px-2.5 py-2 hover:bg-[var(--surface-2)]"
+                className="flex items-center gap-2 rounded-xl px-2.5 py-2 hover:bg-elevated"
               >
                 <button
                   onClick={() => selectCustom(f)}
                   className="flex min-w-0 flex-1 items-center gap-2 text-left"
                 >
-                  <div className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--surface-2)] text-[var(--accent)]">
+                  <div className="grid h-8 w-8 place-items-center rounded-lg bg-elevated text-brand">
                     <Beef size={14} />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -1181,7 +1181,7 @@ function AddFoodSheet({
                 </button>
                 <button
                   onClick={() => deleteCustomFood(f.id)}
-                  className="grid h-7 w-7 place-items-center rounded-full text-mute hover:text-[var(--bad)]"
+                  className="grid h-7 w-7 place-items-center rounded-full text-mute hover:text-danger"
                 >
                   <Trash2 size={12} />
                 </button>
@@ -1198,7 +1198,7 @@ function AddFoodSheet({
       )}
 
       {selected && (
-        <div className="sticky bottom-0 mt-2 rounded-xl border border-[var(--accent-line)] bg-[var(--accent-soft)] px-3 py-2 text-[10px] font-bold text-[var(--accent)]">
+        <div className="sticky bottom-0 mt-2 rounded-xl border border-brand/35 bg-brand/15 px-3 py-2 text-[10px] font-bold text-brand">
           {t('Selected: {name}', {
             name:
               selected.kind === 'food'
@@ -1270,7 +1270,7 @@ function GoalsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
       }
     >
       {error && (
-        <p role="alert" className="mb-3 text-sm font-bold text-[var(--bad)]">
+        <p role="alert" className="mb-3 text-sm font-bold text-danger">
           {error}
         </p>
       )}

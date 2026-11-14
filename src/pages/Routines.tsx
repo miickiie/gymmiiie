@@ -186,10 +186,10 @@ export default function Routines() {
               return (
                 <div
                   key={day}
-                  className={`flex items-center gap-2 rounded-xl border px-2.5 py-2 ${isToday ? 'border-[var(--accent-line)] bg-[var(--accent-soft)]' : 'border-line bg-[var(--surface-2)]'}`}
+                  className={`flex items-center gap-2 rounded-xl border px-2.5 py-2 ${isToday ? 'border-brand/35 bg-brand/15' : 'border-line bg-elevated'}`}
                 >
                   <span
-                    className={`w-9 shrink-0 text-[10px] font-black uppercase ${isToday ? 'text-[var(--accent)]' : 'text-mute'}`}
+                    className={`w-9 shrink-0 text-[10px] font-black uppercase ${isToday ? 'text-brand' : 'text-mute'}`}
                   >
                     {t(DAY_SHORT[day])}
                   </span>
@@ -208,12 +208,12 @@ export default function Routines() {
                   {routine ? (
                     <button
                       onClick={() => start(routine.id)}
-                      className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--accent)] text-[#1a0d07]"
+                      className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand text-brand-fg"
                     >
                       <Play size={12} />
                     </button>
                   ) : (
-                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--surface-3)] text-mute">
+                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-inset text-mute">
                       <Moon size={12} />
                     </span>
                   )}
@@ -222,7 +222,7 @@ export default function Routines() {
             })}
           </div>
           {todayRoutine && (
-            <div className="mt-3 flex items-center gap-2 rounded-xl bg-[var(--good-soft)] px-3 py-2 text-[11px] font-black text-[var(--good)]">
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-success/15 px-3 py-2 text-[11px] font-black text-success">
               <Sparkles size={13} />{' '}
               {t('Today: {name}', { name: todayRoutine.name })}
               <button
@@ -243,7 +243,7 @@ export default function Routines() {
           <div className="space-y-2">
             {PROGRAM_TEMPLATES.map((tpl) => (
               <Card key={tpl.id} className="flex items-center gap-3 p-3.5">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface-2)] text-[var(--accent)]">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-elevated text-brand">
                   <Dumbbell size={18} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -292,13 +292,13 @@ export default function Routines() {
             return (
               <Card key={r.id} className="flex flex-col p-4">
                 <div className="flex items-start gap-3">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand/15 text-brand">
                     <CalendarDays size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <Link
                       to={`/routines/${r.id}`}
-                      className="block truncate text-sm font-black hover:text-[var(--accent)]"
+                      className="block truncate text-sm font-black hover:text-brand"
                     >
                       {r.name}
                     </Link>
@@ -312,7 +312,7 @@ export default function Routines() {
                   </div>
                   <button
                     onClick={() => setConfirm(r)}
-                    className="grid h-7 w-7 place-items-center rounded-full text-mute hover:bg-[var(--surface-3)] hover:text-[var(--bad)]"
+                    className="grid h-7 w-7 place-items-center rounded-full text-mute hover:bg-inset hover:text-danger"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -351,13 +351,13 @@ export default function Routines() {
                     plannedDays.map((d) => (
                       <span
                         key={d}
-                        className="rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-[9px] font-black uppercase text-mute"
+                        className="rounded-full bg-elevated px-2 py-0.5 text-[9px] font-black uppercase text-mute"
                       >
                         {t(d)}
                       </span>
                     ))
                   ) : (
-                    <span className="rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-[9px] font-black uppercase text-mute">
+                    <span className="rounded-full bg-elevated px-2 py-0.5 text-[9px] font-black uppercase text-mute">
                       {t('unscheduled')}
                     </span>
                   )}
@@ -405,7 +405,7 @@ export default function Routines() {
         />
       )}
 
-      <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-[var(--surface)] px-4 py-3">
+      <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-card px-4 py-3">
         <Clock size={14} className="text-mute" />
         <p className="text-[11px] font-semibold text-mute">
           {t(
@@ -414,7 +414,7 @@ export default function Routines() {
         </p>
         <Link
           to="/settings"
-          className="ml-auto flex items-center gap-1 text-[11px] font-black text-[var(--accent)]"
+          className="ml-auto flex items-center gap-1 text-[11px] font-black text-brand"
         >
           {t('Rest settings')} <ArrowRight size={12} />
         </Link>

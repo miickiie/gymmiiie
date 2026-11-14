@@ -61,7 +61,7 @@ export function ExerciseArt({
     return (
       <div
         className={clsx(
-          'grid place-items-center bg-[var(--surface-2)] text-mute',
+          'grid place-items-center bg-art-well text-art-ink',
           className,
         )}
         style={{ height, borderRadius: radius }}
@@ -73,7 +73,7 @@ export function ExerciseArt({
   if (body === 'loading') {
     return (
       <div
-        className={clsx('animate-pulse bg-[var(--surface-2)]', className)}
+        className={clsx('animate-pulse bg-art-well', className)}
         style={{ height, borderRadius: radius }}
       />
     );
@@ -81,12 +81,27 @@ export function ExerciseArt({
 
   return (
     <div
-      className={clsx('overflow-hidden border', className)}
-      style={{ height, borderRadius: radius, borderColor: 'var(--line)' }}
+      className={clsx(
+        'overflow-hidden border border-border/60 bg-art-well text-art-ink',
+        className,
+      )}
+      style={{ height, borderRadius: radius }}
     >
       {body}
     </div>
   );
+}
+
+// Monochrome source art ships a painted light background plus a dark figure.
+// Re-map those two layers to theme tokens so the silhouette never emits a harsh
+// white rectangle in the dark or warm Solar themes.
+const ART_FILL: Record<string, string> = {
+  '#333333': 'rgb(var(--art-ink))',
+  '#ffffff': 'rgb(var(--art-well))',
+};
+
+function themedFill(fill: string): string {
+  return ART_FILL[fill.toLowerCase()] ?? fill;
 }
 
 // ---------------------------------------------------------------------------
@@ -154,7 +169,7 @@ function MotionSvg({ data, playing }: { data: ArtData; playing: boolean }) {
               <path
                 key={pi}
                 d={path.d}
-                fill={path.fill}
+                fill={themedFill(path.fill)}
                 fillRule={path.fillRule}
                 opacity={path.opacity}
               />
@@ -233,7 +248,7 @@ export function ArtThumb({
           live={false}
           height={size}
           radius={12}
-          className="w-full text-dim"
+          className="w-full"
           fallback={fallback}
         />
       )}

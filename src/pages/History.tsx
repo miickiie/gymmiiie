@@ -195,17 +195,19 @@ export default function History() {
                 const idx = week * 7 + day;
                 const lvl = levels[idx] ?? 0;
                 const date = addDaysKey(dateKey(), idx - (levels.length - 1));
-                const op = [0.06, 0.28, 0.48, 0.72, 1][lvl];
+                const fill = [
+                  'rgb(var(--heat-0))',
+                  'rgb(var(--heat-1))',
+                  'rgb(var(--heat-2))',
+                  'rgb(var(--heat-3))',
+                  'rgb(var(--heat-4))',
+                ][lvl];
                 return (
                   <span
                     key={day}
                     title={t('{date} · level {n}', { date, n: lvl })}
                     className="h-3 w-3 rounded-[3px]"
-                    style={{
-                      background: lvl
-                        ? `color-mix(in srgb, var(--accent) ${op * 100}%, transparent)`
-                        : 'var(--surface-3)',
-                    }}
+                    style={{ background: fill }}
                   />
                 );
               })}
@@ -219,9 +221,13 @@ export default function History() {
               key={l}
               className="h-2.5 w-2.5 rounded-[2px]"
               style={{
-                background: l
-                  ? `color-mix(in srgb, var(--accent) ${[6, 28, 48, 72, 100][l]}%, transparent)`
-                  : 'var(--surface-3)',
+                background: [
+                  'rgb(var(--heat-0))',
+                  'rgb(var(--heat-1))',
+                  'rgb(var(--heat-2))',
+                  'rgb(var(--heat-3))',
+                  'rgb(var(--heat-4))',
+                ][l],
               }}
             />
           ))}{' '}
@@ -314,7 +320,7 @@ export default function History() {
                     to={`/history/${s.id}`}
                     className="card flex items-center gap-3 p-3.5 transition hover:border-strong"
                   >
-                    <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[var(--surface-2)]">
+                    <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-elevated">
                       <span className="text-[9px] font-black uppercase leading-none text-mute">
                         {fmtDate(d, { month: 'short' })}
                       </span>
@@ -334,12 +340,12 @@ export default function History() {
                             t('Workout')}
                         </p>
                         {prs > 0 && (
-                          <span className="flex items-center gap-0.5 rounded-full bg-[var(--warn)]/15 px-1.5 py-0.5 text-[9px] font-black text-[var(--warn)]">
+                          <span className="flex items-center gap-0.5 rounded-full badge-pr px-1.5 py-0.5 text-[9px] font-black">
                             <Trophy size={9} /> {prs} PR
                           </span>
                         )}
                         {s.deload && (
-                          <span className="rounded-full bg-[var(--surface-2)] px-1.5 py-0.5 text-[9px] font-black text-mute">
+                          <span className="rounded-full bg-elevated px-1.5 py-0.5 text-[9px] font-black text-mute">
                             {t('deload')}
                           </span>
                         )}

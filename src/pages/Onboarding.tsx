@@ -127,13 +127,13 @@ export default function Onboarding() {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden px-5 pb-4 pt-6 sm:px-8">
-      <div className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full bg-[var(--accent)] opacity-[0.12] blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-[var(--accent-strong)] opacity-[0.08] blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full bg-brand opacity-[0.12] blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-brand-hover opacity-[0.08] blur-3xl" />
 
       <div className="relative mx-auto flex w-full max-w-lg flex-1 flex-col">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] text-lg font-black text-[#1a0d07] shadow-glow">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-lg font-black text-brand-fg shadow-glow">
               G
             </div>
             <div>
@@ -147,7 +147,7 @@ export default function Onboarding() {
             {steps.map((s, i) => (
               <span
                 key={s}
-                className={`h-1.5 rounded-full transition-all ${i === step ? 'w-6 bg-[var(--accent)]' : i < step ? 'w-1.5 bg-[var(--accent)]/50' : 'w-1.5 bg-[var(--surface-3)]'}`}
+                className={`h-1.5 rounded-full transition-all ${i === step ? 'w-6 bg-brand' : i < step ? 'w-1.5 bg-brand/50' : 'w-1.5 bg-inset'}`}
               />
             ))}
           </div>
@@ -162,7 +162,7 @@ export default function Onboarding() {
         <div className="flex flex-1 flex-col justify-center py-8">
           {step === 0 && (
             <div className="animate-fadeUp text-center">
-              <div className="mx-auto mb-6 grid h-24 w-24 place-items-center rounded-[2rem] bg-[var(--accent-soft)] text-[var(--accent)] shadow-glow">
+              <div className="mx-auto mb-6 grid h-24 w-24 place-items-center rounded-[2rem] bg-brand/15 text-brand shadow-glow">
                 <Dumbbell size={48} strokeWidth={1.8} />
               </div>
               <p className="label mb-2">{t('Offline-first gym log')}</p>
@@ -185,9 +185,9 @@ export default function Onboarding() {
                 ].map((x) => (
                   <div
                     key={x.t}
-                    className="rounded-2xl border border-line bg-[var(--surface)] px-3 py-3"
+                    className="rounded-2xl border border-line bg-card px-3 py-3"
                   >
-                    <span className="text-[var(--accent)]">{x.icon}</span>
+                    <span className="text-brand">{x.icon}</span>
                     <p className="mt-2 text-[11px] font-extrabold leading-tight">
                       {t(x.t)}
                     </p>
@@ -213,12 +213,12 @@ export default function Onboarding() {
                   <button
                     key={u}
                     onClick={() => changeUnit(u)}
-                    className={`rounded-3xl border p-5 text-left transition ${unit === u ? 'border-[var(--accent-line)] bg-[var(--accent-soft)]' : 'border-line bg-[var(--surface)] hover:border-strong'}`}
+                    className={`rounded-3xl border p-5 text-left transition ${unit === u ? 'border-brand/35 bg-brand/15' : 'border-line bg-card hover:border-strong'}`}
                   >
                     <Scale
                       size={22}
                       className={
-                        unit === u ? 'text-[var(--accent)]' : 'text-mute'
+                        unit === u ? 'text-brand' : 'text-mute'
                       }
                     />
                     <p className="mt-4 text-2xl font-black">
@@ -230,7 +230,7 @@ export default function Onboarding() {
                         : t('Imperial plates · 5 lb steps')}
                     </p>
                     {unit === u && (
-                      <span className="mt-4 inline-flex items-center gap-1 text-[11px] font-black text-[var(--accent)]">
+                      <span className="mt-4 inline-flex items-center gap-1 text-[11px] font-black text-brand">
                         <Check size={13} /> {t('Selected')}
                       </span>
                     )}
@@ -318,7 +318,7 @@ export default function Onboarding() {
                   'Pick a weekly target and how active you are outside the gym.',
                 )}
               </p>
-              <div className="mt-5 rounded-3xl border border-line bg-[var(--surface)] p-4">
+              <div className="mt-5 rounded-3xl border border-line bg-card p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-extrabold">
@@ -340,7 +340,7 @@ export default function Onboarding() {
                   {[1, 2, 3, 4, 5, 6, 7].map((n) => (
                     <span
                       key={n}
-                      className={`h-2 flex-1 rounded-full ${n <= goal ? 'bg-[var(--accent)]' : 'bg-[var(--surface-3)]'}`}
+                      className={`h-2 flex-1 rounded-full ${n <= goal ? 'bg-brand' : 'bg-inset'}`}
                     />
                   ))}
                 </div>
@@ -351,10 +351,10 @@ export default function Onboarding() {
                   <button
                     key={a.value}
                     onClick={() => setActivity(a.value)}
-                    className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition ${activity === a.value ? 'border-[var(--accent-line)] bg-[var(--accent-soft)]' : 'border-line bg-[var(--surface)] hover:border-strong'}`}
+                    className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition ${activity === a.value ? 'border-brand/35 bg-brand/15' : 'border-line bg-card hover:border-strong'}`}
                   >
                     <span
-                      className={`grid h-9 w-9 place-items-center rounded-xl ${activity === a.value ? 'bg-[var(--accent)] text-[#1a0d07]' : 'bg-[var(--surface-2)] text-mute'}`}
+                      className={`grid h-9 w-9 place-items-center rounded-xl ${activity === a.value ? 'bg-brand text-brand-fg' : 'bg-elevated text-mute'}`}
                     >
                       {a.value >= 1.7 ? (
                         <HeartPulse size={16} />
@@ -373,7 +373,7 @@ export default function Onboarding() {
                       </span>
                     </span>
                     {activity === a.value && (
-                      <Check size={17} className="text-[var(--accent)]" />
+                      <Check size={17} className="text-brand" />
                     )}
                   </button>
                 ))}

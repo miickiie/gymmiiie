@@ -168,7 +168,7 @@ export default function SessionDetail() {
       <div className="mb-3 flex items-center gap-2">
         <button
           onClick={() => navigate(-1)}
-          className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
+          className="grid h-9 w-9 place-items-center rounded-full bg-elevated text-dim"
         >
           <ArrowLeft size={18} />
         </button>
@@ -190,7 +190,7 @@ export default function SessionDetail() {
         </div>
         <button
           onClick={share}
-          className="grid h-9 w-9 place-items-center rounded-full bg-[var(--surface-2)] text-dim"
+          className="grid h-9 w-9 place-items-center rounded-full bg-elevated text-dim"
           title={t('Share workout')}
         >
           <Share2 size={17} />
@@ -256,7 +256,7 @@ export default function SessionDetail() {
           {t('Delete')}
         </Btn>
         {prs > 0 && (
-          <span className="ml-auto flex items-center gap-1 rounded-full bg-[var(--warn)]/15 px-3 py-1.5 text-xs font-black text-[var(--warn)]">
+          <span className="ml-auto flex items-center gap-1 rounded-full badge-pr px-3 py-1.5 text-xs font-black">
             <Trophy size={14} /> {prs} PR{prs === 1 ? '' : 's'}
           </span>
         )}
@@ -281,7 +281,7 @@ export default function SessionDetail() {
               <div className="min-w-0 flex-1">
                 <Link
                   to={`/library/${ex.id}`}
-                  className="truncate text-sm font-black hover:text-[var(--accent)]"
+                  className="truncate text-sm font-black hover:text-brand"
                 >
                   {ex.name}
                 </Link>
@@ -304,16 +304,16 @@ export default function SessionDetail() {
                 </p>
               </div>
             </div>
-            <div className="divide-y divide-[var(--line)]">
+            <div className="divide-y divide-border">
               {ex.sets.map((s, i) => (
                 <div key={i} className="flex items-center gap-3 px-4 py-2">
                   <span
-                    className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[9px] font-black ${s.kind === 'warmup' ? 'bg-[var(--surface-3)] text-mute' : 'bg-[var(--surface-2)] text-dim'}`}
+                    className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[9px] font-black ${s.kind === 'warmup' ? 'badge-warmup' : s.kind === 'drop' ? 'badge-drop' : s.kind === 'failure' ? 'badge-failure' : 'bg-elevated text-dim'}`}
                   >
                     {i + 1}
                   </span>
                   <span
-                    className={`w-14 shrink-0 text-[10px] font-black uppercase ${s.kind === 'warmup' ? 'text-mute' : 'text-dim'}`}
+                    className={`w-14 shrink-0 rounded-full px-1 py-0.5 text-center text-[9px] font-black uppercase ${s.kind === 'warmup' ? 'badge-warmup' : s.kind === 'drop' ? 'badge-drop' : s.kind === 'failure' ? 'badge-failure' : 'text-dim'}`}
                   >
                     {setKindLabel(s.kind)}
                   </span>
@@ -321,7 +321,7 @@ export default function SessionDetail() {
                     {formatLoggedSet(s, ex, unit)}
                   </span>
                   {s.rpe != null && (
-                    <span className="rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-[10px] font-black text-mute">
+                    <span className="rounded-full bg-elevated px-2 py-0.5 text-[10px] font-black text-mute">
                       RPE {s.rpe}
                     </span>
                   )}
@@ -337,7 +337,7 @@ export default function SessionDetail() {
         ))}
       </div>
 
-      <div className="mt-5 rounded-2xl border border-line bg-[var(--surface)] p-4">
+      <div className="mt-5 rounded-2xl border border-line bg-card p-4">
         <div className="flex items-center gap-2 text-[11px] font-black text-mute">
           <Timer size={13} /> {t('SESSION RECAP')}
         </div>
@@ -359,7 +359,7 @@ export default function SessionDetail() {
         {routine && (
           <Link
             to={`/routines/${routine.id}`}
-            className="mt-2 inline-flex items-center gap-1 text-[11px] font-black text-[var(--accent)]"
+            className="mt-2 inline-flex items-center gap-1 text-[11px] font-black text-brand"
           >
             <CalendarDays size={12} />{' '}
             {t('{name} routine', { name: routine.name })}

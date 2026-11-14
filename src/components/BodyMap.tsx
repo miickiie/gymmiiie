@@ -181,7 +181,19 @@ function Body({
   const [hover, setHover] = useState<string | null>(null);
   const maxHeat = heat ? Math.max(1, ...Object.values(heat)) : 1;
 
-  const bodyFill = 'var(--surface-2)';
+  const bodyFill = 'rgb(var(--elevated))';
+  const heatFills = [
+    'rgb(var(--heat-0))',
+    'rgb(var(--heat-1))',
+    'rgb(var(--heat-2))',
+    'rgb(var(--heat-3))',
+    'rgb(var(--heat-4))',
+  ];
+  const heatFill = (value: number) => {
+    if (value <= 0) return heatFills[0];
+    const level = Math.min(4, Math.max(1, Math.ceil((value / maxHeat) * 4)));
+    return heatFills[level];
+  };
 
   return (
     <svg
@@ -207,7 +219,7 @@ function Body({
       </defs>
 
       {/* silhouette */}
-      <g fill={bodyFill} stroke="var(--line)" strokeWidth="1">
+      <g fill={bodyFill} stroke="rgb(var(--border))" strokeWidth="1">
         <circle cx="110" cy="40" r="21" />
         <rect x="102" y="57" width="16" height="12" rx="5" />
         <ellipse cx="110" cy="78" rx="32" ry="10" />
@@ -255,7 +267,6 @@ function Body({
       {regions.map(({ id, render }) => {
         const on = selected.includes(id);
         const hv = heat?.[id] ?? 0;
-        const heatOpacity = heat ? 0.15 + (hv / maxHeat) * 0.75 : 1;
         return (
           <g
             key={id}
@@ -282,15 +293,15 @@ function Body({
           >
             {render({
               fill: on
-                ? 'var(--accent)'
+                ? 'rgb(var(--brand))'
                 : heat
-                  ? `color-mix(in srgb, var(--accent) ${Math.round(heatOpacity * 100)}%, var(--surface-3))`
-                  : 'var(--surface-3)',
+                  ? heatFill(hv)
+                  : 'rgb(var(--inset))',
               stroke: on
-                ? 'var(--accent)'
+                ? 'rgb(var(--brand))'
                 : hover === id
-                  ? 'var(--accent-line)'
-                  : 'var(--line)',
+                  ? 'rgb(var(--brand) / 0.35)'
+                  : 'rgb(var(--border))',
               strokeWidth: on ? 1.6 : 1,
               opacity: on ? 0.95 : 1,
               className: clsx(
@@ -318,7 +329,7 @@ function Body({
         textAnchor="middle"
         fontSize="9"
         fontWeight="800"
-        fill="var(--text-mute)"
+        fill="rgb(var(--fg-muted))"
         className="pointer-events-none uppercase tracking-widest"
       >
         {t(side)}
@@ -330,7 +341,7 @@ function Body({
           textAnchor="middle"
           fontSize="10"
           fontWeight="800"
-          fill="var(--accent)"
+          fill="rgb(var(--brand))"
           className="pointer-events-none"
         >
           {tm(hover, MUSCLE_LABEL[hover as MuscleId])}
@@ -390,7 +401,7 @@ export default function BodyMap({
             className={clsx(
               'rounded-full px-4 py-1.5 text-xs font-black capitalize',
               tab === s
-                ? 'bg-[var(--surface-3)] text-[var(--text)]'
+                ? 'bg-inset text-fg'
                 : 'text-mute',
             )}
           >
