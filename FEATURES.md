@@ -21,7 +21,7 @@ for the signed-in account, with device caching and automatic account synchroniza
 
 - Multi-step onboarding: welcome → units → profile → weekly goal, with optional setup later.
 - Profile: name, sex, age, height, bodyweight, activity level.
-- Unit system (kg/lb), three themes (Dark, Light, and low-blue-light Solar), week start, weekly workout goal. Mochi the cat announces each settings change in her speech bubble.
+- Unit system (kg/lb), six themes (Obsidian, Volt OLED, Abyss, Solar, Studio and Dune), week start, weekly workout goal. Mochi the cat announces each settings change in her speech bubble.
 - TDEE/macro starter targets derived from profile.
 
 ## Today / dashboard
@@ -128,8 +128,9 @@ for the signed-in account, with device caching and automatic account synchroniza
 
 - Web app manifest, maskable PNG icons, Apple touch icon.
 - Generated versioned precache includes the app shell and lazy route chunks; navigations are network-first with an offline fallback.
-- Dark, light, and warm low-blue-light Solar themes with semantic RGB-channel
-  tokens, plus a responsive desktop sidebar and mobile bottom navigation.
+- Six themes (Obsidian, Volt OLED, Abyss, Solar, Studio and Dune) with semantic
+  RGB-channel tokens, plus a responsive desktop sidebar and mobile bottom
+  navigation.
 - Stacked accessible dialogs trap and restore focus, dismiss only the top dialog and lock background scrolling.
 - Keyboard focus indicators, reduced-motion support and responsive mobile set controls.
 - No analytics, cookies or third-party pixels. Fonts are loaded from Google Fonts.

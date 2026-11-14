@@ -102,10 +102,6 @@ const TH: Record<string, string> = {
   'Very active': 'สูงมาก',
   Measurements: 'สัดส่วนร่างกาย',
   'Macro goals': 'เป้าหมายสารอาหาร',
-  'Dark tones': 'โทนมืด',
-  'Light tones': 'โทนสว่าง',
-  'Late night': 'กลางคืน',
-  'Low-blue-light palette for late sessions.': 'โทนแสงสีฟ้าต่ำสำหรับเล่นดึก',
   Kilograms: 'Kilograms',
   Pounds: 'Pounds',
   Off: 'ปิด',
@@ -125,6 +121,8 @@ const TH: Record<string, string> = {
   'Use your browser menu → Add to Home Screen':
     'ใช้เมนูเบราว์เซอร์ → เพิ่มลงหน้าจอหลัก',
   '{theme} theme': 'ธีม {theme}',
+  'Every theme adapts surfaces, charts and exercise artwork.':
+    'ทุกธีมปรับพื้นผิว กราฟ และภาพท่าออกกำลังกายให้เข้ากัน',
   '{n}s rest': 'พัก {n} s',
   '{n}× / week': '{n}× / สัปดาห์',
   'Replace local log?': 'แทนที่ข้อมูลในเครื่อง?',
@@ -1076,7 +1074,7 @@ function ThemePicker({
   const { t } = useI18n(TH);
   return (
     <div>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {THEMES.map((theme) => {
           const active = value === theme.value;
           return (
@@ -1084,38 +1082,68 @@ function ThemePicker({
               key={theme.value}
               type="button"
               aria-pressed={active}
+              aria-label={`${theme.name} (${theme.tag})`}
               onClick={() => onChange(theme.value)}
               className={clsx(
-                'flex flex-col gap-2 rounded-xl border p-2 text-left transition',
+                'relative flex flex-col gap-2 rounded-xl border p-2 text-left transition',
                 active
-                  ? 'border-brand/35 bg-brand/15'
+                  ? 'border-brand bg-brand/5 ring-2 ring-brand/25'
                   : 'border-line bg-elevated hover:border-strong',
               )}
             >
               <span
-                className="flex h-8 items-center gap-1 rounded-lg p-1.5"
-                style={{ background: theme.swatch.bg }}
+                className="flex h-14 flex-col justify-center gap-1.5 rounded-lg p-2"
+                style={{ background: theme.preview.bg }}
                 aria-hidden="true"
               >
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="h-2 w-9 rounded-full"
+                    style={{ background: theme.preview.accent }}
+                  />
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{ background: theme.preview.secondary }}
+                  />
+                </span>
                 <span
-                  className="h-5 w-5 rounded-md"
-                  style={{ background: theme.swatch.surface }}
-                />
-                <span
-                  className="h-5 flex-1 rounded-md"
-                  style={{ background: theme.swatch.accent }}
-                />
+                  className="flex h-6 items-center gap-1.5 rounded px-1.5"
+                  style={{
+                    background: theme.preview.card,
+                    border: `1px solid ${theme.preview.border}`,
+                  }}
+                >
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ background: theme.preview.accent }}
+                  />
+                  <span
+                    className="h-1.5 flex-1 rounded-full opacity-80"
+                    style={{ background: theme.preview.fg }}
+                  />
+                </span>
               </span>
-              <span className="flex items-center justify-between gap-1 text-[11px] font-extrabold">
-                {theme.label}
-                {active && <Check size={12} className="shrink-0 text-accent" />}
+              <span className="flex items-start justify-between gap-1">
+                <span className="min-w-0">
+                  <span className="block truncate text-[11px] font-extrabold">
+                    {theme.name}
+                  </span>
+                  <span className="mt-0.5 inline-block rounded-full border border-line px-1.5 py-0.5 text-[9px] font-bold text-mute">
+                    {theme.tag}
+                  </span>
+                </span>
+                {active && (
+                  <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-brand text-brand-fg">
+                    <Check size={10} strokeWidth={3} />
+                  </span>
+                )}
               </span>
             </button>
           );
         })}
       </div>
       <p className="mt-2 text-[10px] font-semibold text-mute">
-        {t('Low-blue-light palette for late sessions.')}
+        {t('Every theme adapts surfaces, charts and exercise artwork.')}
       </p>
     </div>
   );

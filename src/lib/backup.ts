@@ -170,8 +170,11 @@ export function parseBackup(input: unknown): AppData {
     settings.theme,
     [
       'dark',
-      'light',
+      'volt',
+      'abyss',
       'solar',
+      'light',
+      'dune',
       // Legacy theme ids are accepted on import and normalised below.
       'midnight',
       'forest',

@@ -2,9 +2,10 @@
 /**
  * Verify the RGB-channel theme contract before shipping.
  *
- * 1. Parse token blocks from src/index.css.
- * 2. Check WCAG 2.1 contrast for text, CTA, and set/PR badge pairs.
- * 3. Reject hardcoded Tailwind gray palettes and text-white in components.
+ * 1. Parse all six token blocks from src/index.css.
+ * 2. Check WCAG 2.1 contrast for text, CTA, artwork, and set/PR badge pairs.
+ * 3. Reject hardcoded Tailwind gray palettes, and hardcoded white/black text
+ *    paired with a brand-filled background.
  */
 import { readFile, readdir } from 'node:fs/promises';
 import { extname, join, relative } from 'node:path';
@@ -12,6 +13,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const css = await readFile(join(root, 'src/index.css'), 'utf8');
+
+const THEME_NAMES = ['dark', 'volt', 'abyss', 'solar', 'light', 'dune'];
 
 function readBlock(marker) {
   const start = css.indexOf(marker);
@@ -30,11 +33,7 @@ function parseBlock(block) {
       /--([\w-]+):\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s*;/,
     );
     if (rgb) {
-      tokens[rgb[1]] = [
-        Number(rgb[2]),
-        Number(rgb[3]),
-        Number(rgb[4]),
-      ];
+      tokens[rgb[1]] = [Number(rgb[2]), Number(rgb[3]), Number(rgb[4])];
       continue;
     }
     const scalar = line.match(/--([\w-]+):\s*(0?\.\d+|\d+)\s*;/);
@@ -43,11 +42,12 @@ function parseBlock(block) {
   return tokens;
 }
 
-const themes = {
-  dark: parseBlock(readBlock("html[data-theme='dark']")),
-  light: parseBlock(readBlock("html[data-theme='light']")),
-  solar: parseBlock(readBlock("html[data-theme='solar']")),
-};
+const themes = Object.fromEntries(
+  THEME_NAMES.map((name) => [
+    name,
+    parseBlock(readBlock(`html[data-theme='${name}']`)),
+  ]),
+);
 
 const channelLuminance = (value) => {
   const s = value / 255;
@@ -76,26 +76,39 @@ const check = (label, actual, minimum) => {
   );
 };
 
+const required = [
+  'canvas',
+  'card',
+  'elevated',
+  'inset',
+  'border',
+  'fg',
+  'fg-secondary',
+  'fg-muted',
+  'brand',
+  'brand-hover',
+  'brand-fg',
+  'success',
+  'success-fg',
+  'danger',
+  'art-well',
+  'art-ink',
+  'heat-0',
+  'heat-1',
+  'heat-2',
+  'heat-3',
+  'heat-4',
+  'warmup-bg',
+  'warmup-fg',
+  'drop-bg',
+  'drop-fg',
+  'failure-bg',
+  'failure-fg',
+  'pr-bg',
+  'pr-fg',
+];
+
 for (const [name, tokens] of Object.entries(themes)) {
-  const required = [
-    'canvas',
-    'card',
-    'inset',
-    'fg',
-    'fg-secondary',
-    'brand',
-    'brand-fg',
-    'success',
-    'success-fg',
-    'warmup-bg',
-    'warmup-fg',
-    'drop-bg',
-    'drop-fg',
-    'failure-bg',
-    'failure-fg',
-    'pr-bg',
-    'pr-fg',
-  ];
   for (const token of required) {
     if (!tokens[token]) throw new Error(`${name}: missing --${token}`);
   }
@@ -123,16 +136,17 @@ for (const [name, tokens] of Object.entries(themes)) {
     contrast(tokens['success-fg'], tokens.success),
     4.5,
   );
+  check(
+    `${name}: art-ink on art-well`,
+    contrast(tokens['art-ink'], tokens['art-well']),
+    7,
+  );
 
   const alpha = tokens['badge-alpha'];
   if (!(alpha > 0 && alpha < 1))
     throw new Error(`${name}: invalid --badge-alpha (${alpha})`);
   for (const kind of ['warmup', 'drop', 'failure', 'pr']) {
-    const background = composite(
-      tokens[`${kind}-bg`],
-      tokens.card,
-      alpha,
-    );
+    const background = composite(tokens[`${kind}-bg`], tokens.card, alpha);
     check(
       `${name}: ${kind} badge fg on tinted card`,
       contrast(tokens[`${kind}-fg`], background),
@@ -153,15 +167,27 @@ async function* walk(directory) {
 
 const palette =
   /\b(?:bg|text|border|ring|divide|outline|from|to|via|fill|stroke)-(?:gray|slate|zinc|neutral|stone)-\d{2,3}\b/g;
-const whiteOnBrand = /\btext-white\b/g;
+const hardcodedInk = /\btext-(?:white|black)\b/;
+const brandFill = /\bbg-brand(?:-hover)?\b/;
 const offenders = [];
+
 for await (const path of walk(join(root, 'src'))) {
   const source = await readFile(path, 'utf8');
-  for (const pattern of [palette, whiteOnBrand]) {
-    for (const match of source.matchAll(pattern)) {
-      const line = source.slice(0, match.index).split('\n').length;
-      offenders.push(`${relative(root, path)}:${line} ${match[0]}`);
-    }
+  const lineOf = (index) => source.slice(0, index).split('\n').length;
+
+  for (const match of source.matchAll(palette)) {
+    offenders.push(
+      `${relative(root, path)}:${lineOf(match.index)} ${match[0]}`,
+    );
+  }
+
+  // Inspect complete JSX tags so a multi-line className is checked as a unit.
+  for (const tag of source.matchAll(/<[^<>]*>/g)) {
+    if (!brandFill.test(tag[0]) || !hardcodedInk.test(tag[0])) continue;
+    const ink = tag[0].match(hardcodedInk)[0];
+    offenders.push(
+      `${relative(root, path)}:${lineOf(tag.index)} bg-brand with ${ink}`,
+    );
   }
 }
 
@@ -170,7 +196,9 @@ if (offenders.length) {
   console.log('\nFAIL hardcoded colour utilities:');
   for (const offender of offenders) console.log(`  ${offender}`);
 } else {
-  console.log('PASS no gray/slate/zinc or text-white utilities in components');
+  console.log(
+    'PASS no gray/slate/zinc utilities or text-white/text-black on bg-brand',
+  );
 }
 
 console.log(

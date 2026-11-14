@@ -5,20 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#090b0e" />
     <script>
-      // Apply the last theme before the first paint to avoid a dark/light flash.
+      // Apply the last theme before the first paint to avoid a theme flash.
       (() => {
         try {
           const theme = localStorage.getItem('gymmiie:theme');
-          if (theme !== 'dark' && theme !== 'light' && theme !== 'solar') return;
+          const themeColors = {
+            dark: '#090b0e',
+            volt: '#000000',
+            abyss: '#070d19',
+            solar: '#120f0d',
+            light: '#f1f5f9',
+            dune: '#f5f5f4'
+          };
+          if (!theme || !(theme in themeColors)) return;
           const root = document.documentElement;
+          const light = theme === 'light' || theme === 'dune';
           root.dataset.theme = theme;
-          root.classList.toggle('light', theme === 'light');
-          root.classList.toggle('dark', theme !== 'light');
-          const color =
-            theme === 'light' ? '#f1f5f9' : theme === 'solar' ? '#120f0d' : '#090b0e';
+          root.classList.toggle('light', light);
+          root.classList.toggle('dark', !light);
           document
             .querySelector('meta[name="theme-color"]')
-            ?.setAttribute('content', color);
+            ?.setAttribute('content', themeColors[theme]);
         } catch {
           /* Keep the default dark theme when storage is unavailable. */
         }
